@@ -110,10 +110,6 @@ function AuthModal({ accent, mode, onClose, onSuccess }) {
             </a>
           </p>
         </form>
-
-        <p className="nafe-modal__disclaimer nafe-mono">
-          ⓘ Prototype local — les comptes sont stockés dans ton navigateur uniquement.
-        </p>
       </div>
     </div>
   );
