@@ -1,6 +1,11 @@
+import { supabase } from "@/lib/supabase";
+import { ProductCard } from "@/components/ProductCard";
 
+export const revalidate = 0; // Disable cache for prototype
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { data: products } = await supabase.from("products").select("*").order("created_at", { ascending: false }).limit(3);
+
   return (
     <div className="px-8 md:px-16 pb-32">
       <section className="relative pt-20 pb-32">
@@ -42,22 +47,13 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="nafe-clip-card bg-nafe-surface/60 border border-white/5 p-6 hover:border-nafe-blue/40 transition-colors">
-              <div className="aspect-square bg-black/50 mb-6 flex items-center justify-center">
-                <span className="font-mono text-steel-grey">Image Produit {i}</span>
-              </div>
-              <p className="font-display text-2xl font-bold mb-2">Jersey Officiel 2026</p>
-              <div className="flex justify-between items-center mt-4">
-                <span className="font-mono text-nafe-blue">89.99 €</span>
-                <div className="flex gap-2">
-                  {['S', 'M', 'L', 'XL'].map(size => (
-                    <span key={size} className="text-[10px] font-mono border border-white/20 px-2 py-1">{size}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
+          {products && products.length > 0 ? (
+            products.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))
+          ) : (
+            <p className="font-mono text-steel-grey">La boutique est actuellement vide. Ajoutez des produits depuis l'espace Admin.</p>
+          )}
         </div>
       </section>
     </div>
