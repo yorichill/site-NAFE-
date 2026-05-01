@@ -1,49 +1,148 @@
 import { supabase } from "@/lib/supabase";
 import { ProductCard } from "@/components/ProductCard";
+import Link from "next/link";
 
 export const revalidate = 0; // Disable cache for prototype
 
 export default async function HomePage() {
   const { data: products } = await supabase.from("products").select("*").order("created_at", { ascending: false }).limit(3);
 
+  // Mock live match for prototype
+  const live = { event: "VALORANT CHAMPIONS", result: "13 - 11", opp: "T1", loc: "SEOUL · KR" };
+  const trophies = 12;
+
   return (
-    <div className="px-8 md:px-16 pb-32">
-      <section className="relative pt-20 pb-32">
-        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-nafe-blue mb-6">
-          Season 2026 · Valorant Champions Tour
-        </p>
-        <h1 className="font-display font-black tracking-tighter text-7xl md:text-[10rem] leading-[0.85]">
-          FNATIC
+    <div className="nafe-page">
+      {/* HERO — brutalist typographic wall */}
+      <section className="nafe-hero">
+        <div className="nafe-hero__meta">
+          <span className="nafe-eyebrow" style={{ color: "var(--accent)" }}>
+            Saison 2026 · NAFE TEAM
+          </span>
+          {live && (
+            <span className="nafe-eyebrow nafe-hero__ts">
+              <span className="nafe-pulse" /> EN DIRECT
+            </span>
+          )}
+        </div>
+
+        <h1 className="nafe-hero__title nafe-display">
+          NAFE
           <br />
-          <span className="text-nafe-blue">× NAFE</span>
+          <span style={{ color: "var(--accent)" }}>TEAM<span className="nafe-hero__dot">.</span></span>
         </h1>
-        <p className="mt-8 max-w-xl text-steel-grey text-lg">
-          L'héritage compétitif rencontre la direction créative la plus affûtée
-          du game. Nouvelle ère, même obsession : la victoire.
-        </p>
-        <div className="mt-10 flex gap-4">
-          <button className="nafe-clip-card bg-nafe-blue text-white font-display uppercase tracking-widest px-8 py-4 hover:shadow-nafe-glow-lg transition-shadow">
+
+        <div className="nafe-hero__grid">
+          <p className="nafe-hero__lede">
+            L'héritage compétitif rencontre la direction créative la plus
+            affûtée du game. Nouvelle ère, même obsession&nbsp;: la victoire.
+          </p>
+
+          {live ? (
+            <Link href="/live" className="nafe-hero__matchCard block">
+              <div className="nafe-hero__matchHead">
+                <span className="nafe-mono" style={{ color: "var(--accent)" }}>● LIVE</span>
+                <span className="nafe-mono">{live.event}</span>
+              </div>
+              <div className="nafe-hero__matchBody">
+                <div className="nafe-hero__side">
+                  <span className="nafe-mono">NAFE</span>
+                  <span className="nafe-display nafe-hero__matchScore" style={{ color: "var(--accent)" }}>
+                    {(live.result || "").split(/[-–]/)[0]?.trim() || "—"}
+                  </span>
+                </div>
+                <span className="nafe-mono nafe-hero__matchSep">—</span>
+                <div className="nafe-hero__side">
+                  <span className="nafe-mono">{live.opp}</span>
+                  <span className="nafe-display nafe-hero__matchScore">
+                    {(live.result || "").split(/[-–]/)[1]?.trim() || "—"}
+                  </span>
+                </div>
+              </div>
+              <div className="nafe-hero__matchFoot">
+                <span className="nafe-mono">{live.loc}</span>
+                <span className="nafe-mono">REGARDER →</span>
+              </div>
+            </Link>
+          ) : (
+            <div className="nafe-hero__matchCard nafe-empty nafe-empty--card">
+              <span className="nafe-mono" style={{ color: "var(--accent)" }}>AUCUN MATCH LIVE</span>
+              <p className="nafe-empty__text">Aucun match en direct pour l'instant. Reviens plus tard !</p>
+            </div>
+          )}
+        </div>
+
+        <div className="nafe-hero__cta">
+          <button className="nafe-btn nafe-btn--accent nafe-clip-card">
             Rejoindre le club
           </button>
-          <button className="nafe-clip-card border border-white/20 text-white font-display uppercase tracking-widest px-8 py-4 hover:bg-white/5 transition-colors">
-            Voir le match live
-          </button>
+          <Link href="/calendar" className="nafe-btn nafe-btn--ghost nafe-clip-card">
+            Voir le planning
+          </Link>
+          <div className="nafe-hero__stats">
+            <div>
+              <p className="nafe-mono nafe-hero__statL">JOUEURS</p>
+              <p className="nafe-display nafe-hero__statV">18</p>
+            </div>
+            <div>
+              <p className="nafe-mono nafe-hero__statL">TROPHÉES</p>
+              <p className="nafe-display nafe-hero__statV">
+                {String(trophies).padStart(2, "0")}
+              </p>
+            </div>
+            <div>
+              <p className="nafe-mono nafe-hero__statL">MATCHS PROG.</p>
+              <p className="nafe-display nafe-hero__statV" style={{ color: "var(--accent)" }}>04</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="nafe-hero__rail">
+          <span className="nafe-mono">N/T · 01</span>
+          <span className="nafe-mono">·</span>
+          <span className="nafe-mono">ISSUE #012</span>
+          <span className="nafe-mono">·</span>
+          <span className="nafe-mono">PARIS · EU</span>
         </div>
       </section>
 
-      <section className="mt-24">
-        <div className="flex items-end justify-between mb-12 border-b border-white/10 pb-6">
+      {/* Manifesto strip */}
+      <section className="nafe-manifesto">
+        <div className="nafe-manifesto__inner">
+          <span className="nafe-eyebrow">Manifeste · 2026</span>
+          <h2 className="nafe-display nafe-manifesto__title">
+            Le skill, c'est la <span style={{ color: "var(--accent)" }}>constance</span>.<br/>
+            Le style, c'est la <span style={{ color: "var(--accent)" }}>signature</span>.
+          </h2>
+          <div className="nafe-manifesto__columns">
+            <div>
+              <span className="nafe-mono nafe-manifesto__num" style={{ color: "var(--accent)" }}>01 ·</span>
+              <h3 className="nafe-display nafe-manifesto__h3">Jouer fort</h3>
+              <p>Une méthodologie d'entraînement importée du sport de haut niveau. Analyse vidéo, préparation mentale, S&C.</p>
+            </div>
+            <div>
+              <span className="nafe-mono nafe-manifesto__num" style={{ color: "var(--accent)" }}>02 ·</span>
+              <h3 className="nafe-display nafe-manifesto__h3">Créer plus fort</h3>
+              <p>Un studio interne dédié au contenu long-format. Documentaires, podcasts, drops capsule co-signés.</p>
+            </div>
+            <div>
+              <span className="nafe-mono nafe-manifesto__num" style={{ color: "var(--accent)" }}>03 ·</span>
+              <h3 className="nafe-display nafe-manifesto__h3">Vivre ensemble</h3>
+              <p>Un club de membres actifs. Events physiques, loot tangible, hospitality en finale.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="nafe-section">
+        <div className="nafe-section__head">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-steel-grey">
-              Shop · Nouveautés
-            </p>
-            <h2 className="font-display font-black text-5xl tracking-tighter mt-2">
+            <span className="nafe-eyebrow">Shop · Nouveautés</span>
+            <h2 className="nafe-display nafe-section__title">
               Boutique Officielle
             </h2>
           </div>
-          <button className="text-xs uppercase tracking-wider text-steel-grey hover:text-nafe-blue transition-colors">
-            Voir tout le shop →
-          </button>
+          <Link href="/shop" className="nafe-section__link">Voir tout le shop →</Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

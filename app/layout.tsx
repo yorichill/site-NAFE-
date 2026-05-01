@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./nafe.css";
 import { displayFont, sansFont, monoFont } from "./fonts";
 import { RadialSidebar } from "@/components/RadialSidebar";
 import { StickyHeader } from "@/components/StickyHeader";
@@ -21,14 +22,20 @@ export default function RootLayout({
       lang="fr"
       className={`dark ${displayFont.variable} ${sansFont.variable} ${monoFont.variable}`}
     >
-      <body className="min-h-screen bg-nafe-night text-white font-sans antialiased">
+      <body className="nafe-app">
+        <div className="nafe-ambient" />
+        <div className="nafe-ambient nafe-ambient--2" />
+        
         <ScoreTicker />
         <StickyHeader />
         <RadialSidebar />
-        <main className="pl-16 pt-24 min-h-screen relative">
-          <div className="absolute inset-0 bg-scan-line pointer-events-none opacity-40" />
-          <div className="relative z-10">{children}</div>
+        
+        <main className="nafe-main">
+          {children}
         </main>
+
+        <div className="nafe-scanlines" />
+        <div className="nafe-grain" />
       </body>
     </html>
   );

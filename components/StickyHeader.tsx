@@ -1,37 +1,47 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function StickyHeader() {
-  const { scrollY } = useScroll();
-  const height = useTransform(scrollY, [0, 200], [96, 56]);
-  const bg = useTransform(
-    scrollY,
-    [0, 200],
-    ["rgba(5,8,20,0)", "rgba(5,8,20,0.85)"]
-  );
+  const [shrunk, setShrunk] = useState(false);
+  const route = usePathname();
+
+  useEffect(() => {
+    const scroller = document.querySelector(".nafe-main") || window;
+    const onScroll = () => {
+      const top = (scroller as Element).scrollTop || window.scrollY;
+      setShrunk(top > 80);
+    };
+    scroller.addEventListener("scroll", onScroll);
+    return () => scroller.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <motion.header
-      style={{ height, backgroundColor: bg }}
-      className="fixed top-6 left-16 right-0 z-30 backdrop-blur-xl border-b border-white/5 flex items-center px-8"
-    >
-      <motion.span
-        className="font-display font-black text-xl tracking-tighter"
-        style={{ letterSpacing: useTransform(scrollY, [0, 200], ["-0.02em", "-0.05em"]) }}
-      >
-        FN<span className="text-nafe-blue">/</span>NAFE
-      </motion.span>
-
-      <nav className="ml-auto flex items-center gap-8 text-xs uppercase tracking-widest font-mono text-white/70">
-        <a href="/teams/valorant" className="hover:text-nafe-blue transition-colors">Esport</a>
-        <a href="/club/dashboard" className="hover:text-nafe-blue transition-colors">Club</a>
-        <a href="/shop" className="hover:text-nafe-blue transition-colors">Shop</a>
-        <a href="/teams/valorant" className="hover:text-nafe-blue transition-colors">Roster</a>
-        <button className="nafe-clip-card bg-nafe-blue text-white px-5 py-2 hover:shadow-nafe-glow transition-shadow">
-          S'inscrire
-        </button>
+    <header className={`nafe-header ${shrunk ? "is-shrunk" : ""}`}>
+      <Link href="/" className="nafe-logo">
+        NAFE<span className="nafe-logo__slash">/</span>TEAM
+      </Link>
+      <nav className="nafe-header__nav">
+        <Link href="/shop" className={route === "/shop" ? "is-active" : ""}>Shop</Link>
+        <Link href="/teams/valorant" className={route.startsWith("/teams") ? "is-active" : ""}>Roster</Link>
+        <Link href="/live" className={route === "/live" ? "is-active" : ""}>Live</Link>
+        <Link href="/calendar" className={route === "/calendar" ? "is-active" : ""}>Calendrier</Link>
+        <Link href="/news" className={route === "/news" ? "is-active" : ""}>Actu</Link>
+        <Link href="/community" className={route === "/community" ? "is-active" : ""}>Community</Link>
+        <Link href="/contact" className={route === "/contact" ? "is-active" : ""}>Contact</Link>
+        
+        {/* Simple Login button for now */}
+        <div className="nafe-auth ml-4">
+          <button className="nafe-btn nafe-btn--ghost nafe-btn--sm">
+            Se connecter
+          </button>
+          <button className="nafe-btn nafe-btn--accent nafe-btn--sm">
+            S'inscrire
+          </button>
+        </div>
       </nav>
-    </motion.header>
+    </header>
   );
 }
