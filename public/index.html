@@ -40,6 +40,30 @@
       "sb_publishable_VgpKZ3ocZGzcPAbfEx_2Ag_1dCf-Wcs"
     );
 
+    // Sync Supabase Auth with local store for visual prototype
+    window.supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user && window.store) {
+        const email = session.user.email;
+        const username = session.user.user_metadata?.full_name || email.split("@")[0];
+        // Check if user exists in local store
+        let localUser = window.store.users.list().find(u => u.email === email);
+        if (!localUser) {
+          // Auto-register in local store to give them a profile
+          const role = window.store.users.list().length === 0 ? "admin" : "user";
+          localUser = window.store.users.add({
+            email,
+            username,
+            passwordHash: "google_oauth",
+            role,
+            xp: 0
+          });
+        }
+        window.store.session.set({ userId: localUser.id });
+      } else if (event === 'SIGNED_OUT' && window.store) {
+        window.store.logout();
+      }
+    });
+
     const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
       "accent": "#1E4FD8",
       "cardVariant": "tilt"
