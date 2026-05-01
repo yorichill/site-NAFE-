@@ -1016,12 +1016,27 @@ function CommunityAdmin({ accent }) {
   );
 }
 // ============================================================
-//  Shop
+//  Shop (Supabase)
 // ============================================================
 function ShopAdmin({ accent }) {
-  const list = window.store.shop ? window.store.shop.list() : [];
+  const [list, setList] = useAdminState([]);
+  const [loading, setLoading] = useAdminState(true);
   const [editing, setEditing] = useAdminState(null);
   const [draft, setDraft] = useAdminState(emptyProduct());
+
+  useAdminEffect(() => {
+    fetchProducts();
+  }, []);
+
+  async function fetchProducts() {
+    setLoading(true);
+    if (!window.supabase) return;
+    const { data, error } = await window.supabase.from("products").select("*").order("created_at", { ascending: false });
+    if (!error && data) {
+      setList(data);
+    }
+    setLoading(false);
+  }
 
   function emptyProduct() {
     return { name: "", price: "", sizes: "S, M, L, XL", imageUrl: "" };
@@ -1029,25 +1044,78 @@ function ShopAdmin({ accent }) {
 
   function startEdit(p) {
     setEditing(p.id);
-    setDraft({ ...emptyProduct(), ...p });
+    setDraft({ 
+      name: p.name, 
+      price: p.price, 
+      sizes: Array.isArray(p.sizes) ? p.sizes.join(", ") : p.sizes, 
+      imageUrl: p.image_url || "" 
+    });
   }
 
-  function submit() {
+  async function submit() {
     if (!draft.name.trim()) return alert("Le nom est requis");
-    const payload = { ...draft, price: +draft.price || 0 };
-    if (editing) {
-      window.store.shop.update(editing, payload);
-    } else {
-      window.store.shop.add(payload);
+    const adminPassword = prompt("Mot de passe Admin requis pour modifier la base de données réelle :");
+    if (!adminPassword) return;
+
+    const payload = { 
+      name: draft.name, 
+      price: +draft.price || 0,
+      sizes: draft.sizes.split(",").map(s => s.trim()),
+      imageUrl: draft.imageUrl,
+      adminPassword
+    };
+
+    try {
+      let res;
+      if (editing) {
+        // Not implemented in API yet, but we'll fall back to recreate for prototype simplicity
+        alert("L'édition via API n'est pas supportée dans ce prototype. Créez un nouveau produit.");
+        return;
+      } else {
+        res = await fetch("/api/admin/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Erreur serveur");
+      }
+
+      alert("Opération réussie !");
+      setEditing(null);
+      setDraft(emptyProduct());
+      fetchProducts();
+    } catch (e) {
+      alert("Erreur: " + e.message);
     }
-    setEditing(null);
-    setDraft(emptyProduct());
+  }
+
+  async function deleteProduct(id) {
+    const adminPassword = prompt("Mot de passe Admin requis pour supprimer :");
+    if (!adminPassword) return;
+
+    try {
+      const res = await fetch(`/api/admin/products?id=${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${adminPassword}` }
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Erreur serveur");
+      }
+      fetchProducts();
+    } catch (e) {
+      alert("Erreur: " + e.message);
+    }
   }
 
   return (
     <div className="nafe-admin__section">
       <FormShell
-        title={editing ? "Modifier le produit" : "Nouveau produit"}
+        title={editing ? "Modifier le produit" : "Nouveau produit (Supabase)"}
         onSubmit={submit}
         onCancel={editing ? () => { setEditing(null); setDraft(emptyProduct()); } : null}
         submitLabel={editing ? "Mettre à jour" : "Ajouter le produit"}
@@ -1067,18 +1135,22 @@ function ShopAdmin({ accent }) {
         </Field>
       </FormShell>
 
-      <DataTable
-        accent={accent}
-        empty="Aucun produit dans la boutique."
-        columns={[
-          { key: "name", label: "NOM DU PRODUIT", flex: 2 },
-          { key: "price", label: "PRIX", flex: 1, render: (r) => `${r.price} €` },
-          { key: "sizes", label: "TAILLES", flex: 1 },
-        ]}
-        rows={list}
-        onEdit={startEdit}
-        onDelete={(id) => window.store.shop.remove(id)}
-      />
+      {loading ? (
+        <div className="nafe-admin__empty"><span className="nafe-mono">Chargement des produits Supabase...</span></div>
+      ) : (
+        <DataTable
+          accent={accent}
+          empty="Aucun produit dans la base de données Supabase."
+          columns={[
+            { key: "name", label: "NOM DU PRODUIT", flex: 2 },
+            { key: "price", label: "PRIX", flex: 1, render: (r) => `${r.price} €` },
+            { key: "sizes", label: "TAILLES", flex: 1, render: (r) => Array.isArray(r.sizes) ? r.sizes.join(", ") : r.sizes },
+          ]}
+          rows={list}
+          onEdit={startEdit}
+          onDelete={deleteProduct}
+        />
+      )}
     </div>
   );
 }
