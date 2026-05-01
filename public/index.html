@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>NAFE TEAM — Esport Premium</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/nafe.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="src/store.jsx"></script>
+  <script type="text/babel" src="src/data.jsx"></script>
+  <script type="text/babel" src="src/shell.jsx"></script>
+  <script type="text/babel" src="src/playercard.jsx"></script>
+  <script type="text/babel" src="src/page-hub.jsx"></script>
+  <script type="text/babel" src="src/page-team.jsx"></script>
+  <script type="text/babel" src="src/page-club.jsx"></script>
+  <script type="text/babel" src="src/page-live.jsx"></script>
+  <script type="text/babel" src="src/page-news.jsx"></script>
+  <script type="text/babel" src="src/page-calendar.jsx"></script>
+  <script type="text/babel" src="src/page-community.jsx"></script>
+  <script type="text/babel" src="src/page-contact.jsx"></script>
+  <script type="text/babel" src="src/page-admin.jsx"></script>
+  <script type="text/babel" src="src/auth-modal.jsx"></script>
+
+  <script type="text/babel" data-presets="env,react">
+    const { useState, useEffect } = React;
+
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "accent": "#1E4FD8",
+      "cardVariant": "tilt"
+    }/*EDITMODE-END*/;
+
+    const ACCENTS = [
+      { name: "Electric", value: "#1E4FD8", rgb: "30, 79, 216" },
+      { name: "Acid",     value: "#B6F500", rgb: "182, 245, 0" },
+      { name: "Magenta",  value: "#E11D74", rgb: "225, 29, 116" },
+      { name: "Sunset",   value: "#FF6B2C", rgb: "255, 107, 44" },
+      { name: "Mint",     value: "#00D68F", rgb: "0, 214, 143" },
+      { name: "Ice",      value: "#9AB7FF", rgb: "154, 183, 255" },
+    ];
+
+    // Migration données : renomme les anciens slugs (lol→rl) dans le localStorage
+    window.store.migrate();
+
+    function parseRoute() {
+      const h = location.hash.replace(/^#/, "") || "/";
+      return h;
+    }
+
+    function App() {
+      const [route, setRoute] = useState(parseRoute());
+      const [accent, setAccent] = useState(TWEAK_DEFAULTS.accent);
+      const [cardVariant, setCardVariant] = useState(TWEAK_DEFAULTS.cardVariant);
+      const [authOpen, setAuthOpen] = useState(null); // null | "login" | "register"
+
+      useEffect(() => {
+        const onHash = () => setRoute(parseRoute());
+        window.addEventListener("hashchange", onHash);
+        const saved = localStorage.getItem("nafe:route");
+        if (saved && !location.hash) {
+          location.hash = saved;
+        }
+        return () => window.removeEventListener("hashchange", onHash);
+      }, []);
+
+      useEffect(() => {
+        window.openAuth  = (mode) => setAuthOpen(mode === "register" ? "register" : "login");
+        window.closeAuth = () => setAuthOpen(null);
+        return () => { delete window.openAuth; delete window.closeAuth; };
+      }, []);
+
+      useEffect(() => {
+        localStorage.setItem("nafe:route", route);
+        const main = document.querySelector(".nafe-main");
+        if (main) main.scrollTo({ top: 0, behavior: "smooth" });
+      }, [route]);
+
+      useEffect(() => {
+        const entry = ACCENTS.find(a => a.value === accent) || ACCENTS[0];
+        document.documentElement.style.setProperty("--accent", entry.value);
+        document.documentElement.style.setProperty("--accent-rgb", entry.rgb);
+      }, [accent]);
+
+      const nav = (href) => {
+        location.hash = href.replace(/^#/, "");
+      };
+
+      let Page;
+      if (route === "/") Page = <window.HubPage accent={accent} cardVariant={cardVariant} onNav={nav} />;
+      else if (route.startsWith("/teams/")) {
+        const g = route.split("/")[2];
+        Page = <window.TeamPage accent={accent} cardVariant={cardVariant} initialGame={g} key={g} />;
+      }
+      else if (route === "/community") Page = <window.CommunityPage accent={accent} />;
+      else if (route === "/contact")   Page = <window.ContactPage   accent={accent} />;
+      else if (route === "/live") Page = <window.LivePage accent={accent} />;
+      else if (route === "/news") Page = <window.NewsPage accent={accent} />;
+      else if (route === "/calendar") Page = <window.CalendarPage accent={accent} />;
+      else if (route.startsWith("/admin")) Page = <window.AdminPage accent={accent} />;
+      else if (route === "/shop") Page = <ShopSoon accent={accent} />;
+      else Page = <window.HubPage accent={accent} cardVariant={cardVariant} onNav={nav} />;
+
+      return (
+        <div className="nafe-app" data-screen-label={route}>
+          <div className="nafe-ambient" />
+          <div className="nafe-ambient nafe-ambient--2" />
+          <window.ScoreTicker />
+          <window.Sidebar route={route} onNav={nav} />
+          <window.StickyHeader
+            route={route}
+            onNav={nav}
+            accent={accent}
+            onLogin={() => setAuthOpen("login")}
+            onRegister={() => setAuthOpen("register")}
+          />
+          <main className="nafe-main">
+            {Page}
+          </main>
+          {authOpen && (
+            <window.AuthModal
+              accent={accent}
+              mode={authOpen}
+              onClose={() => setAuthOpen(null)}
+            />
+          )}
+          <div className="nafe-scanlines" />
+          <div className="nafe-grain" />
+        </div>
+      );
+    }
+
+    function ShopSoon({ accent }) {
+      return (
+        <div className="nafe-page">
+          <section style={{ padding: "80px 0", minHeight: "60vh", display: "flex", flexDirection: "column", gap: 24 }}>
+            <span className="nafe-eyebrow" style={{ color: accent }}>Shop</span>
+            <h1 className="nafe-display" style={{ fontSize: "120px", lineHeight: 0.85, margin: 0 }}>
+              BIENTÔT<span style={{ color: accent }}>.</span>
+            </h1>
+            <p style={{ maxWidth: 520, color: "rgba(255,255,255,0.7)", fontSize: 18, lineHeight: 1.5 }}>
+              La boutique officielle ouvre prochainement.
+            </p>
+          </section>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
