@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { PlayerCard } from "@/components/PlayerCard";
+import Link from "next/link";
 import { TEAMS } from "@/lib/rosters";
 
 export function generateStaticParams() {
@@ -15,90 +15,145 @@ export default async function TeamPage({
   const team = TEAMS[game];
   if (!team) notFound();
 
+  // For the prototype, we assume subteam="all"
+  const roster = team.roster;
+  const trophies = team.trophies;
+
+  // Mock record
+  const recordWins = 18;
+  const recordLosses = 4;
+  const record = `${recordWins}–${recordLosses}`;
+
   return (
-    <div className="px-8 md:px-16 pb-32">
-      <section className="pt-12 pb-20 border-b border-white/10">
-        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-nafe-blue mb-4">
+    <div className="nafe-page">
+      <section className="nafe-team__hero">
+        <span className="nafe-eyebrow" style={{ color: "var(--accent)" }}>
           {team.region} · Roster officiel
-        </p>
-        <h1 className="font-display font-black tracking-tighter text-6xl md:text-[8rem] leading-[0.85]">
-          {team.game}
-        </h1>
-        <p className="mt-6 text-steel-grey max-w-xl">
+        </span>
+        <h1 className="nafe-display nafe-team__title">{team.game}</h1>
+        <p className="nafe-team__lede">
           L'effectif complet de {team.title} — statistiques, palmarès et
-          équipement signature.
+          équipement signature. Bilan {team.game}&nbsp;: <strong>{record}</strong>.
         </p>
-      </section>
 
-      <section className="mt-20">
-        <h2 className="font-display font-black text-4xl tracking-tighter mb-10">
-          Roster
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {team.roster.map((p) => (
-            <PlayerCard
-              key={p.tag}
-              name={p.name}
-              tag={p.tag}
-              role={p.role}
-              jersey={p.jersey}
-              kd={p.kd}
-              avatar={`https://api.dicebear.com/7.x/identicon/svg?seed=${p.tag}&backgroundColor=1E4FD8`}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-24">
-        <h2 className="font-display font-black text-4xl tracking-tighter mb-10">
-          Palmarès
-        </h2>
-        <div className="space-y-3">
-          {team.trophies.map((t, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-6 bg-nafe-surface/60 border border-white/5 p-5 nafe-clip-card hover:border-nafe-blue/40 transition-colors"
+        {/* Game tab switch */}
+        <div className="nafe-tabs" role="tablist">
+          {Object.entries(TEAMS).map(([k, t], i) => (
+            <Link
+              key={k}
+              href={`/teams/${k}`}
+              role="tab"
+              className={`nafe-tab ${game === k ? "is-active" : ""}`}
+              style={game === k ? { borderColor: "var(--accent)", color: "#fff" } : {}}
             >
-              <span className="font-mono text-nafe-blue font-bold">
-                {t.year}
+              <span className="nafe-mono nafe-tab__num">0{i + 1}</span>
+              <span className="nafe-display nafe-tab__label">{t.game}</span>
+              <span className="nafe-mono nafe-tab__meta">
+                {t.region} · {t.roster.length} joueur(s)
               </span>
-              <span className="flex-1 font-display text-xl">{t.event}</span>
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-steel-grey">
-                {t.place}
-              </span>
-            </div>
+              {game === k && <span className="nafe-tab__bar" style={{ background: "var(--accent)" }} />}
+            </Link>
           ))}
+        </div>
+
+        {/* Sub-team chips (Mocked for now) */}
+        <div className="nafe-subteams mt-8">
+          <span className="nafe-mono nafe-subteams__label">SOUS-ÉQUIPES {team.game}</span>
+          <div className="nafe-subteams__list flex gap-3 mt-4">
+            <button
+              className="nafe-subteam is-active px-4 py-2 flex items-center gap-3 border text-xs"
+              style={{ borderColor: "var(--accent)", background: "rgba(30, 79, 216, 0.13)", color: "#fff" }}
+            >
+              <span className="w-2 h-2 rounded-full" style={{ background: "var(--accent)" }} />
+              <span className="nafe-mono font-bold tracking-widest">PRINCIPALE</span>
+              <span className="nafe-subteam__count nafe-mono opacity-50">
+                {roster.length}
+              </span>
+            </button>
+          </div>
         </div>
       </section>
 
-      <section className="mt-24">
-        <h2 className="font-display font-black text-4xl tracking-tighter mb-10">
-          Équipement signature
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {["Mouse", "Keyboard", "Headset"].map((label, i) => {
-            const p = team.roster.find((r) => r.gear);
-            const v =
-              i === 0
-                ? p?.gear?.mouse
-                : i === 1
-                ? p?.gear?.keyboard
-                : p?.gear?.headset;
-            return (
-              <div
-                key={label}
-                className="bg-nafe-surface/60 border border-white/5 p-6 nafe-clip-card"
-              >
-                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-steel-grey">
-                  {label}
-                </p>
-                <p className="mt-2 font-display text-2xl font-bold">
-                  {v ?? "À venir"}
-                </p>
+      {/* Roster */}
+      <section className="nafe-section">
+        <header className="nafe-section__head">
+          <div>
+            <span className="nafe-eyebrow">Effectif</span>
+            <h2 className="nafe-display nafe-section__title">Roster global</h2>
+          </div>
+          <span className="nafe-mono nafe-section__count">
+            {String(roster.length).padStart(2, "0")} JOUEUR{roster.length > 1 ? "S" : ""}
+          </span>
+        </header>
+        
+        {roster.length === 0 ? (
+          <div className="nafe-empty nafe-empty--panel">
+            <span className="nafe-mono" style={{ color: "var(--accent)" }}>AUCUN JOUEUR</span>
+            <p className="nafe-empty__text">Le roster sera bientôt dévoilé. Reviens vite !</p>
+          </div>
+        ) : (
+          <div className="nafe-roster nafe-roster--tilt mt-8">
+            {roster.map((p) => (
+              <div key={p.tag} className="nafe-card nafe-card--tilt nafe-clip-card">
+                <div className="nafe-card__jersey">{String(p.jersey).padStart(2, "0")}</div>
+                <div className="nafe-card__head">
+                  <span className="nafe-mono nafe-eyebrow">{p.role}</span>
+                  {p.country && <span className="text-xs uppercase font-bold">{p.country}</span>}
+                </div>
+                {/* SVG Avatar Placeholder since we don't have images */}
+                <div className="nafe-card__mug w-48 h-48 mx-auto mt-4 mb-auto flex items-center justify-center">
+                  <img src={`https://api.dicebear.com/7.x/identicon/svg?seed=${p.tag}&backgroundColor=1E4FD8`} alt={p.name} className="w-full h-full object-contain" />
+                </div>
+                <div className="nafe-card__body mt-6">
+                  <h3 className="nafe-card__name font-display font-black text-3xl">{p.name}</h3>
+                  <p className="nafe-card__tag font-mono text-xs opacity-60">@{p.tag}</p>
+                </div>
+                <div className="nafe-card__foot flex justify-between items-end border-t border-white/10 pt-4 mt-4">
+                  <div>
+                    <p className="nafe-card__statLabel">K/D RATIO</p>
+                    <p className="nafe-card__statVal">{p.kd}</p>
+                  </div>
+                  <span className="nafe-card__cta">VOIR PROFIL</span>
+                </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Palmarès */}
+      <section className="nafe-section">
+        <header className="nafe-section__head">
+          <div>
+            <span className="nafe-eyebrow">Palmarès</span>
+            <h2 className="nafe-display nafe-section__title">Trophées</h2>
+          </div>
+          <span className="nafe-mono nafe-section__count">
+            {String(trophies.length).padStart(2, "0")} ENTRÉE{trophies.length > 1 ? "S" : ""}
+          </span>
+        </header>
+
+        {trophies.length === 0 ? (
+          <div className="nafe-empty nafe-empty--panel">
+            <span className="nafe-mono" style={{ color: "var(--accent)" }}>AUCUN TROPHÉE</span>
+            <p className="nafe-empty__text">Le palmarès sera publié après les premières compétitions officielles.</p>
+          </div>
+        ) : (
+          <div className="nafe-trophies mt-8">
+            {trophies
+              .slice()
+              .sort((a, b) => b.year - a.year)
+              .map((t, i) => (
+                <div key={i} className="nafe-trophy nafe-clip-card">
+                  <span className="nafe-mono nafe-trophy__year" style={{ color: "var(--accent)" }}>
+                    {t.year}
+                  </span>
+                  <span className="nafe-display nafe-trophy__event">{t.event}</span>
+                  <span className="nafe-mono nafe-trophy__place">{t.place}</span>
+                </div>
+              ))}
+          </div>
+        )}
       </section>
     </div>
   );
