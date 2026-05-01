@@ -30,8 +30,10 @@ function TeamPage({ accent, cardVariant, initialGame = "valorant" }) {
 
   const trophies = window.store.getTrophiesByTeam(game);
 
-  const recordWins = window.store.matches.list().filter((m) => m.status === "won").length;
-  const recordLosses = window.store.matches.list().filter((m) => m.status === "lost").length;
+  const GAME_KEY = { valorant: "VAL", rl: "RL", cs2: "CS2" };
+  const gameKey = GAME_KEY[game];
+  const recordWins   = window.store.matches.list().filter(m => m.status === "won"  && m.game === gameKey).length;
+  const recordLosses = window.store.matches.list().filter(m => m.status === "lost" && m.game === gameKey).length;
   const record = `${recordWins}–${recordLosses}`;
 
   return (
@@ -43,7 +45,7 @@ function TeamPage({ accent, cardVariant, initialGame = "valorant" }) {
         <h1 className="nafe-display nafe-team__title">{meta.game}</h1>
         <p className="nafe-team__lede">
           L'effectif complet de {meta.title} — statistiques, palmarès et
-          équipement signature. Bilan toutes compétitions&nbsp;: <strong>{record}</strong>.
+          équipement signature. Bilan {meta.game}&nbsp;: <strong>{record}</strong>.
         </p>
 
         {/* Game tab switch */}

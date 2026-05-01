@@ -15,6 +15,7 @@
     posts:    "nafe:posts",
     socials:  "nafe:socials",
     comments: "nafe:comments",
+    shop:     "nafe:shop",
   };
 
   const uid = (p) =>
@@ -72,6 +73,7 @@
   const posts    = crud(KEYS.posts,    "po");
   const socials  = crud(KEYS.socials,  "sl");
   const comments = crud(KEYS.comments, "cm");
+  const shop     = crud(KEYS.shop,     "sh");
 
   // --- Session (single object, not a list) ---
   const session = {
@@ -104,6 +106,7 @@
     posts,
     socials,
     comments,
+    shop,
     session,
 
     // --- queries croisées utilisées par les pages publiques ---

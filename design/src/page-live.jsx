@@ -135,9 +135,6 @@ function LivePage({ accent }) {
             <span className="nafe-mono nafe-live__map">{live.game}</span>
             <span className="nafe-display nafe-live__mapName">{live.event}</span>
             <span className="nafe-mono nafe-live__round">{live.loc}</span>
-            <div className="nafe-live__timer">
-              <span className="nafe-mono">T+{timer}</span>
-            </div>
           </div>
 
           <div className="nafe-live__team nafe-live__team--away">

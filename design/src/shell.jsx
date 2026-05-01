@@ -115,6 +115,8 @@ function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
         NAFE<span className="nafe-logo__slash">/</span>TEAM
       </a>
       <nav className="nafe-header__nav">
+        <a href="#/shop" onClick={(e) => { e.preventDefault(); onNav("#/shop"); }}
+           className={route === "/shop" ? "is-active" : ""}>Shop</a>
         <a href="#/teams/valorant" onClick={(e) => { e.preventDefault(); onNav("#/teams/valorant"); }}
            className={route.startsWith("/teams") ? "is-active" : ""}>Roster</a>
         <a href="#/live" onClick={(e) => { e.preventDefault(); onNav("#/live"); }}

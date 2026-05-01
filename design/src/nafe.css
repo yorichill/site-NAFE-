@@ -254,14 +254,18 @@ a { color: inherit; text-decoration: none; }
   height: 80px;
   padding: 0 40px;
   display: flex; align-items: center;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  background: rgba(5, 8, 20, 0.4);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  transition: height 0.3s ease, background 0.3s ease;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: height 0.3s ease, background 0.3s ease, border-color 0.3s ease;
   z-index: 30;
 }
-.nafe-header.is-shrunk { height: 56px; background: rgba(5, 8, 20, 0.88); }
+.nafe-header.is-shrunk {
+  height: 56px;
+  background: rgba(5, 8, 20, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom-color: rgba(255,255,255,0.06);
+}
 .nafe-logo {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 900;

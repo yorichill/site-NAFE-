@@ -4,6 +4,7 @@
 const { useState: useAdminState, useEffect: useAdminEffect } = React;
 
 const ADMIN_TABS = [
+  { k: "shop",      label: "Boutique",            icon: "🛍️" },
   { k: "players",   label: "Joueurs",             icon: "👤" },
   { k: "subteams",  label: "Sous-équipes",        icon: "◈" },
   { k: "matches",   label: "Matchs & calendrier", icon: "📅" },
@@ -71,6 +72,7 @@ function AdminPage({ accent }) {
   }
 
   const counts = {
+    shop:      window.store.shop ? window.store.shop.list().length : 0,
     players:   window.store.players.list().length,
     subteams:  window.store.subteams.list().length,
     matches:   window.store.matches.list().length,
@@ -97,14 +99,6 @@ function AdminPage({ accent }) {
         </p>
 
         <div className="nafe-admin__toolbar">
-          <button
-            className="nafe-btn nafe-btn--ghost"
-            onClick={() => {
-              window.store.seedDemo();
-            }}
-          >
-            Charger données de démo
-          </button>
           <button
             className="nafe-btn nafe-btn--ghost"
             style={{ borderColor: "#E53E3E", color: "#E53E3E" }}
@@ -140,6 +134,7 @@ function AdminPage({ accent }) {
       </section>
 
       <section className="nafe-admin__panel">
+        {tab === "shop"      && <ShopAdmin      accent={accent} />}
         {tab === "players"   && <PlayersAdmin   accent={accent} />}
         {tab === "subteams"  && <SubteamsAdmin  accent={accent} />}
         {tab === "matches"   && <MatchesAdmin   accent={accent} />}
@@ -1016,6 +1011,73 @@ function CommunityAdmin({ accent }) {
         rows={list}
         onEdit={() => {}}
         onDelete={(id) => { if (confirm("Supprimer ce post ?")) window.store.posts.remove(id); }}
+      />
+    </div>
+  );
+}
+// ============================================================
+//  Shop
+// ============================================================
+function ShopAdmin({ accent }) {
+  const list = window.store.shop ? window.store.shop.list() : [];
+  const [editing, setEditing] = useAdminState(null);
+  const [draft, setDraft] = useAdminState(emptyProduct());
+
+  function emptyProduct() {
+    return { name: "", price: "", sizes: "S, M, L, XL", imageUrl: "" };
+  }
+
+  function startEdit(p) {
+    setEditing(p.id);
+    setDraft({ ...emptyProduct(), ...p });
+  }
+
+  function submit() {
+    if (!draft.name.trim()) return alert("Le nom est requis");
+    const payload = { ...draft, price: +draft.price || 0 };
+    if (editing) {
+      window.store.shop.update(editing, payload);
+    } else {
+      window.store.shop.add(payload);
+    }
+    setEditing(null);
+    setDraft(emptyProduct());
+  }
+
+  return (
+    <div className="nafe-admin__section">
+      <FormShell
+        title={editing ? "Modifier le produit" : "Nouveau produit"}
+        onSubmit={submit}
+        onCancel={editing ? () => { setEditing(null); setDraft(emptyProduct()); } : null}
+        submitLabel={editing ? "Mettre à jour" : "Ajouter le produit"}
+        accent={accent}
+      >
+        <Field label="Nom du Produit" span={2}>
+          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex: Jersey Officiel 2026" />
+        </Field>
+        <Field label="Prix (€)">
+          <input type="number" step="0.01" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} placeholder="Ex: 89.99" />
+        </Field>
+        <Field label="Tailles (séparées par virgule)">
+          <input value={draft.sizes} onChange={(e) => setDraft({ ...draft, sizes: e.target.value })} placeholder="Ex: S, M, L, XL" />
+        </Field>
+        <Field label="URL de l'Image" span={2}>
+          <input value={draft.imageUrl} onChange={(e) => setDraft({ ...draft, imageUrl: e.target.value })} placeholder="https://..." />
+        </Field>
+      </FormShell>
+
+      <DataTable
+        accent={accent}
+        empty="Aucun produit dans la boutique."
+        columns={[
+          { key: "name", label: "NOM DU PRODUIT", flex: 2 },
+          { key: "price", label: "PRIX", flex: 1, render: (r) => `${r.price} €` },
+          { key: "sizes", label: "TAILLES", flex: 1 },
+        ]}
+        rows={list}
+        onEdit={startEdit}
+        onDelete={(id) => window.store.shop.remove(id)}
       />
     </div>
   );

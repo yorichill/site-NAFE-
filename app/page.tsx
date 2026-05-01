@@ -1,12 +1,4 @@
-import { PlayerCard } from "@/components/PlayerCard";
 
-const ROSTER = [
-  { name: "Boaster", tag: "boaster", role: "IGL", jersey: 1, kd: 1.08 },
-  { name: "Derke", tag: "derke", role: "Duelist", jersey: 7, kd: 1.34 },
-  { name: "Alfajer", tag: "alfajer", role: "Sentinel", jersey: 11, kd: 1.21 },
-  { name: "Chronicle", tag: "chronicle", role: "Flex", jersey: 23, kd: 1.18 },
-  { name: "Leo", tag: "leo", role: "Initiator", jersey: 42, kd: 1.26 },
-];
 
 export default function HomePage() {
   return (
@@ -38,24 +30,33 @@ export default function HomePage() {
         <div className="flex items-end justify-between mb-12 border-b border-white/10 pb-6">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-steel-grey">
-              Roster · Valorant
+              Shop · Nouveautés
             </p>
             <h2 className="font-display font-black text-5xl tracking-tighter mt-2">
-              Le Cinq de Départ
+              Boutique Officielle
             </h2>
           </div>
           <button className="text-xs uppercase tracking-wider text-steel-grey hover:text-nafe-blue transition-colors">
-            Voir l'effectif complet →
+            Voir tout le shop →
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {ROSTER.map((p) => (
-            <PlayerCard
-              key={p.tag}
-              {...p}
-              avatar={`https://api.dicebear.com/7.x/identicon/svg?seed=${p.tag}&backgroundColor=1E4FD8`}
-            />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="nafe-clip-card bg-nafe-surface/60 border border-white/5 p-6 hover:border-nafe-blue/40 transition-colors">
+              <div className="aspect-square bg-black/50 mb-6 flex items-center justify-center">
+                <span className="font-mono text-steel-grey">Image Produit {i}</span>
+              </div>
+              <p className="font-display text-2xl font-bold mb-2">Jersey Officiel 2026</p>
+              <div className="flex justify-between items-center mt-4">
+                <span className="font-mono text-nafe-blue">89.99 €</span>
+                <div className="flex gap-2">
+                  {['S', 'M', 'L', 'XL'].map(size => (
+                    <span key={size} className="text-[10px] font-mono border border-white/20 px-2 py-1">{size}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </section>

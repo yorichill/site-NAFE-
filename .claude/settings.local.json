@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.google.com)",
+      "WebFetch(domain:archipelago.gg)",
+      "Bash(node scripts/extract-build.mjs)",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}
