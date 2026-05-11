@@ -129,9 +129,44 @@ function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
            className={route === "/community" ? "is-active" : ""}>Community</a>
         <a href="#/contact" onClick={(e) => { e.preventDefault(); onNav("#/contact"); }}
            className={route === "/contact" ? "is-active" : ""}>Contact</a>
+        <TwitterToggle />
         <UserPill onLogin={onLogin} onRegister={onRegister} onNav={onNav} accent={accent} />
       </nav>
     </header>
+  );
+}
+
+function TwitterToggle() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button 
+        className="nafe-twitter-toggle" 
+        onClick={() => setOpen(!open)}
+        title="Flux Twitter"
+      >
+        𝕏
+      </button>
+      {open && <SocialOverlay onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+function SocialOverlay({ onClose }) {
+  useEffect(() => {
+    if (window.twttr) window.twttr.widgets.load();
+  }, []);
+
+  return (
+    <div className="nafe-twitter-overlay nafe-clip-card">
+      <div className="nafe-twitter-overlay__head">
+        <span className="nafe-mono" style={{ fontSize: 10, color: "#1d9bf0" }}>LIVE FEED @NAFEOFFICIEL</span>
+        <button onClick={onClose} style={{ opacity: 0.5, fontSize: 18 }}>×</button>
+      </div>
+      <div className="nafe-twitter-overlay__body">
+        <a className="twitter-timeline" data-theme="dark" data-chrome="noheader nofooter noborders transparent" data-height="600" href="https://twitter.com/NafeOfficiel?ref_src=twsrc%5Etfw">Tweets by NafeOfficiel</a>
+      </div>
+    </div>
   );
 }
 
@@ -225,4 +260,4 @@ function Sidebar({ route, onNav }) {
   );
 }
 
-Object.assign(window, { ScoreTicker, StickyHeader, Sidebar, UserPill });
+Object.assign(window, { ScoreTicker, StickyHeader, Sidebar, UserPill, SocialOverlay });

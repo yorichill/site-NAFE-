@@ -63,6 +63,7 @@ function NewsPage({ accent }) {
 
   return (
     <div className="nafe-page">
+      <TwitterBanner />
       <section className="nafe-news__hero">
         <span className="nafe-eyebrow" style={{ color: accent }}>
           Actualité · NAFE TEAM
@@ -249,6 +250,28 @@ function ArticlePlaceholder({ accent, seed }) {
         [IMAGE·{s.slice(0,5).toUpperCase()}]
       </text>
     </svg>
+  );
+}
+
+function TwitterBanner() {
+  React.useEffect(() => {
+    if (window.twttr) window.twttr.widgets.load();
+  }, []);
+
+  return (
+    <section className="nafe-news__twitter-banner nafe-clip-card">
+      <div style={{ maxWidth: "100%", margin: "0 auto" }}>
+        <a 
+          className="twitter-timeline" 
+          data-theme="dark" 
+          data-chrome="noheader nofooter noborders transparent" 
+          data-height="400"
+          href="https://twitter.com/NafeOfficiel?ref_src=twsrc%5Etfw"
+        >
+          Tweets by NafeOfficiel
+        </a>
+      </div>
+    </section>
   );
 }
 
