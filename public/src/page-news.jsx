@@ -35,6 +35,31 @@ function TweetCard({ tweet }) {
   );
 }
 
+function LatestTweetCard({ tweet, accent }) {
+  if (!tweet) return null;
+  const date = new Date(tweet.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }).toUpperCase();
+  return (
+    <a
+      href={`https://x.com/NafeOfficiel/status/${tweet.id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="nafe-news__latest-tweet nafe-clip-card"
+    >
+      <div className="nafe-news__lt-icon">𝕏</div>
+      <div className="nafe-news__lt-content">
+        <div className="nafe-news__lt-head">
+          <span className="nafe-mono" style={{ color: "#1d9bf0" }}>@NAFEOFFICIEL</span>
+          <span className="nafe-mono" style={{ opacity: 0.4 }}>{date}</span>
+        </div>
+        <p className="nafe-news__lt-text">{tweet.text}</p>
+        <div className="nafe-news__lt-foot">
+          <span className="nafe-mono" style={{ color: "#1d9bf0" }}>DERNIÈRE ACTUALITÉ SUR X →</span>
+        </div>
+      </div>
+    </a>
+  );
+}
+
 function NewsPage({ accent }) {
   window.store.useVersion();
   const all = window.store.news.list()
@@ -46,24 +71,29 @@ function NewsPage({ accent }) {
   const [tweetsErr, setTweetsErr] = useNewsState(false);
 
   useNewsEffect(() => {
-    fetch(TWEETS_API)
-      .then(r => r.json())
-      .then(d => setTweets(d.tweets || []))
-      .catch(() => setTweetsErr(true));
+    const fetchTweets = () => {
+      fetch(TWEETS_API)
+        .then(r => r.json())
+        .then(d => setTweets(d.tweets || []))
+        .catch(() => setTweetsErr(true));
+    };
+    fetchTweets();
+    const timer = setInterval(fetchTweets, 60000);
+    return () => clearInterval(timer);
   }, []);
 
-  const showTweets = (cat === "Tout" || cat === "Twitter") && tweets.length > 0;
-  const filtered   = cat === "Tout" || cat === "Twitter"
+  const latestTweet = tweets[0];
+  const filtered    = cat === "Tout" || cat === "Twitter"
     ? all
     : all.filter(n => n.cat === cat);
-  const featured   = cat !== "Twitter" && (filtered.find(n => n.featured) || filtered[0]);
-  const rest       = cat !== "Twitter" ? filtered.filter(n => (featured ? n.id !== featured.id : true)) : [];
+  
+  const featured = cat !== "Twitter" && (filtered.find(n => n.featured) || filtered[0]);
+  const rest     = cat !== "Twitter" ? filtered.filter(n => (featured ? n.id !== featured.id : true)) : [];
 
   const hasContent = all.length > 0 || tweets.length > 0;
 
   return (
     <div className="nafe-page">
-      <TwitterBanner />
       <section className="nafe-news__hero">
         <span className="nafe-eyebrow" style={{ color: accent }}>
           Actualité · NAFE TEAM
@@ -115,35 +145,16 @@ function NewsPage({ accent }) {
             ))}
           </section>
 
-          {/* Tweets */}
-          {showTweets && (
-            <section className="nafe-section" style={{ marginTop: 48 }}>
-              <header className="nafe-section__head" style={{ marginBottom: 24 }}>
-                <div>
-                  <span className="nafe-eyebrow" style={{ color: "#1d9bf0" }}>X · @NafeOfficiel</span>
-                  <h2 className="nafe-display nafe-section__title">Derniers tweets</h2>
-                </div>
-                <a
-                  href="https://x.com/NafeOfficiel"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="nafe-mono"
-                  style={{ color: "#1d9bf0", fontSize: 12, opacity: 0.85 }}
-                >
-                  VOIR LE PROFIL →
-                </a>
-              </header>
-              <div className="nafe-news__grid">
-                {tweets.map(t => <TweetCard key={t.id} tweet={t} />)}
-              </div>
-            </section>
+          {/* Latest Tweet (Feature item) */}
+          {(cat === "Tout" || cat === "Twitter") && (
+            <LatestTweetCard tweet={latestTweet} accent={accent} />
           )}
 
           {/* Articles — masqués si filtre Twitter actif */}
           {cat !== "Twitter" && all.length > 0 && (
             <>
               {featured && (
-                <section className="nafe-news__featured nafe-clip-card" style={{ marginTop: showTweets ? 60 : 0 }}>
+                <section className="nafe-news__featured nafe-clip-card" style={{ marginTop: 40 }}>
                   <div className="nafe-news__featImg" style={{ borderColor: accent }}>
                     <FeaturedPlaceholder accent={accent} seed={featured.id} />
                     <span className="nafe-news__featTag" style={{ background: accent }}>À LA UNE</span>
@@ -201,6 +212,15 @@ function NewsPage({ accent }) {
               )}
             </>
           )}
+
+          {/* Grid de tweets si filtre Twitter actif */}
+          {cat === "Twitter" && tweets.slice(1).length > 0 && (
+            <section className="nafe-section" style={{ marginTop: 48 }}>
+               <div className="nafe-news__grid">
+                {tweets.slice(1).map(t => <TweetCard key={t.id} tweet={t} />)}
+              </div>
+            </section>
+          )}
         </>
       )}
     </div>
@@ -250,28 +270,6 @@ function ArticlePlaceholder({ accent, seed }) {
         [IMAGE·{s.slice(0,5).toUpperCase()}]
       </text>
     </svg>
-  );
-}
-
-function TwitterBanner() {
-  React.useEffect(() => {
-    if (window.twttr) window.twttr.widgets.load();
-  }, []);
-
-  return (
-    <section className="nafe-news__twitter-banner nafe-clip-card">
-      <div style={{ maxWidth: "100%", margin: "0 auto" }}>
-        <a 
-          className="twitter-timeline" 
-          data-theme="dark" 
-          data-chrome="noheader nofooter noborders transparent" 
-          data-height="400"
-          href="https://twitter.com/NafeOfficiel?ref_src=twsrc%5Etfw"
-        >
-          Tweets by NafeOfficiel
-        </a>
-      </div>
-    </section>
   );
 }
 

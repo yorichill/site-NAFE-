@@ -99,6 +99,41 @@ function UserPill({ onLogin, onRegister, onNav, accent }) {
   );
 }
 
+// ========== LatestTweetHeader ==========
+function LatestTweetHeader() {
+  const [tweet, setTweet] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLatest = () => {
+      fetch("http://localhost:3000/api/tweets")
+        .then(r => r.json())
+        .then(d => {
+          if (d.tweets && d.tweets.length > 0) setTweet(d.tweets[0]);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    };
+    fetchLatest();
+    const timer = setInterval(fetchLatest, 60000); // refresh every minute
+    return () => clearInterval(timer);
+  }, []);
+
+  if (loading || !tweet) return null;
+
+  return (
+    <a 
+      href={`https://x.com/NafeOfficiel/status/${tweet.id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="nafe-header__tweet"
+    >
+      <span className="nafe-header__tweet-x">𝕏</span>
+      <span className="nafe-header__tweet-text">{tweet.text}</span>
+    </a>
+  );
+}
+
 // ========== StickyHeader ==========
 function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
   const [shrunk, setShrunk] = useState(false);
@@ -111,9 +146,12 @@ function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
   }, []);
   return (
     <header className={`nafe-header ${shrunk ? "is-shrunk" : ""}`}>
-      <a href="#/" onClick={(e) => { e.preventDefault(); onNav("#/"); }} className="nafe-logo">
-        NAFE<span className="nafe-logo__slash">/</span>TEAM
-      </a>
+      <div className="nafe-header__left">
+        <a href="#/" onClick={(e) => { e.preventDefault(); onNav("#/"); }} className="nafe-logo">
+          NAFE<span className="nafe-logo__slash">/</span>TEAM
+        </a>
+        <LatestTweetHeader />
+      </div>
       <nav className="nafe-header__nav">
         <a href="#/shop" onClick={(e) => { e.preventDefault(); onNav("#/shop"); }}
            className={route === "/shop" ? "is-active" : ""}>Shop</a>
@@ -129,44 +167,9 @@ function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
            className={route === "/community" ? "is-active" : ""}>Community</a>
         <a href="#/contact" onClick={(e) => { e.preventDefault(); onNav("#/contact"); }}
            className={route === "/contact" ? "is-active" : ""}>Contact</a>
-        <TwitterToggle />
         <UserPill onLogin={onLogin} onRegister={onRegister} onNav={onNav} accent={accent} />
       </nav>
     </header>
-  );
-}
-
-function TwitterToggle() {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <button 
-        className="nafe-twitter-toggle" 
-        onClick={() => setOpen(!open)}
-        title="Flux Twitter"
-      >
-        𝕏
-      </button>
-      {open && <SocialOverlay onClose={() => setOpen(false)} />}
-    </>
-  );
-}
-
-function SocialOverlay({ onClose }) {
-  useEffect(() => {
-    if (window.twttr) window.twttr.widgets.load();
-  }, []);
-
-  return (
-    <div className="nafe-twitter-overlay nafe-clip-card">
-      <div className="nafe-twitter-overlay__head">
-        <span className="nafe-mono" style={{ fontSize: 10, color: "#1d9bf0" }}>LIVE FEED @NAFEOFFICIEL</span>
-        <button onClick={onClose} style={{ opacity: 0.5, fontSize: 18 }}>×</button>
-      </div>
-      <div className="nafe-twitter-overlay__body">
-        <a className="twitter-timeline" data-theme="dark" data-chrome="noheader nofooter noborders transparent" data-height="600" href="https://twitter.com/NafeOfficiel?ref_src=twsrc%5Etfw">Tweets by NafeOfficiel</a>
-      </div>
-    </div>
   );
 }
 

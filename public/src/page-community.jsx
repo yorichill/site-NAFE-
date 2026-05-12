@@ -79,15 +79,30 @@ function CommunityPage({ accent }) {
       content:    content.trim(),
       authorId:   user.id,
       authorName: user.username,
-      likes: 0,
+      likedBy:    [],
     });
     setTitle("");
     setContent("");
     setBusy(false);
   }
 
-  function like(post) {
-    window.store.posts.update(post.id, { likes: (post.likes || 0) + 1 });
+  function toggleLike(post) {
+    if (!user) {
+      window.openAuth?.("login");
+      return;
+    }
+    const likedBy = post.likedBy || [];
+    const idx = likedBy.indexOf(user.id);
+    let nextLikedBy;
+    if (idx > -1) {
+      nextLikedBy = likedBy.filter(id => id !== user.id);
+    } else {
+      nextLikedBy = [...likedBy, user.id];
+    }
+    window.store.posts.update(post.id, { 
+      likedBy: nextLikedBy,
+      likes: nextLikedBy.length
+    });
   }
 
   return (
@@ -186,6 +201,7 @@ function CommunityPage({ accent }) {
                 .filter((c) => c.postId === post.id)
                 .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
               const isOpen = openPosts.has(post.id);
+              const isLiked = user && post.likedBy && post.likedBy.includes(user.id);
 
               return (
                 <article key={post.id} className="nafe-post nafe-clip-card">
@@ -205,8 +221,8 @@ function CommunityPage({ accent }) {
                           if (confirm("Supprimer ce post et tous ses commentaires ?")) {
                             // supprimer les commentaires liés
                             window.store.comments.list()
-                              .filter((c) => c.postId === post.id)
-                              .forEach((c) => window.store.comments.remove(c.id));
+                               .filter((c) => c.postId === post.id)
+                               .forEach((c) => window.store.comments.remove(c.id));
                             window.store.posts.remove(post.id);
                           }
                         }}
@@ -221,10 +237,10 @@ function CommunityPage({ accent }) {
                   <div className="nafe-post__foot">
                     <button
                       className="nafe-post__like"
-                      onClick={() => like(post)}
-                      style={{ color: accent }}
+                      onClick={() => toggleLike(post)}
+                      style={{ color: isLiked ? accent : "rgba(255,255,255,0.4)" }}
                     >
-                      <span>♥</span>
+                      <span>{isLiked ? "♥" : "♡"}</span>
                       <span className="nafe-mono">{post.likes || 0}</span>
                     </button>
                     <button
