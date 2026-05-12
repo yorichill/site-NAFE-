@@ -106,7 +106,7 @@ function LatestTweetHeader() {
 
   useEffect(() => {
     const fetchLatest = () => {
-      fetch("http://localhost:3000/api/tweets")
+      fetch("/api/tweets")
         .then(r => r.json())
         .then(d => {
           if (d.tweets && d.tweets.length > 0) setTweet(d.tweets[0]);

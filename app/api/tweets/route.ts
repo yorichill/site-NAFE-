@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { execFileSync } from "child_process";
 
 const CORS  = { "Access-Control-Allow-Origin": "*" };
-const USER  = "NafeOfficiel";
+const USER  = process.env.TWITTER_USER || "NafeOfficiel";
 const URL   = `https://syndication.twitter.com/srv/timeline-profile/screen-name/${USER}`;
 const RE    = /id="__NEXT_DATA__"[^>]*>(.+?)<\/script>/;
 

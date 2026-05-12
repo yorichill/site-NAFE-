@@ -2,7 +2,7 @@
 
 const { useState: useNewsState, useEffect: useNewsEffect } = React;
 
-const TWEETS_API = "http://localhost:3000/api/tweets";
+const TWEETS_API = "/api/tweets";
 const CATS = ["Tout", "Twitter", "Compétition", "Annonce", "Transfert", "Analyse", "Structure", "Partenariat", "Académie"];
 
 function TweetCard({ tweet }) {
