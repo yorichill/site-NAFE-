@@ -223,7 +223,7 @@ function DataTable({ columns, rows, onEdit, onDelete, empty, accent }) {
 // ============================================================
 //  Players
 // ============================================================
-const ROLES = ["IGL", "Duelist", "Sentinel", "Initiator", "Controller", "Flex", "Top", "Jungle", "Mid", "ADC", "Support", "AWP", "Rifler", "Anchor", "Entry", "Attaquant", "Défenseur", "Pivot", "Rotateur"];
+const ROLES = ["IGL", "Duelist", "Sentinel", "Initiator", "Controller", "Flex", "Coach", "Caster", "Analyst", "Manager", "CEO", "AWP", "Rifler", "Anchor", "Entry", "Attaquant", "Défenseur", "Pivot", "Rotateur"];
 
 function PlayersAdmin({ accent }) {
   window.store.useVersion(); // réabonnement direct pour réagir à l'ajout de sous-équipes
