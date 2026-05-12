@@ -105,13 +105,6 @@ function HubPage({ accent, cardVariant, onNav }) {
           </div>
         </div>
 
-        <div className="nafe-hero__rail">
-          <span className="nafe-mono">N/T · 01</span>
-          <span className="nafe-mono">·</span>
-          <span className="nafe-mono">ISSUE #012</span>
-          <span className="nafe-mono">·</span>
-          <span className="nafe-mono">PARIS · EU</span>
-        </div>
       </section>
 
       {/* Manifesto strip */}

@@ -101,7 +101,7 @@ function NewsPage({ accent }) {
         <h1 className="nafe-display nafe-team__title">ACTU<span style={{ color: accent }}>.</span></h1>
         <p className="nafe-team__lede">
           Tout ce qui fait bouger NAFE TEAM — matchs, transferts, annonces structure
-          et drops. Curation par la rédaction interne.
+          et drops.
         </p>
       </section>
 
