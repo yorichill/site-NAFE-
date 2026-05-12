@@ -94,23 +94,9 @@ function AdminPage({ accent }) {
           ADMIN<span style={{ color: accent }}>.</span>
         </h1>
         <p className="nafe-team__lede">
-          Crée, modifie et supprime tout le contenu visible côté public. Les
-          changements sont instantanés et persistés localement dans ce navigateur.
+          Crée, modifie et supprime tout le contenu visible côté public.
         </p>
 
-        <div className="nafe-admin__toolbar">
-          <button
-            className="nafe-btn nafe-btn--ghost"
-            style={{ borderColor: "#E53E3E", color: "#E53E3E" }}
-            onClick={() => {
-              if (confirm("Effacer TOUT le contenu (joueurs, matchs, actus, scores, palmarès) ?")) {
-                window.store.wipeAll();
-              }
-            }}
-          >
-            Tout effacer
-          </button>
-        </div>
 
         <div className="nafe-admin__tabs">
           {ADMIN_TABS.map((t) => {
@@ -246,7 +232,7 @@ function PlayersAdmin({ accent }) {
   const [draft, setDraft] = useAdminState(emptyPlayer());
 
   function emptyPlayer() {
-    return { team: "valorant", subteam: "", name: "", tag: "", role: "Duelist", jersey: 1, country: "FR", kd: 0, hs: 0, acs: 0, gear: { mouse: "", keyboard: "", headset: "" } };
+    return { team: "valorant", subteam: "", name: "", tag: "", role: "Duelist", jersey: 1, country: "FR", kd: 0, hs: 0, gear: { mouse: "", keyboard: "", headset: "" } };
   }
 
   // Sous-équipes : d'abord celles du jeu sélectionné, puis les autres en fallback
@@ -262,7 +248,7 @@ function PlayersAdmin({ accent }) {
   function submit() {
     if (!draft.name.trim()) return alert("Le nom est requis");
     if (!draft.tag.trim()) return alert("Le pseudo est requis");
-    const payload = { ...draft, jersey: +draft.jersey || 0, kd: +draft.kd || 0, hs: +draft.hs || 0, acs: +draft.acs || 0 };
+    const payload = { ...draft, jersey: +draft.jersey || 0, kd: +draft.kd || 0, hs: +draft.hs || 0 };
     if (editing) {
       window.store.players.update(editing, payload);
     } else {
@@ -330,9 +316,6 @@ function PlayersAdmin({ accent }) {
         </Field>
         <Field label="HS %">
           <input type="number" min={0} max={100} value={draft.hs} onChange={(e) => setDraft({ ...draft, hs: e.target.value })} />
-        </Field>
-        <Field label="ACS">
-          <input type="number" value={draft.acs} onChange={(e) => setDraft({ ...draft, acs: e.target.value })} />
         </Field>
         <Field label="Souris">
           <input value={draft.gear.mouse} onChange={(e) => setDraft({ ...draft, gear: { ...draft.gear, mouse: e.target.value } })} />
@@ -491,7 +474,7 @@ function NewsAdmin({ accent }) {
   function emptyNews() {
     const d = new Date();
     const fr = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase().replace(/\./g, "");
-    return { date: fr, cat: "Annonce", game: "CLUB", title: "", lede: "", author: "Rédaction NAFE", readTime: "3 min", featured: false };
+    return { date: fr, cat: "Annonce", game: "CLUB", title: "", lede: "", author: "Rédaction NAFE", featured: false };
   }
 
   function startEdit(n) {
@@ -532,9 +515,6 @@ function NewsAdmin({ accent }) {
           <select value={draft.game} onChange={(e) => setDraft({ ...draft, game: e.target.value })}>
             {["CLUB", "VALORANT", "LOL", "CS2", "AUTRE"].map((g) => <option key={g} value={g}>{g}</option>)}
           </select>
-        </Field>
-        <Field label="Temps de lecture">
-          <input value={draft.readTime} onChange={(e) => setDraft({ ...draft, readTime: e.target.value })} placeholder="Ex: 5 min" />
         </Field>
         <Field label="Titre" span={2}>
           <input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
@@ -837,14 +817,6 @@ function UsersAdmin({ accent, currentUser }) {
 
   return (
     <div className="nafe-admin__section">
-      <div className="nafe-admin__note">
-        <span className="nafe-mono" style={{ color: accent }}>ⓘ INFO</span>
-        <p>
-          Tu vois ici tous les comptes créés sur ce navigateur. Le premier compte enregistré
-          a automatiquement le rôle <strong>admin</strong>. Tu peux promouvoir/rétrograder
-          les autres, ou supprimer un compte (sauf le tien).
-        </p>
-      </div>
 
       <DataTable
         accent={accent}

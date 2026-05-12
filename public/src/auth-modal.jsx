@@ -67,9 +67,9 @@ function AuthModal({ accent, mode, onClose, onSuccess }) {
         </h2>
         <p className="nafe-modal__lede">
           {tab === "login"
-            ? "Accède à ton dashboard, tes missions et ton XP fan."
+            ? ""
             : !usersExist
-              ? "Premier compte créé = administrateur. Toutes les inscriptions suivantes sont des comptes fan standards."
+              ? ""
               : "Crée ton compte fan gratuit. XP, drops et accès aux événements club."}
         </p>
 

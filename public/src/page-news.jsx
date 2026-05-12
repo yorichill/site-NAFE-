@@ -169,7 +169,6 @@ function NewsPage({ accent }) {
                     <p className="nafe-news__featLede">{featured.lede}</p>
                     <div className="nafe-news__featFoot">
                       <span className="nafe-mono">PAR {(featured.author || "").toUpperCase()}</span>
-                      <span className="nafe-mono">{(featured.readTime || "").toUpperCase()}</span>
                       <span className="nafe-news__featRead" style={{ color: accent }}>LIRE →</span>
                     </div>
                   </div>
@@ -201,7 +200,7 @@ function NewsPage({ accent }) {
                           <h3 className="nafe-display nafe-news__cardTitle">{n.title}</h3>
                           <p className="nafe-news__cardLede">{n.lede}</p>
                           <div className="nafe-news__cardFoot">
-                            <span className="nafe-mono">{n.game} · {n.readTime}</span>
+                            <span className="nafe-mono">{n.game}</span>
                             <span className="nafe-mono" style={{ color: accent }}>→</span>
                           </div>
                         </div>
