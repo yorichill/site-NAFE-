@@ -153,7 +153,6 @@ function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
         <a href="#/" onClick={(e) => { e.preventDefault(); onNav("#/"); }} className="nafe-logo">
           NAFE<span className="nafe-logo__slash">/</span>TEAM
         </a>
-        <LatestTweetHeader />
       </div>
       <nav className="nafe-header__nav">
         <a href="#/shop" onClick={(e) => { e.preventDefault(); onNav("#/shop"); }}
