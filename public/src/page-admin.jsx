@@ -14,7 +14,6 @@ const ADMIN_TABS = [
   { k: "socials",   label: "Réseaux sociaux",     icon: "🔗" },
   { k: "community", label: "Communauté",          icon: "💬" },
   { k: "users",     label: "Utilisateurs",        icon: "👥" },
-  { k: "engagement", label: "Engagement",          icon: "🎮" },
 ];
 
 // Route helper : renvoie la sous-page courante depuis le hash
@@ -465,7 +464,7 @@ function MatchesAdmin({ accent }) {
 // ============================================================
 //  News
 // ============================================================
-const NEWS_CATS = ["Compétition", "Annonce", "Transfert", "Analyse", "Structure", "Partenariat", "Académie"];
+const NEWS_CATS = ["Compétition", "Annonce", "Transfert", "Analyse", "Structure", "Partenariat", "Académie", "YouTube", "Twitch"];
 
 function NewsAdmin({ accent }) {
   const list = window.store.news.list()
@@ -477,7 +476,7 @@ function NewsAdmin({ accent }) {
   function emptyNews() {
     const d = new Date();
     const fr = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase().replace(/\./g, "");
-    return { date: fr, cat: "Annonce", game: "CLUB", title: "", lede: "", author: "Rédaction NAFE", featured: false };
+    return { date: fr, cat: "Annonce", game: "CLUB", title: "", lede: "", author: "Rédaction NAFE", featured: false, url: "" };
   }
 
   function startEdit(n) {
@@ -496,6 +495,8 @@ function NewsAdmin({ accent }) {
     setEditing(null);
     setDraft(emptyNews());
   }
+
+  const isVideo = draft.cat === "YouTube" || draft.cat === "Twitch";
 
   return (
     <div className="nafe-admin__section">
@@ -522,6 +523,11 @@ function NewsAdmin({ accent }) {
         <Field label="Titre" span={2}>
           <input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
         </Field>
+        {isVideo && (
+          <Field label="Lien Vidéo (URL YouTube ou Twitch)" span={2}>
+            <input value={draft.url || ""} onChange={(e) => setDraft({ ...draft, url: e.target.value })} placeholder="https://..." />
+          </Field>
+        )}
         <Field label="Chapeau / résumé" span={2}>
           <textarea rows={3} value={draft.lede} onChange={(e) => setDraft({ ...draft, lede: e.target.value })} />
         </Field>

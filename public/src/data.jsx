@@ -97,7 +97,6 @@ const NAV = [
   { key: "news",      label: "Actu",       icon: "✎", href: "#/news" },
   { key: "community", label: "Community",  icon: "✦", href: "#/community" },
   { key: "contact",   label: "Contact",    icon: "⊙", href: "#/contact" },
-  { key: "locker",    label: "Locker",     icon: "⧉", href: "#/locker" },
   { key: "admin",     label: "Admin",      icon: "⚙", href: "#/admin" },
 ];
 
