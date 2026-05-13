@@ -12,7 +12,7 @@ function TweetCard({ tweet, accent }) {
         <div className="nafe-tweet-avatar">
           <img src="https://pbs.twimg.com/profile_images/1769830504746684416/Uu-L8v-Z_400x400.jpg" alt="NAFE" />
         </div>
-        <div className="nafe-tweet-meta">
+        <div className="nafe-tweet-info">
           <div className="nafe-tweet-user">
             <span className="nafe-tweet-name">NAFE</span>
             <span className="nafe-tweet-handle">@NafeOfficiel · {date}</span>
@@ -22,19 +22,20 @@ function TweetCard({ tweet, accent }) {
       </div>
       <div className="nafe-tweet-body">
         <p className="nafe-tweet-text">{tweet.text}</p>
-        
         {tweet.media && tweet.media.length > 0 && (
           <div className="nafe-tweet-media">
-            <img src={tweet.media[0].url} alt="Media" className="nafe-tweet-img" />
+            <img src={tweet.media[0].url} alt="Tweet media" className="nafe-tweet-img" />
           </div>
         )}
       </div>
       <div className="nafe-tweet-footer">
         <div className="nafe-tweet-stats nafe-mono">
-          <span>♥ {tweet.public_metrics.like_count}</span>
-          <span>↺ {tweet.public_metrics.retweet_count}</span>
+          <span className="nafe-tweet-stat">▼ {tweet.public_metrics.like_count}</span>
+          <span className="nafe-tweet-stat">↺ {tweet.public_metrics.retweet_count}</span>
         </div>
-        <a href={`https://x.com/NafeOfficiel/status/${tweet.id}`} target="_blank" rel="noopener" className="nafe-mono">VOIR SUR 𝕏 →</a>
+        <a href={`https://x.com/NafeOfficiel/status/${tweet.id}`} target="_blank" rel="noopener" className="nafe-tweet-link nafe-mono">
+          VOIR SUR 𝕏 →
+        </a>
       </div>
     </div>
   );
@@ -44,9 +45,9 @@ function VideoCard({ news, accent }) {
   const isYoutube = news.cat === "YouTube";
   const color = isYoutube ? "#FF0000" : "#9146FF";
   return (
-    <div className="nafe-news__card nafe-video-card">
-      <div className="nafe-video-thumb" style={{ background: '#050814', borderBottom: `1px solid ${color}33` }}>
-        <div className="nafe-video-play" style={{ border: `1px solid ${color}44` }}>▶</div>
+    <div className="nafe-news__card nafe-video-card nafe-clip-card">
+      <div className="nafe-video-thumb">
+        <div className="nafe-video-play">▶</div>
         <span className="nafe-video-tag" style={{ background: color }}>{news.cat.toUpperCase()}</span>
       </div>
       <div className="nafe-news__cardBody">
@@ -54,10 +55,10 @@ function VideoCard({ news, accent }) {
           <span className="nafe-mono" style={{ color: color }}>NOUVEAU CONTENU</span>
           <span className="nafe-mono">· {news.date}</span>
         </div>
-        <h3 className="nafe-display nafe-news__cardTitle" style={{ fontSize: 18 }}>{news.title}</h3>
-        <p className="nafe-news__cardLede" style={{ fontSize: 13, opacity: 0.7 }}>{news.lede}</p>
+        <h3 className="nafe-display nafe-news__cardTitle">{news.title}</h3>
+        <p className="nafe-news__cardLede">{news.lede}</p>
         <div className="nafe-news__cardFoot">
-          <a href={news.url} target="_blank" rel="noopener" className="nafe-mono" style={{ color: color, textDecoration: 'none' }}>
+          <a href={news.url} target="_blank" rel="noopener" className="nafe-mono" style={{ color: color, textDecoration: 'none', fontWeight: 700 }}>
             REGARDER SUR {news.cat.toUpperCase()} →
           </a>
         </div>
@@ -76,7 +77,10 @@ function NewsPage({ accent }) {
   useNewsEffect(() => {
     fetch(TWEETS_API)
       .then(r => r.json())
-      .then(d => setTweets(d.tweets || []))
+      .then(d => {
+        // If we get fallback tweets (ID 1, 2), they might not have media
+        setTweets(d.tweets || []);
+      })
       .catch(() => {});
   }, []);
 
@@ -149,31 +153,29 @@ function NewsPage({ accent }) {
 
       <style>{`
         .nafe-tweet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 30px; }
-        .nafe-tweet-card { background: #000; border: 1px solid #333; padding: 20px; transition: border-color 0.3s; }
-        .nafe-tweet-card:hover { border-color: #555; }
-        .nafe-tweet-header { display: flex; gap: 12px; margin-bottom: 12px; }
-        .nafe-tweet-avatar { width: 48px; height: 48px; border-radius: 50%; overflow: hidden; background: #222; }
+        .nafe-tweet-card { background: #000; border: 1px solid #1a1a1a; padding: 24px; position: relative; }
+        .nafe-tweet-header { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+        .nafe-tweet-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 1px solid #333; flex-shrink: 0; }
         .nafe-tweet-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .nafe-tweet-meta { flex: 1; display: flex; justify-content: space-between; align-items: flex-start; }
+        .nafe-tweet-info { flex: 1; display: flex; justify-content: space-between; }
         .nafe-tweet-user { display: flex; flex-direction: column; }
-        .nafe-tweet-name { font-weight: 700; font-size: 15px; color: #fff; }
-        .nafe-tweet-handle { font-size: 14px; color: #71767b; }
-        .nafe-tweet-x { color: #fff; font-weight: 700; font-size: 16px; }
-        .nafe-tweet-text { font-size: 15px; line-height: 1.5; color: #e7e9ea; white-space: pre-wrap; margin-bottom: 16px; }
-        .nafe-tweet-media { margin-top: 12px; border-radius: 16px; overflow: hidden; border: 1px solid #333; line-height: 0; }
-        .nafe-tweet-img { width: 100%; height: auto; display: block; }
-        .nafe-tweet-footer { margin-top: 16px; padding-top: 12px; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-        .nafe-tweet-stats { display: flex; gap: 16px; color: #71767b; font-size: 12px; }
-        .nafe-tweet-footer a { color: #1d9bf0; font-size: 12px; text-decoration: none; font-weight: 700; }
+        .nafe-tweet-name { font-weight: 700; color: #fff; font-size: 15px; }
+        .nafe-tweet-handle { color: #71767b; font-size: 14px; }
+        .nafe-tweet-x { color: #fff; font-weight: 700; font-size: 14px; opacity: 0.8; }
+        .nafe-tweet-text { font-size: 15px; line-height: 1.5; color: #e7e9ea; margin-bottom: 16px; white-space: pre-wrap; }
+        .nafe-tweet-media { border-radius: 12px; overflow: hidden; border: 1px solid #2f3336; margin-bottom: 16px; }
+        .nafe-tweet-img { width: 100%; display: block; }
+        .nafe-tweet-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #1a1a1a; }
+        .nafe-tweet-stats { display: flex; gap: 20px; color: #71767b; font-size: 12px; }
+        .nafe-tweet-link { color: #1d9bf0; text-decoration: none; font-size: 11px; font-weight: 700; }
         
-        .nafe-video-thumb { aspect-ratio: 16/9; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .nafe-video-play { width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.3s; }
+        .nafe-video-thumb { aspect-ratio: 16/9; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .nafe-video-play { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 24px; transition: all 0.3s; }
         .nafe-video-card:hover .nafe-video-play { background: #fff; color: #000; transform: scale(1.1); }
-        .nafe-video-tag { position: absolute; top: 12px; right: 12px; padding: 4px 10px; font-size: 10px; font-family: 'JetBrains Mono', monospace; color: #fff; font-weight: 700; }
+        .nafe-video-tag { position: absolute; top: 12px; right: 12px; padding: 6px 12px; font-size: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: #fff; }
         
-        @media (max-width: 600px) {
-          .nafe-tweet-grid { grid-template-columns: 1fr; }
-        }
+        .nafe-news__cardTitle { font-size: 24px; margin: 12px 0; }
+        .nafe-news__cardLede { opacity: 0.6; font-size: 14px; margin-bottom: 24px; }
       `}</style>
     </div>
   );

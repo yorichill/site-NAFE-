@@ -83,16 +83,17 @@ export async function GET() {
       console.warn("[TweetsAPI] No tweets parsed, using fallback.");
       tweets = [
         {
-          id: "1",
-          text: "Bienvenue sur le nouveau portail NAFE TEAM ! Restez connectés pour les prochains matchs. #NAFE #Esport",
+          id: "1782356781234567890",
+          text: "NOTRE ROSTER ROCKET LEAGUE 🚨\n\nVoici l'équipe qui portera nos couleurs cette saison ❤️\n\n🔥 MASTERZZ\n🔥 BAYOO\n🔥 ITOCHI\n\nPrêts à tout donner pour aller chercher la victoire 💥 #RocketLeague #Esport #NAFE #RL",
           created_at: new Date().toISOString(),
-          public_metrics: { like_count: 142, retweet_count: 24 }
+          public_metrics: { like_count: 842, retweet_count: 156 },
+          media: [{ url: "https://pbs.twimg.com/media/GKEj_u1XwAAXm-H?format=jpg&name=large", type: "photo" }]
         },
         {
-          id: "2",
-          text: "Victoire 2-0 de notre équipe Valorant face à l'académie ! Le travail paie. 🦾",
+          id: "1782356781234567891",
+          text: "Victoire 2-0 de notre équipe Valorant face à l'académie ! Le travail paie. 🦾 #VCT #NAFEWIN",
           created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-          public_metrics: { like_count: 89, retweet_count: 12 }
+          public_metrics: { like_count: 421, retweet_count: 89 }
         }
       ];
     }

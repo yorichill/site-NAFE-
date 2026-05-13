@@ -549,7 +549,13 @@ function NewsAdmin({ accent }) {
         columns={[
           { key: "date", label: "DATE", flex: 0.7 },
           { key: "cat", label: "CAT", flex: 0.7 },
-          { key: "title", label: "TITRE", flex: 2 },
+          { key: "title", label: "TITRE", flex: 2, render: (r) => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {(r.cat === "YouTube" || r.cat === "Twitch") && <span style={{ color: r.cat === "YouTube" ? "#FF0000" : "#9146FF" }}>▶</span>}
+              {r.title}
+            </div>
+          )},
+          { key: "url", label: "URL", flex: 1, render: (r) => r.url ? <a href={r.url} target="_blank" style={{ color: accent }}>Lien ↗</a> : "—" },
           { key: "author", label: "AUTEUR", flex: 0.8 },
           { key: "featured", label: "UNE", flex: 0.3, render: (r) => r.featured ? "★" : "" },
         ]}
