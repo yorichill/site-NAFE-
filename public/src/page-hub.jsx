@@ -146,9 +146,6 @@ function HubPage({ accent, cardVariant, onNav }) {
           .nafe-hero__announcement { max-width: 600px; }
         }
       `}</style>
-     </div>
-
-      </section>
 
       {/* Manifesto strip */}
       <section className="nafe-manifesto">
