@@ -22,16 +22,18 @@ function TweetCard({ tweet, accent }) {
       </div>
       <div className="nafe-tweet-body">
         <p className="nafe-tweet-text">{tweet.text}</p>
-        {/* Placeholder for media if it looks like a roster reveal or similar */}
-        {(tweet.text.includes("ROSTER") || tweet.text.includes("BIENVENUE")) && (
+        
+        {tweet.media && tweet.media.length > 0 && (
           <div className="nafe-tweet-media">
-            <div className="nafe-tweet-media-placeholder" style={{ background: `linear-gradient(45deg, #050814, ${accent}22)` }}>
-              <span className="nafe-mono" style={{ opacity: 0.3 }}>[ IMAGE / MEDIA 𝕏 ]</span>
-            </div>
+            <img src={tweet.media[0].url} alt="Media" className="nafe-tweet-img" />
           </div>
         )}
       </div>
       <div className="nafe-tweet-footer">
+        <div className="nafe-tweet-stats nafe-mono">
+          <span>♥ {tweet.public_metrics.like_count}</span>
+          <span>↺ {tweet.public_metrics.retweet_count}</span>
+        </div>
         <a href={`https://x.com/NafeOfficiel/status/${tweet.id}`} target="_blank" rel="noopener" className="nafe-mono">VOIR SUR 𝕏 →</a>
       </div>
     </div>
@@ -158,9 +160,10 @@ function NewsPage({ accent }) {
         .nafe-tweet-handle { font-size: 14px; color: #71767b; }
         .nafe-tweet-x { color: #fff; font-weight: 700; font-size: 16px; }
         .nafe-tweet-text { font-size: 15px; line-height: 1.5; color: #e7e9ea; white-space: pre-wrap; margin-bottom: 16px; }
-        .nafe-tweet-media { margin-top: 12px; border-radius: 16px; overflow: hidden; border: 1px solid #333; }
-        .nafe-tweet-media-placeholder { aspect-ratio: 1.91/1; display: flex; align-items: center; justify-content: center; }
-        .nafe-tweet-footer { margin-top: 16px; padding-top: 12px; border-top: 1px solid #333; }
+        .nafe-tweet-media { margin-top: 12px; border-radius: 16px; overflow: hidden; border: 1px solid #333; line-height: 0; }
+        .nafe-tweet-img { width: 100%; height: auto; display: block; }
+        .nafe-tweet-footer { margin-top: 16px; padding-top: 12px; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .nafe-tweet-stats { display: flex; gap: 16px; color: #71767b; font-size: 12px; }
         .nafe-tweet-footer a { color: #1d9bf0; font-size: 12px; text-decoration: none; font-weight: 700; }
         
         .nafe-video-thumb { aspect-ratio: 16/9; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }

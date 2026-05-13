@@ -11,6 +11,7 @@ interface Tweet {
   text: string;
   created_at: string;
   public_metrics: { like_count: number; retweet_count: number };
+  media?: { url: string; type: string }[];
 }
 
 const g = global as typeof globalThis & { _tweetCache?: { tweets: Tweet[]; at: number } };
@@ -29,26 +30,37 @@ function fetchWithCurl(): string {
 function parse(html: string): Tweet[] {
   const m = html.match(RE);
   if (!m) return [];
-  const data    = JSON.parse(m[1]);
-  const entries = (data?.props?.pageProps?.timeline?.entries ?? []) as {
-    type: string;
-    content: { tweet: Record<string, unknown> };
-  }[];
-  return entries
-    .filter(e => e.type === "tweet")
-    .slice(0, 5)
-    .map(e => {
-      const t = e.content.tweet;
-      return {
-        id:         String(t.id_str ?? ""),
-        text:       String(t.full_text ?? t.text ?? ""),
-        created_at: new Date(String(t.created_at ?? "")).toISOString(),
-        public_metrics: {
-          like_count:    Number(t.favorite_count ?? 0),
-          retweet_count: Number(t.retweet_count  ?? 0),
-        },
-      };
-    });
+  try {
+    const data    = JSON.parse(m[1]);
+    const entries = (data?.props?.pageProps?.timeline?.entries ?? []) as {
+      type: string;
+      content: { tweet: any };
+    }[];
+    return entries
+      .filter(e => e.type === "tweet")
+      .slice(0, 5)
+      .map(e => {
+        const t = e.content.tweet;
+        const media = (t.extended_entities?.media || t.entities?.media || []).map((m: any) => ({
+          url: m.media_url_https || m.media_url,
+          type: m.type
+        }));
+
+        return {
+          id:         String(t.id_str ?? ""),
+          text:       String(t.full_text ?? t.text ?? ""),
+          created_at: new Date(String(t.created_at ?? "")).toISOString(),
+          public_metrics: {
+            like_count:    Number(t.favorite_count ?? 0),
+            retweet_count: Number(t.retweet_count  ?? 0),
+          },
+          media: media.length > 0 ? media : undefined
+        };
+      });
+  } catch (err) {
+    console.error("[TweetsAPI] Parse error:", err);
+    return [];
+  }
 }
 
 export async function GET() {
