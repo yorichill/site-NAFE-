@@ -30,7 +30,10 @@
   <script type="text/babel" src="src/page-community.jsx"></script>
   <script type="text/babel" src="src/page-contact.jsx"></script>
   <script type="text/babel" src="src/page-admin.jsx"></script>
+  <script type="text/babel" src="src/page-locker.jsx"></script>
+  <script type="text/babel" src="src/social-feed.jsx"></script>
   <script type="text/babel" src="src/auth-modal.jsx"></script>
+  <script type="text/babel" src="src/custom-cursor.jsx"></script>
 
   <script type="text/babel" data-presets="env,react">
     const { useState, useEffect } = React;
@@ -137,11 +140,13 @@
       else if (route === "/news") Page = <window.NewsPage accent={accent} />;
       else if (route === "/calendar") Page = <window.CalendarPage accent={accent} />;
       else if (route.startsWith("/admin")) Page = <window.AdminPage accent={accent} />;
+      else if (route === "/locker") Page = <window.LockerPage accent={accent} />;
       else if (route === "/shop") Page = <ShopSoon accent={accent} />;
       else Page = <window.HubPage accent={accent} cardVariant={cardVariant} onNav={nav} />;
 
       return (
         <div className="nafe-app" data-screen-label={route}>
+          <window.CustomCursor />
           <div className="nafe-ambient" />
           <div className="nafe-ambient nafe-ambient--2" />
           <window.ScoreTicker />

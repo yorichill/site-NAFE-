@@ -79,6 +79,9 @@ function UserPill({ onLogin, onRegister, onNav, accent }) {
       </button>
       {open && (
         <div className="nafe-userPill__menu nafe-clip-card">
+          <a href="#/locker" onClick={(e) => { e.preventDefault(); onNav("#/locker"); setOpen(false); }}>
+            Mon vestiaire
+          </a>
           <a href="#/club" onClick={(e) => { e.preventDefault(); onNav("#/club"); setOpen(false); }}>
             Mon dashboard
           </a>

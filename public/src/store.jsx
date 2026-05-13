@@ -16,6 +16,8 @@
     socials:  "nafe:socials",
     comments: "nafe:comments",
     shop:     "nafe:shop",
+    predictions: "nafe:predictions",
+    badges:   "nafe:badges",
   };
 
   const uid = (p) =>
@@ -74,6 +76,8 @@
   const socials  = crud(KEYS.socials,  "sl");
   const comments = crud(KEYS.comments, "cm");
   const shop     = crud(KEYS.shop,     "sh");
+  const predictions = crud(KEYS.predictions, "pr");
+  const badges      = crud(KEYS.badges,      "bd");
 
   // --- Session (single object, not a list) ---
   const session = {
@@ -107,6 +111,8 @@
     socials,
     comments,
     shop,
+    predictions,
+    badges,
     session,
 
     // --- queries croisées utilisées par les pages publiques ---
@@ -153,6 +159,7 @@
         passwordHash: btoa(unescape(encodeURIComponent(password))),
         role,
         xp: 0,
+        badges: [],
       });
       session.set({ userId: user.id });
       return user;
@@ -172,6 +179,54 @@
 
     promoteToAdmin: (id) => users.update(id, { role: "admin" }),
     demoteToUser:   (id) => users.update(id, { role: "user" }),
+
+    // --- XP & Gamification ---
+    addXp: (userId, amount) => {
+      const u = users.get(userId);
+      if (!u) return;
+      users.update(userId, { xp: (u.xp || 0) + amount });
+    },
+
+    getLevel: (xp) => {
+      // Level formula: floor(sqrt(xp / 50)) + 1
+      // Level 1 = 0 xp, Level 2 = 50 xp, Level 3 = 200 xp, etc.
+      return Math.floor(Math.sqrt((xp || 0) / 50)) + 1;
+    },
+
+    getNextLevelXp: (level) => {
+      return Math.pow(level, 2) * 50;
+    },
+
+    grantBadge: (userId, badgeId) => {
+      const u = users.get(userId);
+      if (!u) return;
+      const b = badges.get(badgeId);
+      if (!b) return;
+      const current = u.badges || [];
+      if (current.includes(badgeId)) return;
+      users.update(userId, { badges: [...current, badgeId] });
+      // Granting a badge gives 100 XP
+      store.addXp(userId, 100);
+    },
+
+    // --- Predictions ---
+    votePrediction: (predictionId, userId, optionId) => {
+      const p = predictions.get(predictionId);
+      if (!p) return;
+      const votes = p.votes || [];
+      // Remove previous vote by same user if any
+      const nextVotes = votes.filter(v => v.userId !== userId);
+      nextVotes.push({ userId, optionId, createdAt: Date.now() });
+      predictions.update(predictionId, { votes: nextVotes });
+      // Voting gives 10 XP
+      store.addXp(userId, 10);
+    },
+
+    getUserPredictions: (userId) => {
+      return predictions.list().filter(p => 
+        (p.votes || []).some(v => v.userId === userId)
+      );
+    },
 
     getLiveMatch: () =>
       matches.list().find((m) => m.status === "live"),

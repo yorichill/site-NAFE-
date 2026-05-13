@@ -14,6 +14,7 @@ const ADMIN_TABS = [
   { k: "socials",   label: "Réseaux sociaux",     icon: "🔗" },
   { k: "community", label: "Communauté",          icon: "💬" },
   { k: "users",     label: "Utilisateurs",        icon: "👥" },
+  { k: "engagement", label: "Engagement",          icon: "🎮" },
 ];
 
 // Route helper : renvoie la sous-page courante depuis le hash
@@ -82,6 +83,7 @@ function AdminPage({ accent }) {
     socials:   window.store.socials.list().length,
     community: window.store.posts.list().length,
     users:     window.store.users.list().length,
+    engagement: (window.store.predictions.list().length + window.store.badges.list().length),
   };
 
   return (
@@ -130,6 +132,7 @@ function AdminPage({ accent }) {
         {tab === "socials"   && <SocialsAdmin   accent={accent} />}
         {tab === "community" && <CommunityAdmin accent={accent} />}
         {tab === "users"     && <UsersAdmin     accent={accent} currentUser={user} />}
+        {tab === "engagement" && <EngagementAdmin accent={accent} />}
       </section>
     </div>
   );
@@ -987,6 +990,50 @@ function CommunityAdmin({ accent }) {
     </div>
   );
 }
+
+function EngagementAdmin({ accent }) {
+  const [subTab, setSubTab] = useAdminState("predictions");
+  
+  function seed() {
+    if (window.store.badges.list().length > 0) return alert("Données déjà présentes.");
+    window.store.badges.add({ name: "Premier Pas", description: "Inscrit sur le portail NAFE", icon: "🌱", color: "#B6F500" });
+    window.store.badges.add({ name: "Pronostiqueur", description: "A voté sur son premier match", icon: "🎯", color: "#1E4FD8" });
+    window.store.badges.add({ name: "Fidèle", description: "Membre actif de la communauté", icon: "👑", color: "#E11D74" });
+    
+    const match = window.store.matches.list()[0];
+    if (match) {
+      window.store.predictions.add({ 
+        title: "Qui remportera la map 1 ?", 
+        matchId: match.id, 
+        matchTitle: `${match.opp} (${match.date})`,
+        status: "active", 
+        options: [{ id: "o1", label: "NAFE" }, { id: "o2", label: match.opp }] 
+      });
+    }
+    alert("Données d'engagement générées !");
+  }
+
+  return (
+    <div className="nafe-admin__section">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+        <div className="nafe-admin__filterBtns" style={{ marginBottom: 0 }}>
+          <button className={`nafe-news__chip ${subTab === 'predictions' ? 'is-active' : ''}`} onClick={() => setSubTab('predictions')}>
+            <span className="nafe-mono">PRÉDICTIONS</span>
+          </button>
+          <button className={`nafe-news__chip ${subTab === 'badges' ? 'is-active' : ''}`} onClick={() => setSubTab('badges')}>
+            <span className="nafe-mono">BADGES</span>
+          </button>
+        </div>
+        <button className="nafe-btn nafe-btn--ghost nafe-btn--sm" onClick={seed}>
+          Seed Engagement Data
+        </button>
+      </div>
+      
+      {subTab === 'predictions' ? <PredictionsAdmin accent={accent} /> : <BadgesAdmin accent={accent} />}
+    </div>
+  );
+}
+
 // ============================================================
 //  Shop (Supabase)
 // ============================================================

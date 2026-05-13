@@ -176,17 +176,15 @@ function CommunityPage({ accent }) {
         )}
       </section>
 
-      {/* Feed de posts */}
-      <section className="nafe-section">
-        <header className="nafe-section__head">
-          <div>
-            <span className="nafe-eyebrow">Discussions</span>
-            <h2 className="nafe-display nafe-section__title">Posts récents</h2>
-          </div>
-          <span className="nafe-mono nafe-section__count">
-            {String(posts.length).padStart(2, "0")} POST{posts.length !== 1 ? "S" : ""}
-          </span>
-        </header>
+      <div className="nafe-community-layout">
+        {/* Colonne gauche : Posts communautaires */}
+        <div className="nafe-community-main">
+          <header className="nafe-section__head">
+            <div>
+              <span className="nafe-eyebrow">Discussions</span>
+              <h2 className="nafe-display nafe-section__title">Fan Posts</h2>
+            </div>
+          </header>
 
         {posts.length === 0 ? (
           <div className="nafe-empty nafe-empty--panel">
@@ -305,7 +303,29 @@ function CommunityPage({ accent }) {
             })}
           </div>
         )}
-      </section>
+        </div>
+
+        {/* Colonne droite : Live Feed */}
+        <aside className="nafe-community-sidebar">
+          <header className="nafe-section__head">
+            <div>
+              <span className="nafe-eyebrow">Direct</span>
+              <h2 className="nafe-display nafe-section__title" style={{ fontSize: 32 }}>Live Feed</h2>
+            </div>
+          </header>
+          <window.SocialFeed accent={accent} />
+        </aside>
+      </div>
+
+      <style>{`
+        .nafe-community-layout { display: grid; grid-template-columns: 1fr 400px; gap: 60px; margin-top: 60px; }
+        .nafe-community-main { display: flex; flex-direction: column; gap: 40px; }
+        .nafe-community-sidebar { position: sticky; top: 100px; height: fit-content; }
+        @media (max-width: 1200px) {
+          .nafe-community-layout { grid-template-columns: 1fr; }
+          .nafe-community-sidebar { position: static; }
+        }
+      `}</style>
     </div>
   );
 }
