@@ -459,8 +459,6 @@ function MatchesAdmin({ accent }) {
       />
     </div>
   );
-}
-
 // ============================================================
 //  News
 // ============================================================
@@ -500,48 +498,104 @@ function NewsAdmin({ accent }) {
 
   return (
     <div className="nafe-admin__section">
-      <FormShell
-        title={editing ? "Modifier l'article" : "Poster une nouvelle actu"}
-        onSubmit={submit}
-        onCancel={editing ? () => { setEditing(null); setDraft(emptyNews()); } : null}
-        submitLabel={editing ? "Mettre à jour" : "Publier"}
-        accent={accent}
-      >
-        <Field label="Date (libellé affiché)">
-          <input value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
-        </Field>
-        <Field label="Catégorie">
-          <select value={draft.cat} onChange={(e) => setDraft({ ...draft, cat: e.target.value })}>
-            {NEWS_CATS.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </Field>
-        <Field label="Jeu / rubrique">
-          <select value={draft.game} onChange={(e) => setDraft({ ...draft, game: e.target.value })}>
-            {["CLUB", "VALORANT", "LOL", "CS2", "AUTRE"].map((g) => <option key={g} value={g}>{g}</option>)}
-          </select>
-        </Field>
-        <Field label="Titre" span={2}>
-          <input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
-        </Field>
-        {isVideo && (
-          <Field label="Lien Vidéo (URL YouTube ou Twitch)" span={2}>
-            <input value={draft.url || ""} onChange={(e) => setDraft({ ...draft, url: e.target.value })} placeholder="https://..." />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 30 }}>
+        <FormShell
+          title={editing ? "Modifier l'actualité" : "Poster une nouvelle actu"}
+          onSubmit={submit}
+          onCancel={editing ? () => { setEditing(null); setDraft(emptyNews()); } : null}
+          submitLabel={editing ? "Mettre à jour" : "Publier"}
+          accent={accent}
+        >
+          <Field label="Type de contenu">
+            <select value={isVideo ? "video" : "article"} onChange={(e) => {
+              const val = e.target.value;
+              setDraft({ ...draft, cat: val === "video" ? "YouTube" : "Annonce" });
+            }}>
+              <option value="article">Article / Annonce</option>
+              <option value="video">Vidéo (YouTube/Twitch)</option>
+            </select>
           </Field>
-        )}
-        <Field label="Chapeau / résumé" span={2}>
-          <textarea rows={3} value={draft.lede} onChange={(e) => setDraft({ ...draft, lede: e.target.value })} />
-        </Field>
-        <Field label="Auteur">
-          <input value={draft.author} onChange={(e) => setDraft({ ...draft, author: e.target.value })} />
-        </Field>
-        <Field label="À la une">
-          <label className="nafe-field__checkbox">
-            <input type="checkbox" checked={!!draft.featured}
-              onChange={(e) => setDraft({ ...draft, featured: e.target.checked })} />
-            <span>Épingler comme article à la une</span>
-          </label>
-        </Field>
-      </FormShell>
+
+          {isVideo ? (
+            <Field label="Plateforme">
+              <select value={draft.cat} onChange={(e) => setDraft({ ...draft, cat: e.target.value })}>
+                <option value="YouTube">YouTube</option>
+                <option value="Twitch">Twitch</option>
+              </select>
+            </Field>
+          ) : (
+            <Field label="Catégorie">
+              <select value={draft.cat} onChange={(e) => setDraft({ ...draft, cat: e.target.value })}>
+                {NEWS_CATS.filter(c => c !== "YouTube" && c !== "Twitch").map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </Field>
+          )}
+
+          <Field label="Date (libellé)">
+            <input value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
+          </Field>
+          
+          <Field label="Titre" span={2}>
+            <input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="Ex: NAFE VALORANT : LE DOCUMENTAIRE" />
+          </Field>
+
+          {isVideo && (
+            <Field label="Lien Vidéo (URL)" span={2}>
+              <input value={draft.url || ""} onChange={(e) => setDraft({ ...draft, url: e.target.value })} placeholder="https://youtube.com/watch?v=..." />
+            </Field>
+          )}
+
+          <Field label="Résumé / Chapeau" span={2}>
+            <textarea rows={3} value={draft.lede} onChange={(e) => setDraft({ ...draft, lede: e.target.value })} />
+          </Field>
+
+          <Field label="À la une">
+            <label className="nafe-field__checkbox">
+              <input type="checkbox" checked={!!draft.featured}
+                onChange={(e) => setDraft({ ...draft, featured: e.target.checked })} />
+              <span>Épingler en haut de page</span>
+            </label>
+          </Field>
+        </FormShell>
+
+        {/* LIVE PREVIEW */}
+        <div className="nafe-admin__preview">
+          <p className="nafe-mono" style={{ marginBottom: 15, opacity: 0.5 }}>APERÇU DU DESIGN</p>
+          <div style={{ pointerEvents: 'none', transform: 'scale(0.8)', transformOrigin: 'top left' }}>
+            {isVideo ? (
+              <div className="nafe-news__card nafe-video-card nafe-clip-card" style={{ width: 450 }}>
+                <div className="nafe-video-thumb" style={{ background: '#000', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div className="nafe-video-play" style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>▶</div>
+                  <span className="nafe-video-tag" style={{ position: 'absolute', top: 12, right: 12, background: draft.cat === "YouTube" ? "#FF0000" : "#9146FF", padding: '6px 12px', color: '#fff', fontSize: 10, fontWeight: 800 }}>{draft.cat.toUpperCase()}</span>
+                </div>
+                <div className="nafe-news__cardBody" style={{ padding: 24, background: '#050814' }}>
+                  <div className="nafe-news__meta" style={{ display: 'flex', gap: 10, marginBottom: 10, fontSize: 12 }}>
+                    <span className="nafe-mono" style={{ color: draft.cat === "YouTube" ? "#FF0000" : "#9146FF" }}>NOUVEAU CONTENU</span>
+                    <span className="nafe-mono" style={{ opacity: 0.5 }}>· {draft.date}</span>
+                  </div>
+                  <h3 className="nafe-display" style={{ fontSize: 22, margin: '10px 0' }}>{draft.title || "TITRE DE LA VIDÉO"}</h3>
+                  <div style={{ marginTop: 20, paddingTop: 15, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    <span className="nafe-mono" style={{ color: draft.cat === "YouTube" ? "#FF0000" : "#9146FF", fontSize: 11, fontWeight: 700 }}>
+                      REGARDER SUR {draft.cat.toUpperCase()} →
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="nafe-news__card nafe-clip-card" style={{ width: 450, background: '#050814' }}>
+                <div style={{ height: 180, background: '#111' }}></div>
+                <div style={{ padding: 24 }}>
+                   <div style={{ display: 'flex', gap: 10, marginBottom: 10, fontSize: 12 }}>
+                    <span className="nafe-mono" style={{ color: accent }}>{draft.cat.toUpperCase()}</span>
+                    <span className="nafe-mono" style={{ opacity: 0.5 }}>· {draft.date}</span>
+                  </div>
+                  <h3 className="nafe-display" style={{ fontSize: 22 }}>{draft.title || "TITRE DE L'ARTICLE"}</h3>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       <DataTable
         accent={accent}
