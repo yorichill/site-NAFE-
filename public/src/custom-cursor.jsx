@@ -1,9 +1,8 @@
 // NAFE — Custom Cursor Component
-// Renders a dot and a lagging ring for a premium gaming feel.
+// Renders a simple dot for a premium gaming feel.
 
 function CustomCursor() {
   const [pos, setPos] = React.useState({ x: -100, y: -100 });
-  const [ringPos, setRingPos] = React.useState({ x: -100, y: -100 });
   const [isHovering, setIsHovering] = React.useState(false);
 
   React.useEffect(() => {
@@ -19,6 +18,7 @@ function CustomCursor() {
         target.closest(".nafe-hero__matchCard") ||
         target.closest(".nafe-news__card") ||
         target.closest(".nafe-clip-card") ||
+        target.closest(".nafe-hero__tweetCard") ||
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA";
       
@@ -34,20 +34,6 @@ function CustomCursor() {
     };
   }, []);
 
-  // Lagging ring effect
-  React.useEffect(() => {
-    let frame;
-    const updateRing = () => {
-      setRingPos(prev => ({
-        x: prev.x + (pos.x - prev.x) * 0.15,
-        y: prev.y + (pos.y - prev.y) * 0.15
-      }));
-      frame = requestAnimationFrame(updateRing);
-    };
-    frame = requestAnimationFrame(updateRing);
-    return () => cancelAnimationFrame(frame);
-  }, [pos]);
-
   // Don't show on touch devices
   const [isTouch, setIsTouch] = React.useState(false);
   React.useEffect(() => {
@@ -57,16 +43,10 @@ function CustomCursor() {
   if (isTouch) return null;
 
   return (
-    <>
-      <div 
-        className={`nafe-cursor ${isHovering ? 'is-hovering' : ''}`}
-        style={{ left: pos.x, top: pos.y }}
-      />
-      <div 
-        className={`nafe-cursor-ring ${isHovering ? 'is-hovering' : ''}`}
-        style={{ left: ringPos.x, top: ringPos.y }}
-      />
-    </>
+    <div 
+      className={`nafe-cursor ${isHovering ? 'is-hovering' : ''}`}
+      style={{ left: pos.x, top: pos.y }}
+    />
   );
 }
 

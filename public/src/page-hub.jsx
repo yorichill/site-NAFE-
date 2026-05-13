@@ -1,4 +1,5 @@
-// NAFE — Hub (home) pagefunction HubPage({ accent, cardVariant, onNav }) {
+// NAFE — Hub (home) page
+function HubPage({ accent, cardVariant, onNav }) {
   window.store.useVersion();
   const roster = window.store.getPlayersByTeam("valorant");
   const live = window.store.getLiveMatch();
