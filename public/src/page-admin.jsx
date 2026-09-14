@@ -4,7 +4,6 @@
 const { useState: useAdminState, useEffect: useAdminEffect } = React;
 
 const ADMIN_TABS = [
-  { k: "shop",      label: "Boutique",            icon: "🛍️" },
   { k: "players",   label: "Joueurs",             icon: "👤" },
   { k: "subteams",  label: "Sous-équipes",        icon: "◈" },
   { k: "matches",   label: "Matchs & calendrier", icon: "📅" },
@@ -72,7 +71,6 @@ function AdminPage({ accent }) {
   }
 
   const counts = {
-    shop:      window.store.shop ? window.store.shop.list().length : 0,
     players:   window.store.players.list().length,
     subteams:  window.store.subteams.list().length,
     matches:   window.store.matches.list().length,
@@ -121,7 +119,6 @@ function AdminPage({ accent }) {
       </section>
 
       <section className="nafe-admin__panel">
-        {tab === "shop"      && <ShopAdmin      accent={accent} />}
         {tab === "players"   && <PlayersAdmin   accent={accent} />}
         {tab === "subteams"  && <SubteamsAdmin  accent={accent} />}
         {tab === "matches"   && <MatchesAdmin   accent={accent} />}
@@ -1098,146 +1095,6 @@ function EngagementAdmin({ accent }) {
       </div>
       
       {subTab === 'predictions' ? <PredictionsAdmin accent={accent} /> : <BadgesAdmin accent={accent} />}
-    </div>
-  );
-}
-
-// ============================================================
-//  Shop (Supabase)
-// ============================================================
-function ShopAdmin({ accent }) {
-  const [list, setList] = useAdminState([]);
-  const [loading, setLoading] = useAdminState(true);
-  const [editing, setEditing] = useAdminState(null);
-  const [draft, setDraft] = useAdminState(emptyProduct());
-
-  useAdminEffect(() => {
-    fetchProducts();
-  }, []);
-
-  async function fetchProducts() {
-    setLoading(true);
-    if (!window.supabase) return;
-    const { data, error } = await window.supabase.from("products").select("*").order("created_at", { ascending: false });
-    if (!error && data) {
-      setList(data);
-    }
-    setLoading(false);
-  }
-
-  function emptyProduct() {
-    return { name: "", price: "", sizes: "S, M, L, XL", imageUrl: "" };
-  }
-
-  function startEdit(p) {
-    setEditing(p.id);
-    setDraft({ 
-      name: p.name, 
-      price: p.price, 
-      sizes: Array.isArray(p.sizes) ? p.sizes.join(", ") : p.sizes, 
-      imageUrl: p.image_url || "" 
-    });
-  }
-
-  async function submit() {
-    if (!draft.name.trim()) return alert("Le nom est requis");
-    const adminPassword = prompt("Mot de passe Admin requis pour modifier la base de données réelle :");
-    if (!adminPassword) return;
-
-    const payload = { 
-      name: draft.name, 
-      price: +draft.price || 0,
-      sizes: draft.sizes.split(",").map(s => s.trim()),
-      imageUrl: draft.imageUrl,
-      adminPassword
-    };
-
-    try {
-      let res;
-      if (editing) {
-        // Not implemented in API yet, but we'll fall back to recreate for prototype simplicity
-        alert("L'édition via API n'est pas supportée dans ce prototype. Créez un nouveau produit.");
-        return;
-      } else {
-        res = await fetch("/api/admin/products", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-      }
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Erreur serveur");
-      }
-
-      alert("Opération réussie !");
-      setEditing(null);
-      setDraft(emptyProduct());
-      fetchProducts();
-    } catch (e) {
-      alert("Erreur: " + e.message);
-    }
-  }
-
-  async function deleteProduct(id) {
-    const adminPassword = prompt("Mot de passe Admin requis pour supprimer :");
-    if (!adminPassword) return;
-
-    try {
-      const res = await fetch(`/api/admin/products?id=${id}`, {
-        method: "DELETE",
-        headers: { "Authorization": `Bearer ${adminPassword}` }
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Erreur serveur");
-      }
-      fetchProducts();
-    } catch (e) {
-      alert("Erreur: " + e.message);
-    }
-  }
-
-  return (
-    <div className="nafe-admin__section">
-      <FormShell
-        title={editing ? "Modifier le produit" : "Nouveau produit (Supabase)"}
-        onSubmit={submit}
-        onCancel={editing ? () => { setEditing(null); setDraft(emptyProduct()); } : null}
-        submitLabel={editing ? "Mettre à jour" : "Ajouter le produit"}
-        accent={accent}
-      >
-        <Field label="Nom du Produit" span={2}>
-          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex: Jersey Officiel 2026" />
-        </Field>
-        <Field label="Prix (€)">
-          <input type="number" step="0.01" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} placeholder="Ex: 89.99" />
-        </Field>
-        <Field label="Tailles (séparées par virgule)">
-          <input value={draft.sizes} onChange={(e) => setDraft({ ...draft, sizes: e.target.value })} placeholder="Ex: S, M, L, XL" />
-        </Field>
-        <Field label="URL de l'Image" span={2}>
-          <input value={draft.imageUrl} onChange={(e) => setDraft({ ...draft, imageUrl: e.target.value })} placeholder="https://..." />
-        </Field>
-      </FormShell>
-
-      {loading ? (
-        <div className="nafe-admin__empty"><span className="nafe-mono">Chargement des produits Supabase...</span></div>
-      ) : (
-        <DataTable
-          accent={accent}
-          empty="Aucun produit dans la base de données Supabase."
-          columns={[
-            { key: "name", label: "NOM DU PRODUIT", flex: 2 },
-            { key: "price", label: "PRIX", flex: 1, render: (r) => `${r.price} €` },
-            { key: "sizes", label: "TAILLES", flex: 1, render: (r) => Array.isArray(r.sizes) ? r.sizes.join(", ") : r.sizes },
-          ]}
-          rows={list}
-          onEdit={startEdit}
-          onDelete={deleteProduct}
-        />
-      )}
     </div>
   );
 }

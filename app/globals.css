@@ -13,8 +13,13 @@
     --foreground: #F5F7FF;
   }
 
+  *, *::before, *::after {
+    cursor: none !important;
+  }
+
   html {
     scroll-behavior: smooth;
+    cursor: none !important;
   }
 
   body {
@@ -22,6 +27,7 @@
     color: var(--foreground);
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
+    cursor: none !important;
   }
 
   ::selection {
