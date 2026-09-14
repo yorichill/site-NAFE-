@@ -10,7 +10,7 @@ function TweetCard({ tweet, accent }) {
     <div className="nafe-tweet-card nafe-clip-card">
       <div className="nafe-tweet-header">
         <div className="nafe-tweet-avatar">
-          <img src="https://pbs.twimg.com/profile_images/1769830504746684416/Uu-L8v-Z_400x400.jpg" alt="NAFE" />
+          <img src={window.NAFE_TWITTER_AVATAR || "https://pbs.twimg.com/profile_images/2089748890027196416/5diWkPDV_400x400.png"} alt="NAFE" />
         </div>
         <div className="nafe-tweet-info">
           <div className="nafe-tweet-user">
@@ -72,16 +72,19 @@ function NewsPage({ accent }) {
   const allNews = window.store.news.list().slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
   const [cat, setCat]             = useNewsState("Tout");
-  const [tweets, setTweets]       = useNewsState([]);
+  const [tweets, setTweets]       = useNewsState(window.DEFAULT_TWEETS || []);
 
   useNewsEffect(() => {
     fetch(TWEETS_API)
       .then(r => r.json())
       .then(d => {
-        // If we get fallback tweets (ID 1, 2), they might not have media
-        setTweets(d.tweets || []);
+        if (d.tweets && d.tweets.length > 0) {
+          setTweets(d.tweets);
+        }
       })
-      .catch(() => {});
+      .catch(() => {
+        if (window.DEFAULT_TWEETS) setTweets(window.DEFAULT_TWEETS);
+      });
   }, []);
 
   const filteredNews = cat === "Tout" ? allNews : allNews.filter(n => n.cat === cat);

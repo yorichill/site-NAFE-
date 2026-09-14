@@ -6,6 +6,19 @@ function HubPage({ accent, cardVariant, onNav }) {
   const live = window.store.getLiveMatch();
   const trophies = window.store.trophies.list().length;
 
+  const [tweets, setTweets] = React.useState(window.DEFAULT_TWEETS || []);
+
+  React.useEffect(() => {
+    fetch("/api/tweets")
+      .then(r => r.json())
+      .then(d => {
+        if (d.tweets && d.tweets.length > 0) setTweets(d.tweets);
+      })
+      .catch(() => {
+        if (window.DEFAULT_TWEETS) setTweets(window.DEFAULT_TWEETS);
+      });
+  }, []);
+
   return (
     <div className="nafe-page">
       {/* HERO — brutalist typographic wall */}
@@ -105,14 +118,111 @@ function HubPage({ accent, cardVariant, onNav }) {
           </div>
         </div>
 
-        <div className="nafe-hero__rail">
-          <span className="nafe-mono">N/T · 01</span>
-          <span className="nafe-mono">·</span>
-          <span className="nafe-mono">ISSUE #012</span>
-          <span className="nafe-mono">·</span>
-          <span className="nafe-mono">PARIS · EU</span>
+      </section>
+
+      {/* SECTION DERNIERS TWEETS @NAFEOFFICIEL */}
+      <section className="nafe-hub-tweets">
+        <div className="nafe-hub-tweets__head">
+          <div>
+            <span className="nafe-eyebrow" style={{ color: accent }}>FLUX OFFICIEL · 𝕏 TWITTER</span>
+            <h2 className="nafe-display nafe-hub-tweets__title">
+              DERNIERS TWEETS<span style={{ color: accent }}>.</span>
+            </h2>
+          </div>
+          <div className="nafe-hub-tweets__actions">
+            <button className="nafe-btn nafe-btn--ghost nafe-clip-card" onClick={() => onNav("#/news")}>
+              Toute l'actu →
+            </button>
+            <a 
+              href="https://x.com/NafeOfficiel" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="nafe-btn nafe-btn--accent nafe-clip-card" 
+              style={{ background: "#1d9bf0", textDecoration: "none" }}
+            >
+              Suivre @NafeOfficiel 𝕏
+            </a>
+          </div>
+        </div>
+
+        <div className="nafe-hub-tweets__grid">
+          {tweets.slice(0, 3).map(tweet => {
+            const date = new Date(tweet.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }).toUpperCase();
+            return (
+              <a
+                key={tweet.id}
+                href={`https://x.com/NafeOfficiel/status/${tweet.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nafe-hub-tweet-card nafe-clip-card"
+              >
+                <div className="nafe-hub-tweet-card__top">
+                  <div className="nafe-hub-tweet-card__avatar">
+                    <img src={window.NAFE_TWITTER_AVATAR || "https://pbs.twimg.com/profile_images/2089748890027196416/5diWkPDV_400x400.png"} alt="NAFE" />
+                  </div>
+                  <div className="nafe-hub-tweet-card__author">
+                    <span className="nafe-hub-tweet-card__name">NAFE</span>
+                    <span className="nafe-mono nafe-hub-tweet-card__handle">@NafeOfficiel · {date}</span>
+                  </div>
+                  <span className="nafe-hub-tweet-card__x">𝕏</span>
+                </div>
+
+                <p className="nafe-hub-tweet-card__text">{tweet.text}</p>
+
+                {tweet.media && tweet.media.length > 0 && (
+                  <div className="nafe-hub-tweet-card__media">
+                    <img src={tweet.media[0].url} alt="Tweet media" />
+                  </div>
+                )}
+
+                <div className="nafe-hub-tweet-card__foot nafe-mono">
+                  <div className="nafe-hub-tweet-card__stats">
+                    <span>♥ {tweet.public_metrics?.like_count || 0}</span>
+                    <span>↺ {tweet.public_metrics?.retweet_count || 0}</span>
+                  </div>
+                  <span className="nafe-hub-tweet-card__link">VOIR SUR 𝕏 →</span>
+                </div>
+              </a>
+            );
+          })}
         </div>
       </section>
+
+      <style>{`
+        .nafe-hub-tweets { margin: 80px 0 60px; }
+        .nafe-hub-tweets__head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
+        .nafe-hub-tweets__title { font-size: clamp(28px, 4vw, 44px); margin-top: 6px; }
+        .nafe-hub-tweets__actions { display: flex; gap: 12px; }
+        .nafe-hub-tweets__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+        .nafe-hub-tweet-card { 
+          background: rgba(255, 255, 255, 0.02); 
+          border: 1px solid rgba(255, 255, 255, 0.08); 
+          padding: 24px; 
+          display: flex; 
+          flex-direction: column; 
+          text-decoration: none; 
+          color: inherit;
+          transition: all 0.3s ease;
+        }
+        .nafe-hub-tweet-card:hover { 
+          border-color: rgba(29, 155, 240, 0.4); 
+          background: rgba(255, 255, 255, 0.04); 
+          transform: translateY(-3px); 
+        }
+        .nafe-hub-tweet-card__top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .nafe-hub-tweet-card__avatar { width: 38px; height: 38px; border-radius: 50%; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.15); flex-shrink: 0; }
+        .nafe-hub-tweet-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .nafe-hub-tweet-card__author { flex: 1; min-width: 0; }
+        .nafe-hub-tweet-card__name { font-weight: 700; font-size: 14px; color: #fff; display: block; }
+        .nafe-hub-tweet-card__handle { font-size: 11px; color: #71767b; }
+        .nafe-hub-tweet-card__x { font-weight: 700; color: #1d9bf0; font-size: 16px; }
+        .nafe-hub-tweet-card__text { font-size: 14px; line-height: 1.55; color: rgba(255, 255, 255, 0.9); margin-bottom: 16px; white-space: pre-wrap; flex: 1; }
+        .nafe-hub-tweet-card__media { border-radius: 8px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 16px; max-height: 220px; }
+        .nafe-hub-tweet-card__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .nafe-hub-tweet-card__foot { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 11px; }
+        .nafe-hub-tweet-card__stats { color: #71767b; display: flex; gap: 16px; }
+        .nafe-hub-tweet-card__link { color: #1d9bf0; font-weight: 700; }
+      `}</style>
 
       {/* Manifesto strip */}
       <section className="nafe-manifesto">

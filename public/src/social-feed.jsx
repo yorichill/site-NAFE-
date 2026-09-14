@@ -3,15 +3,19 @@
 
 function SocialFeed({ accent }) {
   window.store.useVersion();
-  const [tweets, setTweets] = React.useState([]);
+  const [tweets, setTweets] = React.useState(window.DEFAULT_TWEETS || []);
   const posts = window.store.posts.list().slice(0, 10);
   const news = window.store.news.list().slice(0, 5);
 
   React.useEffect(() => {
     fetch("/api/tweets")
       .then(r => r.json())
-      .then(d => setTweets(d.tweets || []))
-      .catch(() => {});
+      .then(d => {
+        if (d.tweets && d.tweets.length > 0) setTweets(d.tweets);
+      })
+      .catch(() => {
+        if (window.DEFAULT_TWEETS) setTweets(window.DEFAULT_TWEETS);
+      });
   }, []);
 
   // Combine and sort by date
@@ -48,7 +52,9 @@ function SocialFeed({ accent }) {
         }
         .nafe-feed-item__meta { margin-bottom: 12px; font-size: 11px; opacity: 0.5; display: flex; gap: 12px; }
         .nafe-feed-item__title { font-size: 20px; margin-bottom: 8px; }
-        .nafe-feed-item__content { font-size: 14px; opacity: 0.8; line-height: 1.6; }
+        .nafe-feed-item__content { font-size: 14px; opacity: 0.8; line-height: 1.6; white-space: pre-wrap; }
+        .nafe-feed-item__media { margin: 16px 0; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+        .nafe-feed-item__media img { width: 100%; display: block; }
       `}</style>
     </div>
   );
@@ -64,8 +70,16 @@ function TweetItem({ tweet, accent }) {
         <span>· {date}</span>
       </div>
       <p className="nafe-feed-item__content">{tweet.text}</p>
-      <div style={{ marginTop: 16, fontSize: 11, opacity: 0.4 }} className="nafe-mono">
-        ♥ {tweet.public_metrics?.like_count || 0} · ↺ {tweet.public_metrics?.retweet_count || 0}
+      {tweet.media && tweet.media.length > 0 && (
+        <div className="nafe-feed-item__media">
+          <img src={tweet.media[0].url} alt="Tweet media" />
+        </div>
+      )}
+      <div style={{ marginTop: 16, fontSize: 11, display: "flex", justifyContent: "space-between", alignItems: "center" }} className="nafe-mono">
+        <span style={{ opacity: 0.4 }}>♥ {tweet.public_metrics?.like_count || 0} · ↺ {tweet.public_metrics?.retweet_count || 0}</span>
+        <a href={`https://x.com/NafeOfficiel/status/${tweet.id}`} target="_blank" rel="noopener noreferrer" style={{ color: "#1d9bf0", textDecoration: "none", fontWeight: 700 }}>
+          VOIR SUR 𝕏 →
+        </a>
       </div>
     </div>
   );

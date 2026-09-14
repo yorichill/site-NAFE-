@@ -2,7 +2,7 @@
 
 const { useState: useNewsState, useEffect: useNewsEffect } = React;
 
-const TWEETS_API = "http://localhost:3000/api/tweets";
+const TWEETS_API = "/api/tweets";
 const CATS = ["Tout", "Twitter", "Compétition", "Annonce", "Transfert", "Analyse", "Structure", "Partenariat", "Académie"];
 
 function TweetCard({ tweet }) {
@@ -23,12 +23,17 @@ function TweetCard({ tweet }) {
         <span className="nafe-mono" style={{ opacity: 0.4, fontSize: 11, marginLeft: "auto" }}>{date}</span>
       </div>
       <div className="nafe-news__cardBody" style={{ flex: 1 }}>
-        <p className="nafe-news__cardLede" style={{ fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.88)" }}>
+        <p className="nafe-news__cardLede" style={{ fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.88)", whiteSpace: "pre-wrap" }}>
           {tweet.text}
         </p>
+        {tweet.media && tweet.media.length > 0 && (
+          <div style={{ borderRadius: 8, overflow: "hidden", margin: "12px 0" }}>
+            <img src={tweet.media[0].url} alt="media" style={{ width: "100%", display: "block" }} />
+          </div>
+        )}
         <div className="nafe-news__cardFoot" style={{ marginTop: "auto" }}>
           <span className="nafe-mono" style={{ opacity: 0.5, fontSize: 11 }}>♥ {likes} · ↺ {rts}</span>
-          <span className="nafe-mono" style={{ color: "#1d9bf0", fontSize: 11 }}>Voir →</span>
+          <span className="nafe-mono" style={{ color: "#1d9bf0", fontSize: 11 }}>Voir sur 𝕏 →</span>
         </div>
       </div>
     </a>
@@ -42,14 +47,19 @@ function NewsPage({ accent }) {
     .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
   const [cat, setCat]             = useNewsState("Tout");
-  const [tweets, setTweets]       = useNewsState([]);
+  const [tweets, setTweets]       = useNewsState(window.DEFAULT_TWEETS || []);
   const [tweetsErr, setTweetsErr] = useNewsState(false);
 
   useNewsEffect(() => {
     fetch(TWEETS_API)
       .then(r => r.json())
-      .then(d => setTweets(d.tweets || []))
-      .catch(() => setTweetsErr(true));
+      .then(d => {
+        if (d.tweets && d.tweets.length > 0) setTweets(d.tweets);
+      })
+      .catch(() => {
+        if (window.DEFAULT_TWEETS) setTweets(window.DEFAULT_TWEETS);
+        setTweetsErr(true);
+      });
   }, []);
 
   const showTweets = (cat === "Tout" || cat === "Twitter") && tweets.length > 0;
