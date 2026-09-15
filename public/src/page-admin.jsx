@@ -4,15 +4,15 @@
 const { useState: useAdminState, useEffect: useAdminEffect } = React;
 
 const ADMIN_TABS = [
-  { k: "players",   label: "Joueurs",             icon: "👤" },
-  { k: "subteams",  label: "Sous-équipes",        icon: "◈" },
-  { k: "matches",   label: "Matchs & calendrier", icon: "📅" },
-  { k: "news",      label: "Actualités",          icon: "📰" },
-  { k: "scores",    label: "Ticker scores",       icon: "📊" },
-  { k: "trophies",  label: "Palmarès",            icon: "🏆" },
-  { k: "socials",   label: "Réseaux sociaux",     icon: "🔗" },
-  { k: "community", label: "Communauté",          icon: "💬" },
-  { k: "users",     label: "Utilisateurs",        icon: "👥" },
+  { k: "players",   label: "Joueurs",             icon: "◈" },
+  { k: "subteams",  label: "Sous-équipes",        icon: "◇" },
+  { k: "matches",   label: "Matchs & calendrier", icon: "▦" },
+  { k: "news",      label: "Actualités",          icon: "▤" },
+  { k: "scores",    label: "Ticker scores",       icon: "▲" },
+  { k: "trophies",  label: "Palmarès",            icon: "✦" },
+  { k: "socials",   label: "Réseaux sociaux",     icon: "●" },
+  { k: "community", label: "Communauté",          icon: "◆" },
+  { k: "users",     label: "Utilisateurs",        icon: "⚙" },
 ];
 
 // Route helper : renvoie la sous-page courante depuis le hash
@@ -86,14 +86,14 @@ function AdminPage({ accent }) {
   return (
     <div className="nafe-page">
       <section className="nafe-team__hero">
-        <span className="nafe-eyebrow" style={{ color: accent }}>
-          Admin · Staff NAFE uniquement
+        <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>
+          Admin · Staff NAFE ESPORT uniquement
         </span>
         <h1 className="nafe-display nafe-team__title">
-          ADMIN<span style={{ color: accent }}>.</span>
+          CONSOLE ADMIN<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span>
         </h1>
         <p className="nafe-team__lede">
-          Crée, modifie et supprime tout le contenu visible côté public.
+          Gérez l'ensemble des rosters, matchs, trophées, actus et le flux officiel de la structure.
         </p>
 
 
@@ -928,6 +928,147 @@ function UsersAdmin({ accent, currentUser }) {
 }
 
 // ============================================================
+//  Pinned Tweet Manager (Gestion du tweet épinglé à gauche)
+// ============================================================
+function PinnedTweetManager({ accent }) {
+  window.store.useVersion();
+  const [tweets, setTweets] = useAdminState(window.DEFAULT_TWEETS || []);
+  const [pinnedId, setPinnedId] = useAdminState(
+    window.store.settings ? window.store.settings.getPinnedTweetId() : "2098488608801935761"
+  );
+  const [customId, setCustomId] = useAdminState("");
+
+  useAdminEffect(() => {
+    fetch("/api/tweets")
+      .then(r => r.json())
+      .then(d => {
+        if (d.tweets && d.tweets.length > 0) setTweets(d.tweets);
+      })
+      .catch(() => {});
+  }, []);
+
+  const currentPinned = tweets.find(t => t.id === pinnedId) || tweets[0];
+
+  function handlePin(id) {
+    if (!id) return;
+    if (window.store.settings) {
+      window.store.settings.setPinnedTweetId(id);
+      setPinnedId(id);
+    }
+  }
+
+  return (
+    <div className="nafe-admin-pinned-panel nafe-clip-card">
+      <div className="nafe-admin-pinned-panel__head">
+        <div>
+          <span className="nafe-eyebrow" style={{ color: "var(--nafe-denim-blue)" }}>Twitter · Position Gauche Verrouillée</span>
+          <h3 className="nafe-display" style={{ margin: "6px 0 0", fontSize: 22, color: "#FFFFFF" }}>
+            TWEET ÉPINGLÉ SUR L'ACCUEIL
+          </h3>
+        </div>
+        <span className="nafe-pinned-badge">
+          <span>POSITION GAUCHE VERROUILLÉE</span>
+        </span>
+      </div>
+
+      <p style={{ fontSize: 13, opacity: 0.7, lineHeight: 1.5, margin: "0 0 20px" }}>
+        Le tweet sélectionné ci-dessous reste verrouillé en première position (à gauche) sur l'accueil. Si Nafe publie un nouveau tweet épinglé, choisissez-le ci-dessous pour qu'il prenne immédiatement sa place.
+      </p>
+
+      {/* Tweet actuellement épinglé */}
+      {currentPinned && (
+        <div style={{
+          background: "linear-gradient(135deg, rgba(2, 136, 209, 0.12) 0%, rgba(51, 51, 51, 0.35) 100%)",
+          border: "1px solid var(--nafe-denim-blue)",
+          padding: 20,
+          marginBottom: 20
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+            <span className="nafe-mono" style={{ color: "var(--nafe-denim-blue)", fontSize: 11, fontWeight: 700 }}>
+              ✓ ACTUELLEMENT AFFICHÉ À GAUCHE (ID: {currentPinned.id})
+            </span>
+            <span className="nafe-mono" style={{ opacity: 0.5, fontSize: 11 }}>
+              {new Date(currentPinned.created_at).toLocaleDateString("fr-FR")}
+            </span>
+          </div>
+          <p style={{ margin: 0, fontSize: 14, color: "#fff", whiteSpace: "pre-wrap" }}>{currentPinned.text}</p>
+        </div>
+      )}
+
+      {/* Remplacer par un autre tweet */}
+      <div style={{ marginTop: 20 }}>
+        <h4 className="nafe-display" style={{ fontSize: 15, margin: "0 0 12px", color: "var(--nafe-denim-blue)" }}>
+          Changer le tweet fixé à gauche :
+        </h4>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 240, overflowY: "auto", paddingRight: 8 }}>
+          {tweets.map(t => {
+            const isThisPinned = t.id === currentPinned?.id;
+            return (
+              <div 
+                key={t.id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "10px 14px",
+                  background: isThisPinned ? "rgba(2, 136, 209, 0.15)" : "rgba(255,255,255,0.02)",
+                  border: isThisPinned ? "1px solid var(--nafe-denim-blue)" : "1px solid rgba(255,255,255,0.06)",
+                  gap: 16
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="nafe-mono" style={{ fontSize: 10, opacity: 0.5, marginBottom: 2 }}>
+                    {new Date(t.created_at).toLocaleDateString("fr-FR")} · ID: {t.id}
+                  </div>
+                  <p style={{ margin: 0, fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", opacity: 0.9 }}>
+                    {t.text}
+                  </p>
+                </div>
+                {isThisPinned ? (
+                  <span className="nafe-mono" style={{ color: "var(--nafe-denim-blue)", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap" }}>
+                    ✓ ACTIF
+                  </span>
+                ) : (
+                  <button 
+                    className="nafe-btn nafe-btn--ghost nafe-btn--sm"
+                    style={{ whiteSpace: "nowrap", padding: "6px 12px", fontSize: 10 }}
+                    onClick={() => handlePin(t.id)}
+                  >
+                    Fixer à gauche
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Option saisie manuelle d'un ID de tweet */}
+        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+          <input 
+            type="text" 
+            placeholder="Ou coller l'ID d'un nouveau tweet..." 
+            value={customId}
+            onChange={(e) => setCustomId(e.target.value)}
+            style={{ flex: 1, padding: "10px 14px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontFamily: "JetBrains Mono", fontSize: 12 }}
+          />
+          <button 
+            className="nafe-btn nafe-btn--accent nafe-btn--sm"
+            style={{ background: accent || "var(--nafe-water-blue)" }}
+            onClick={() => {
+              if (!customId.trim()) return alert("Veuillez saisir un ID de tweet valide");
+              handlePin(customId.trim());
+              setCustomId("");
+            }}
+          >
+            Définir comme épinglé
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 //  Socials (réseaux sociaux)
 // ============================================================
 const PLATFORM_OPTIONS = ["discord","twitch","youtube","twitter","instagram","tiktok","kick","snapchat"];
@@ -955,6 +1096,9 @@ function SocialsAdmin({ accent }) {
 
   return (
     <div className="nafe-admin__section">
+      {/* Panneau de verrouillage du Tweet Épinglé */}
+      <PinnedTweetManager accent={accent} />
+
       <div className="nafe-admin__note">
         <span className="nafe-mono" style={{ color: accent }}>ⓘ RÉSEAUX</span>
         <p>Ajoute ici les liens vers vos réseaux sociaux. Ils s'affichent sur la page <strong>Contact</strong>.
@@ -1045,7 +1189,7 @@ function CommunityAdmin({ accent }) {
           { key: "authorName", label: "AUTEUR",  flex: 0.7 },
           { key: "title",      label: "TITRE",   flex: 1.4 },
           { key: "content",    label: "CONTENU", flex: 2,   render: (r) => r.content?.slice(0, 80) + (r.content?.length > 80 ? "…" : "") },
-          { key: "likes",      label: "♥",       flex: 0.3, render: (r) => r.likes || 0 },
+          { key: "likes",      label: "LIKES",   flex: 0.3, render: (r) => r.likes || 0 },
           { key: "createdAt",  label: "DATE",    flex: 0.7, render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleDateString("fr-FR") : "—" },
         ]}
         rows={list}
@@ -1061,9 +1205,9 @@ function EngagementAdmin({ accent }) {
   
   function seed() {
     if (window.store.badges.list().length > 0) return alert("Données déjà présentes.");
-    window.store.badges.add({ name: "Premier Pas", description: "Inscrit sur le portail NAFE", icon: "🌱", color: "#B6F500" });
-    window.store.badges.add({ name: "Pronostiqueur", description: "A voté sur son premier match", icon: "🎯", color: "#1E4FD8" });
-    window.store.badges.add({ name: "Fidèle", description: "Membre actif de la communauté", icon: "👑", color: "#E11D74" });
+    window.store.badges.add({ name: "Premier Pas", description: "Inscrit sur le portail NAFE", icon: "✦", color: "#B6F500" });
+    window.store.badges.add({ name: "Pronostiqueur", description: "A voté sur son premier match", icon: "◈", color: "#1E4FD8" });
+    window.store.badges.add({ name: "Fidèle", description: "Membre actif de la communauté", icon: "▲", color: "#E11D74" });
     
     const match = window.store.matches.list()[0];
     if (match) {

@@ -49,8 +49,8 @@ function ClubPage({ accent }) {
     <div className="nafe-page">
       <section className="nafe-club__hero">
         <div className="nafe-club__heroTop">
-          <span className="nafe-eyebrow" style={{ color: accent }}>
-            Club · Membre actif
+          <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>
+            Club · NAFE ESPORT Fan Club
           </span>
           <span className="nafe-mono nafe-club__id">
             ID · 0427 · {currentTier.tier.toUpperCase()} · SAISON 2026

@@ -96,6 +96,65 @@ function UserPill({ onLogin, onRegister, onNav, accent }) {
   );
 }
 
+// ========== LatestTweetHeader ==========
+function LatestTweetHeader() {
+  const [tweet, setTweet] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLatest = () => {
+      fetch("/api/tweets")
+        .then(r => r.json())
+        .then(d => {
+          if (d.tweets && d.tweets.length > 0) setTweet(d.tweets[0]);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    };
+    fetchLatest();
+    const timer = setInterval(fetchLatest, 60000); // refresh every minute
+    return () => clearInterval(timer);
+  }, []);
+
+  if (loading || !tweet) return null;
+
+  return (
+    <a 
+      href={`https://x.com/NafeOfficiel/status/${tweet.id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="nafe-header__tweet"
+    >
+      <span className="nafe-header__tweet-x nafe-mono">X</span>
+      <span className="nafe-header__tweet-text">{tweet.text}</span>
+    </a>
+  );
+}
+
+// ========== NafeSymbol (Official Phoenix Icon from Brand Guide) ==========
+function NafeSymbol({ size = 30, className = "" }) {
+  return (
+    <img 
+      src="assets/brand/nafe-symbol.png" 
+      alt="NAFE"
+      className={`nafe-phoenix-symbol ${className}`}
+      style={{ height: size, width: "auto", objectFit: "contain", display: "inline-block", verticalAlign: "middle" }}
+    />
+  );
+}
+
+// ========== NafeLogo (Official Full Logo with Lettering from Brand Guide) ==========
+function NafeLogo({ height = 42, className = "" }) {
+  return (
+    <img 
+      src="assets/brand/nafe-logo.png" 
+      alt="NAFE ESPORT"
+      className={`nafe-phoenix-logo ${className}`}
+      style={{ height: height, width: "auto", objectFit: "contain", display: "inline-block", verticalAlign: "middle" }}
+    />
+  );
+}
+
 // ========== StickyHeader ==========
 function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
   const [shrunk, setShrunk] = useState(false);
@@ -108,9 +167,11 @@ function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
   }, []);
   return (
     <header className={`nafe-header ${shrunk ? "is-shrunk" : ""}`}>
-      <a href="#/" onClick={(e) => { e.preventDefault(); onNav("#/"); }} className="nafe-logo">
-        NAFE<span className="nafe-logo__slash">/</span>TEAM
-      </a>
+      <div className="nafe-header__left">
+        <a href="#/" onClick={(e) => { e.preventDefault(); onNav("#/"); }} style={{ display: "inline-flex", alignItems: "center", textDecoration: "none" }} title="NAFE ESPORT">
+          <NafeSymbol size={shrunk ? 32 : 42} />
+        </a>
+      </div>
       <nav className="nafe-header__nav">
         <a href="#/shop" onClick={(e) => { e.preventDefault(); onNav("#/shop"); }}
            className={route === "/shop" ? "is-active" : ""}>Shop</a>
@@ -173,7 +234,9 @@ function Sidebar({ route, onNav }) {
 
   return (
     <aside className="nafe-sidebar">
-      <div className="nafe-sidebar__mark">N</div>
+      <div className="nafe-sidebar__mark" onClick={() => onNav("#/")} title="NAFE ESPORT — Accueil">
+        <NafeSymbol size={28} />
+      </div>
       {items.map((item) => {
         const active =
           (item.key === "teams"     && route.startsWith("/teams")) ||
@@ -222,4 +285,4 @@ function Sidebar({ route, onNav }) {
   );
 }
 
-Object.assign(window, { ScoreTicker, StickyHeader, Sidebar, UserPill });
+Object.assign(window, { ScoreTicker, StickyHeader, Sidebar, UserPill, SocialOverlay, NafeSymbol, NafeLogo });

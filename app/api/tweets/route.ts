@@ -11,6 +11,7 @@ interface Tweet {
   created_at: string;
   public_metrics: { like_count: number; retweet_count: number };
   media?: { url: string; type: string }[];
+  pinned?: boolean;
 }
 
 const FALLBACK_TWEETS: Tweet[] = [
@@ -18,6 +19,7 @@ const FALLBACK_TWEETS: Tweet[] = [
     "id": "2098488608801935761",
     "text": "LE ROSTER ARRIVE.\n\nDemain, NAFE dévoile officiellement sa line-up Valorant.\n\n@BoostahVLR • @KyMeVLR • @Yeezerr • @Piou888 • @GlassySkyvlr \n\nUne nouvelle page s’ouvre.\nLe travail commence maintenant.\n\nLe phœnix ne meurt jamais. 🩵🤍\n\n#NAFE #Valorant #Esport #RosterAnnounce",
     "created_at": "2026-09-11T19:07:27.000Z",
+    "pinned": true,
     "public_metrics": {
       "like_count": 14,
       "retweet_count": 2
@@ -248,10 +250,11 @@ function parse(html: string): Tweet[] {
       content: { tweet: any };
     }[];
     return entries
-      .filter(e => e.type === "tweet")
+      .filter(e => e.type === "tweet" || (e as any).entryType === "pinned")
       .slice(0, 15)
-      .map(e => {
+      .map((e, idx) => {
         const t = e.content.tweet;
+        const isPinned = idx === 0 && (Boolean((e as any).entryType === "pinned" || (t as any)?.is_pinned || (t as any)?.pinned));
         const media = (t.extended_entities?.media || t.entities?.media || []).map((m: any) => ({
           url: m.media_url_https || m.media_url,
           type: m.type
@@ -265,7 +268,8 @@ function parse(html: string): Tweet[] {
             like_count:    Number(t.favorite_count ?? 0),
             retweet_count: Number(t.retweet_count  ?? 0),
           },
-          media: media.length > 0 ? media : undefined
+          media: media.length > 0 ? media : undefined,
+          pinned: isPinned || undefined
         };
       });
   } catch (err) {

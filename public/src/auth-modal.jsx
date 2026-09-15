@@ -113,7 +113,7 @@ function AuthModal({ accent, mode, onClose, onSuccess }) {
               value={password} onChange={(e) => setPassword(e.target.value)} />
           </label>
 
-          {error && <p className="nafe-modal__error">⚠ {error}</p>}
+          {error && <p className="nafe-modal__error">{error}</p>}
 
           <button type="submit" className="nafe-btn nafe-btn--accent"
             style={{ background: accent, width: "100%", justifyContent: "center" }} disabled={busy}>

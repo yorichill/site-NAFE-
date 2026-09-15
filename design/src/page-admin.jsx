@@ -4,16 +4,15 @@
 const { useState: useAdminState, useEffect: useAdminEffect } = React;
 
 const ADMIN_TABS = [
-  { k: "shop",      label: "Boutique",            icon: "🛍️" },
-  { k: "players",   label: "Joueurs",             icon: "👤" },
-  { k: "subteams",  label: "Sous-équipes",        icon: "◈" },
-  { k: "matches",   label: "Matchs & calendrier", icon: "📅" },
-  { k: "news",      label: "Actualités",          icon: "📰" },
-  { k: "scores",    label: "Ticker scores",       icon: "📊" },
-  { k: "trophies",  label: "Palmarès",            icon: "🏆" },
-  { k: "socials",   label: "Réseaux sociaux",     icon: "🔗" },
-  { k: "community", label: "Communauté",          icon: "💬" },
-  { k: "users",     label: "Utilisateurs",        icon: "👥" },
+  { k: "players",   label: "Joueurs",             icon: "◈" },
+  { k: "subteams",  label: "Sous-équipes",        icon: "◇" },
+  { k: "matches",   label: "Matchs & calendrier", icon: "▦" },
+  { k: "news",      label: "Actualités",          icon: "▤" },
+  { k: "scores",    label: "Ticker scores",       icon: "▲" },
+  { k: "trophies",  label: "Palmarès",            icon: "✦" },
+  { k: "socials",   label: "Réseaux sociaux",     icon: "●" },
+  { k: "community", label: "Communauté",          icon: "◆" },
+  { k: "users",     label: "Utilisateurs",        icon: "⚙" },
 ];
 
 // Route helper : renvoie la sous-page courante depuis le hash
@@ -72,7 +71,6 @@ function AdminPage({ accent }) {
   }
 
   const counts = {
-    shop:      window.store.shop ? window.store.shop.list().length : 0,
     players:   window.store.players.list().length,
     subteams:  window.store.subteams.list().length,
     matches:   window.store.matches.list().length,
@@ -82,35 +80,22 @@ function AdminPage({ accent }) {
     socials:   window.store.socials.list().length,
     community: window.store.posts.list().length,
     users:     window.store.users.list().length,
+    engagement: (window.store.predictions.list().length + window.store.badges.list().length),
   };
 
   return (
     <div className="nafe-page">
       <section className="nafe-team__hero">
-        <span className="nafe-eyebrow" style={{ color: accent }}>
-          Admin · Staff NAFE uniquement
+        <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>
+          Admin · Staff NAFE ESPORT uniquement
         </span>
         <h1 className="nafe-display nafe-team__title">
-          ADMIN<span style={{ color: accent }}>.</span>
+          CONSOLE ADMIN<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span>
         </h1>
         <p className="nafe-team__lede">
-          Crée, modifie et supprime tout le contenu visible côté public. Les
-          changements sont instantanés et persistés localement dans ce navigateur.
+          Gérez l'ensemble des rosters, matchs, trophées, actus et le flux officiel de la structure.
         </p>
 
-        <div className="nafe-admin__toolbar">
-          <button
-            className="nafe-btn nafe-btn--ghost"
-            style={{ borderColor: "#E53E3E", color: "#E53E3E" }}
-            onClick={() => {
-              if (confirm("Effacer TOUT le contenu (joueurs, matchs, actus, scores, palmarès) ?")) {
-                window.store.wipeAll();
-              }
-            }}
-          >
-            Tout effacer
-          </button>
-        </div>
 
         <div className="nafe-admin__tabs">
           {ADMIN_TABS.map((t) => {
@@ -134,7 +119,6 @@ function AdminPage({ accent }) {
       </section>
 
       <section className="nafe-admin__panel">
-        {tab === "shop"      && <ShopAdmin      accent={accent} />}
         {tab === "players"   && <PlayersAdmin   accent={accent} />}
         {tab === "subteams"  && <SubteamsAdmin  accent={accent} />}
         {tab === "matches"   && <MatchesAdmin   accent={accent} />}
@@ -144,6 +128,7 @@ function AdminPage({ accent }) {
         {tab === "socials"   && <SocialsAdmin   accent={accent} />}
         {tab === "community" && <CommunityAdmin accent={accent} />}
         {tab === "users"     && <UsersAdmin     accent={accent} currentUser={user} />}
+        {tab === "engagement" && <EngagementAdmin accent={accent} />}
       </section>
     </div>
   );
@@ -237,7 +222,7 @@ function DataTable({ columns, rows, onEdit, onDelete, empty, accent }) {
 // ============================================================
 //  Players
 // ============================================================
-const ROLES = ["IGL", "Duelist", "Sentinel", "Initiator", "Controller", "Flex", "Top", "Jungle", "Mid", "ADC", "Support", "AWP", "Rifler", "Anchor", "Entry", "Attaquant", "Défenseur", "Pivot", "Rotateur"];
+const ROLES = ["IGL", "Duelist", "Sentinel", "Initiator", "Controller", "Flex", "Coach", "Caster", "Analyst", "Manager", "CEO", "AWP", "Rifler", "Anchor", "Entry", "Attaquant", "Défenseur", "Pivot", "Rotateur"];
 
 function PlayersAdmin({ accent }) {
   window.store.useVersion(); // réabonnement direct pour réagir à l'ajout de sous-équipes
@@ -246,7 +231,7 @@ function PlayersAdmin({ accent }) {
   const [draft, setDraft] = useAdminState(emptyPlayer());
 
   function emptyPlayer() {
-    return { team: "valorant", subteam: "", name: "", tag: "", role: "Duelist", jersey: 1, country: "FR", kd: 0, hs: 0, acs: 0, gear: { mouse: "", keyboard: "", headset: "" } };
+    return { team: "valorant", subteam: "", name: "", tag: "", role: "Duelist", jersey: 1, country: "FR", kd: 0, hs: 0, gear: { mouse: "", keyboard: "", headset: "" } };
   }
 
   // Sous-équipes : d'abord celles du jeu sélectionné, puis les autres en fallback
@@ -262,7 +247,7 @@ function PlayersAdmin({ accent }) {
   function submit() {
     if (!draft.name.trim()) return alert("Le nom est requis");
     if (!draft.tag.trim()) return alert("Le pseudo est requis");
-    const payload = { ...draft, jersey: +draft.jersey || 0, kd: +draft.kd || 0, hs: +draft.hs || 0, acs: +draft.acs || 0 };
+    const payload = { ...draft, jersey: +draft.jersey || 0, kd: +draft.kd || 0, hs: +draft.hs || 0 };
     if (editing) {
       window.store.players.update(editing, payload);
     } else {
@@ -330,9 +315,6 @@ function PlayersAdmin({ accent }) {
         </Field>
         <Field label="HS %">
           <input type="number" min={0} max={100} value={draft.hs} onChange={(e) => setDraft({ ...draft, hs: e.target.value })} />
-        </Field>
-        <Field label="ACS">
-          <input type="number" value={draft.acs} onChange={(e) => setDraft({ ...draft, acs: e.target.value })} />
         </Field>
         <Field label="Souris">
           <input value={draft.gear.mouse} onChange={(e) => setDraft({ ...draft, gear: { ...draft.gear, mouse: e.target.value } })} />
@@ -479,7 +461,7 @@ function MatchesAdmin({ accent }) {
 // ============================================================
 //  News
 // ============================================================
-const NEWS_CATS = ["Compétition", "Annonce", "Transfert", "Analyse", "Structure", "Partenariat", "Académie"];
+const NEWS_CATS = ["Compétition", "Annonce", "Transfert", "Analyse", "Structure", "Partenariat", "Académie", "YouTube", "Twitch"];
 
 function NewsAdmin({ accent }) {
   const list = window.store.news.list()
@@ -491,7 +473,7 @@ function NewsAdmin({ accent }) {
   function emptyNews() {
     const d = new Date();
     const fr = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase().replace(/\./g, "");
-    return { date: fr, cat: "Annonce", game: "CLUB", title: "", lede: "", author: "Rédaction NAFE", readTime: "3 min", featured: false };
+    return { date: fr, cat: "Annonce", game: "CLUB", title: "", lede: "", author: "Rédaction NAFE", featured: false, url: "" };
   }
 
   function startEdit(n) {
@@ -511,48 +493,108 @@ function NewsAdmin({ accent }) {
     setDraft(emptyNews());
   }
 
+  const isVideo = draft.cat === "YouTube" || draft.cat === "Twitch";
+
   return (
     <div className="nafe-admin__section">
-      <FormShell
-        title={editing ? "Modifier l'article" : "Poster une nouvelle actu"}
-        onSubmit={submit}
-        onCancel={editing ? () => { setEditing(null); setDraft(emptyNews()); } : null}
-        submitLabel={editing ? "Mettre à jour" : "Publier"}
-        accent={accent}
-      >
-        <Field label="Date (libellé affiché)">
-          <input value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
-        </Field>
-        <Field label="Catégorie">
-          <select value={draft.cat} onChange={(e) => setDraft({ ...draft, cat: e.target.value })}>
-            {NEWS_CATS.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </Field>
-        <Field label="Jeu / rubrique">
-          <select value={draft.game} onChange={(e) => setDraft({ ...draft, game: e.target.value })}>
-            {["CLUB", "VALORANT", "LOL", "CS2", "AUTRE"].map((g) => <option key={g} value={g}>{g}</option>)}
-          </select>
-        </Field>
-        <Field label="Temps de lecture">
-          <input value={draft.readTime} onChange={(e) => setDraft({ ...draft, readTime: e.target.value })} placeholder="Ex: 5 min" />
-        </Field>
-        <Field label="Titre" span={2}>
-          <input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
-        </Field>
-        <Field label="Chapeau / résumé" span={2}>
-          <textarea rows={3} value={draft.lede} onChange={(e) => setDraft({ ...draft, lede: e.target.value })} />
-        </Field>
-        <Field label="Auteur">
-          <input value={draft.author} onChange={(e) => setDraft({ ...draft, author: e.target.value })} />
-        </Field>
-        <Field label="À la une">
-          <label className="nafe-field__checkbox">
-            <input type="checkbox" checked={!!draft.featured}
-              onChange={(e) => setDraft({ ...draft, featured: e.target.checked })} />
-            <span>Épingler comme article à la une</span>
-          </label>
-        </Field>
-      </FormShell>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 30 }}>
+        <FormShell
+          title={editing ? "Modifier l'actualité" : "Poster une nouvelle actu"}
+          onSubmit={submit}
+          onCancel={editing ? () => { setEditing(null); setDraft(emptyNews()); } : null}
+          submitLabel={editing ? "Mettre à jour" : "Publier"}
+          accent={accent}
+        >
+          <Field label="Type de contenu">
+            <select value={isVideo ? "video" : "article"} onChange={(e) => {
+              const val = e.target.value;
+              setDraft({ ...draft, cat: val === "video" ? "YouTube" : "Annonce" });
+            }}>
+              <option value="article">Article / Annonce</option>
+              <option value="video">Vidéo (YouTube/Twitch)</option>
+            </select>
+          </Field>
+
+          {isVideo ? (
+            <Field label="Plateforme">
+              <select value={draft.cat} onChange={(e) => setDraft({ ...draft, cat: e.target.value })}>
+                <option value="YouTube">YouTube</option>
+                <option value="Twitch">Twitch</option>
+              </select>
+            </Field>
+          ) : (
+            <Field label="Catégorie">
+              <select value={draft.cat} onChange={(e) => setDraft({ ...draft, cat: e.target.value })}>
+                {NEWS_CATS.filter(c => c !== "YouTube" && c !== "Twitch").map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </Field>
+          )}
+
+          <Field label="Date (libellé)">
+            <input value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
+          </Field>
+          
+          <Field label="Titre" span={2}>
+            <input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="Ex: NAFE VALORANT : LE DOCUMENTAIRE" />
+          </Field>
+
+          {isVideo && (
+            <Field label="Lien Vidéo (URL)" span={2}>
+              <input value={draft.url || ""} onChange={(e) => setDraft({ ...draft, url: e.target.value })} placeholder="https://youtube.com/watch?v=..." />
+            </Field>
+          )}
+
+          <Field label="Résumé / Chapeau" span={2}>
+            <textarea rows={3} value={draft.lede} onChange={(e) => setDraft({ ...draft, lede: e.target.value })} />
+          </Field>
+
+          <Field label="À la une">
+            <label className="nafe-field__checkbox">
+              <input type="checkbox" checked={!!draft.featured}
+                onChange={(e) => setDraft({ ...draft, featured: e.target.checked })} />
+              <span>Épingler en haut de page</span>
+            </label>
+          </Field>
+        </FormShell>
+
+        {/* LIVE PREVIEW */}
+        <div className="nafe-admin__preview">
+          <p className="nafe-mono" style={{ marginBottom: 15, opacity: 0.5 }}>APERÇU DU DESIGN</p>
+          <div style={{ pointerEvents: 'none', transform: 'scale(0.8)', transformOrigin: 'top left' }}>
+            {isVideo ? (
+              <div className="nafe-news__card nafe-video-card nafe-clip-card" style={{ width: 450 }}>
+                <div className="nafe-video-thumb" style={{ background: '#000', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div className="nafe-video-play" style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>▶</div>
+                  <span className="nafe-video-tag" style={{ position: 'absolute', top: 12, right: 12, background: draft.cat === "YouTube" ? "#FF0000" : "#9146FF", padding: '6px 12px', color: '#fff', fontSize: 10, fontWeight: 800 }}>{draft.cat.toUpperCase()}</span>
+                </div>
+                <div className="nafe-news__cardBody" style={{ padding: 24, background: '#050814' }}>
+                  <div className="nafe-news__meta" style={{ display: 'flex', gap: 10, marginBottom: 10, fontSize: 12 }}>
+                    <span className="nafe-mono" style={{ color: draft.cat === "YouTube" ? "#FF0000" : "#9146FF" }}>NOUVEAU CONTENU</span>
+                    <span className="nafe-mono" style={{ opacity: 0.5 }}>· {draft.date}</span>
+                  </div>
+                  <h3 className="nafe-display" style={{ fontSize: 22, margin: '10px 0' }}>{draft.title || "TITRE DE LA VIDÉO"}</h3>
+                  <div style={{ marginTop: 20, paddingTop: 15, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    <span className="nafe-mono" style={{ color: draft.cat === "YouTube" ? "#FF0000" : "#9146FF", fontSize: 11, fontWeight: 700 }}>
+                      REGARDER SUR {draft.cat.toUpperCase()} →
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="nafe-news__card nafe-clip-card" style={{ width: 450, background: '#050814' }}>
+                <div style={{ height: 180, background: '#111' }}></div>
+                <div style={{ padding: 24 }}>
+                   <div style={{ display: 'flex', gap: 10, marginBottom: 10, fontSize: 12 }}>
+                    <span className="nafe-mono" style={{ color: accent }}>{draft.cat.toUpperCase()}</span>
+                    <span className="nafe-mono" style={{ opacity: 0.5 }}>· {draft.date}</span>
+                  </div>
+                  <h3 className="nafe-display" style={{ fontSize: 22 }}>{draft.title || "TITRE DE L'ARTICLE"}</h3>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       <DataTable
         accent={accent}
@@ -560,7 +602,13 @@ function NewsAdmin({ accent }) {
         columns={[
           { key: "date", label: "DATE", flex: 0.7 },
           { key: "cat", label: "CAT", flex: 0.7 },
-          { key: "title", label: "TITRE", flex: 2 },
+          { key: "title", label: "TITRE", flex: 2, render: (r) => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {(r.cat === "YouTube" || r.cat === "Twitch") && <span style={{ color: r.cat === "YouTube" ? "#FF0000" : "#9146FF" }}>▶</span>}
+              {r.title}
+            </div>
+          )},
+          { key: "url", label: "URL", flex: 1, render: (r) => r.url ? <a href={r.url} target="_blank" style={{ color: accent }}>Lien ↗</a> : "—" },
           { key: "author", label: "AUTEUR", flex: 0.8 },
           { key: "featured", label: "UNE", flex: 0.3, render: (r) => r.featured ? "★" : "" },
         ]}
@@ -837,14 +885,6 @@ function UsersAdmin({ accent, currentUser }) {
 
   return (
     <div className="nafe-admin__section">
-      <div className="nafe-admin__note">
-        <span className="nafe-mono" style={{ color: accent }}>ⓘ INFO</span>
-        <p>
-          Tu vois ici tous les comptes créés sur ce navigateur. Le premier compte enregistré
-          a automatiquement le rôle <strong>admin</strong>. Tu peux promouvoir/rétrograder
-          les autres, ou supprimer un compte (sauf le tien).
-        </p>
-      </div>
 
       <DataTable
         accent={accent}
@@ -888,6 +928,147 @@ function UsersAdmin({ accent, currentUser }) {
 }
 
 // ============================================================
+//  Pinned Tweet Manager (Gestion du tweet épinglé à gauche)
+// ============================================================
+function PinnedTweetManager({ accent }) {
+  window.store.useVersion();
+  const [tweets, setTweets] = useAdminState(window.DEFAULT_TWEETS || []);
+  const [pinnedId, setPinnedId] = useAdminState(
+    window.store.settings ? window.store.settings.getPinnedTweetId() : "2098488608801935761"
+  );
+  const [customId, setCustomId] = useAdminState("");
+
+  useAdminEffect(() => {
+    fetch("/api/tweets")
+      .then(r => r.json())
+      .then(d => {
+        if (d.tweets && d.tweets.length > 0) setTweets(d.tweets);
+      })
+      .catch(() => {});
+  }, []);
+
+  const currentPinned = tweets.find(t => t.id === pinnedId) || tweets[0];
+
+  function handlePin(id) {
+    if (!id) return;
+    if (window.store.settings) {
+      window.store.settings.setPinnedTweetId(id);
+      setPinnedId(id);
+    }
+  }
+
+  return (
+    <div className="nafe-admin-pinned-panel nafe-clip-card">
+      <div className="nafe-admin-pinned-panel__head">
+        <div>
+          <span className="nafe-eyebrow" style={{ color: "var(--nafe-denim-blue)" }}>Twitter · Position Gauche Verrouillée</span>
+          <h3 className="nafe-display" style={{ margin: "6px 0 0", fontSize: 22, color: "#FFFFFF" }}>
+            TWEET ÉPINGLÉ SUR L'ACCUEIL
+          </h3>
+        </div>
+        <span className="nafe-pinned-badge">
+          <span>POSITION GAUCHE VERROUILLÉE</span>
+        </span>
+      </div>
+
+      <p style={{ fontSize: 13, opacity: 0.7, lineHeight: 1.5, margin: "0 0 20px" }}>
+        Le tweet sélectionné ci-dessous reste verrouillé en première position (à gauche) sur l'accueil. Si Nafe publie un nouveau tweet épinglé, choisissez-le ci-dessous pour qu'il prenne immédiatement sa place.
+      </p>
+
+      {/* Tweet actuellement épinglé */}
+      {currentPinned && (
+        <div style={{
+          background: "linear-gradient(135deg, rgba(2, 136, 209, 0.12) 0%, rgba(51, 51, 51, 0.35) 100%)",
+          border: "1px solid var(--nafe-denim-blue)",
+          padding: 20,
+          marginBottom: 20
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+            <span className="nafe-mono" style={{ color: "var(--nafe-denim-blue)", fontSize: 11, fontWeight: 700 }}>
+              ✓ ACTUELLEMENT AFFICHÉ À GAUCHE (ID: {currentPinned.id})
+            </span>
+            <span className="nafe-mono" style={{ opacity: 0.5, fontSize: 11 }}>
+              {new Date(currentPinned.created_at).toLocaleDateString("fr-FR")}
+            </span>
+          </div>
+          <p style={{ margin: 0, fontSize: 14, color: "#fff", whiteSpace: "pre-wrap" }}>{currentPinned.text}</p>
+        </div>
+      )}
+
+      {/* Remplacer par un autre tweet */}
+      <div style={{ marginTop: 20 }}>
+        <h4 className="nafe-display" style={{ fontSize: 15, margin: "0 0 12px", color: "var(--nafe-denim-blue)" }}>
+          Changer le tweet fixé à gauche :
+        </h4>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 240, overflowY: "auto", paddingRight: 8 }}>
+          {tweets.map(t => {
+            const isThisPinned = t.id === currentPinned?.id;
+            return (
+              <div 
+                key={t.id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "10px 14px",
+                  background: isThisPinned ? "rgba(2, 136, 209, 0.15)" : "rgba(255,255,255,0.02)",
+                  border: isThisPinned ? "1px solid var(--nafe-denim-blue)" : "1px solid rgba(255,255,255,0.06)",
+                  gap: 16
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="nafe-mono" style={{ fontSize: 10, opacity: 0.5, marginBottom: 2 }}>
+                    {new Date(t.created_at).toLocaleDateString("fr-FR")} · ID: {t.id}
+                  </div>
+                  <p style={{ margin: 0, fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", opacity: 0.9 }}>
+                    {t.text}
+                  </p>
+                </div>
+                {isThisPinned ? (
+                  <span className="nafe-mono" style={{ color: "var(--nafe-denim-blue)", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap" }}>
+                    ✓ ACTIF
+                  </span>
+                ) : (
+                  <button 
+                    className="nafe-btn nafe-btn--ghost nafe-btn--sm"
+                    style={{ whiteSpace: "nowrap", padding: "6px 12px", fontSize: 10 }}
+                    onClick={() => handlePin(t.id)}
+                  >
+                    Fixer à gauche
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Option saisie manuelle d'un ID de tweet */}
+        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+          <input 
+            type="text" 
+            placeholder="Ou coller l'ID d'un nouveau tweet..." 
+            value={customId}
+            onChange={(e) => setCustomId(e.target.value)}
+            style={{ flex: 1, padding: "10px 14px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontFamily: "JetBrains Mono", fontSize: 12 }}
+          />
+          <button 
+            className="nafe-btn nafe-btn--accent nafe-btn--sm"
+            style={{ background: accent || "var(--nafe-water-blue)" }}
+            onClick={() => {
+              if (!customId.trim()) return alert("Veuillez saisir un ID de tweet valide");
+              handlePin(customId.trim());
+              setCustomId("");
+            }}
+          >
+            Définir comme épinglé
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 //  Socials (réseaux sociaux)
 // ============================================================
 const PLATFORM_OPTIONS = ["discord","twitch","youtube","twitter","instagram","tiktok","kick","snapchat"];
@@ -915,6 +1096,9 @@ function SocialsAdmin({ accent }) {
 
   return (
     <div className="nafe-admin__section">
+      {/* Panneau de verrouillage du Tweet Épinglé */}
+      <PinnedTweetManager accent={accent} />
+
       <div className="nafe-admin__note">
         <span className="nafe-mono" style={{ color: accent }}>ⓘ RÉSEAUX</span>
         <p>Ajoute ici les liens vers vos réseaux sociaux. Ils s'affichent sur la page <strong>Contact</strong>.
@@ -1005,7 +1189,7 @@ function CommunityAdmin({ accent }) {
           { key: "authorName", label: "AUTEUR",  flex: 0.7 },
           { key: "title",      label: "TITRE",   flex: 1.4 },
           { key: "content",    label: "CONTENU", flex: 2,   render: (r) => r.content?.slice(0, 80) + (r.content?.length > 80 ? "…" : "") },
-          { key: "likes",      label: "♥",       flex: 0.3, render: (r) => r.likes || 0 },
+          { key: "likes",      label: "LIKES",   flex: 0.3, render: (r) => r.likes || 0 },
           { key: "createdAt",  label: "DATE",    flex: 0.7, render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleDateString("fr-FR") : "—" },
         ]}
         rows={list}
@@ -1015,70 +1199,46 @@ function CommunityAdmin({ accent }) {
     </div>
   );
 }
-// ============================================================
-//  Shop
-// ============================================================
-function ShopAdmin({ accent }) {
-  const list = window.store.shop ? window.store.shop.list() : [];
-  const [editing, setEditing] = useAdminState(null);
-  const [draft, setDraft] = useAdminState(emptyProduct());
 
-  function emptyProduct() {
-    return { name: "", price: "", sizes: "S, M, L, XL", imageUrl: "" };
-  }
-
-  function startEdit(p) {
-    setEditing(p.id);
-    setDraft({ ...emptyProduct(), ...p });
-  }
-
-  function submit() {
-    if (!draft.name.trim()) return alert("Le nom est requis");
-    const payload = { ...draft, price: +draft.price || 0 };
-    if (editing) {
-      window.store.shop.update(editing, payload);
-    } else {
-      window.store.shop.add(payload);
+function EngagementAdmin({ accent }) {
+  const [subTab, setSubTab] = useAdminState("predictions");
+  
+  function seed() {
+    if (window.store.badges.list().length > 0) return alert("Données déjà présentes.");
+    window.store.badges.add({ name: "Premier Pas", description: "Inscrit sur le portail NAFE", icon: "✦", color: "#B6F500" });
+    window.store.badges.add({ name: "Pronostiqueur", description: "A voté sur son premier match", icon: "◈", color: "#1E4FD8" });
+    window.store.badges.add({ name: "Fidèle", description: "Membre actif de la communauté", icon: "▲", color: "#E11D74" });
+    
+    const match = window.store.matches.list()[0];
+    if (match) {
+      window.store.predictions.add({ 
+        title: "Qui remportera la map 1 ?", 
+        matchId: match.id, 
+        matchTitle: `${match.opp} (${match.date})`,
+        status: "active", 
+        options: [{ id: "o1", label: "NAFE" }, { id: "o2", label: match.opp }] 
+      });
     }
-    setEditing(null);
-    setDraft(emptyProduct());
+    alert("Données d'engagement générées !");
   }
 
   return (
     <div className="nafe-admin__section">
-      <FormShell
-        title={editing ? "Modifier le produit" : "Nouveau produit"}
-        onSubmit={submit}
-        onCancel={editing ? () => { setEditing(null); setDraft(emptyProduct()); } : null}
-        submitLabel={editing ? "Mettre à jour" : "Ajouter le produit"}
-        accent={accent}
-      >
-        <Field label="Nom du Produit" span={2}>
-          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex: Jersey Officiel 2026" />
-        </Field>
-        <Field label="Prix (€)">
-          <input type="number" step="0.01" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} placeholder="Ex: 89.99" />
-        </Field>
-        <Field label="Tailles (séparées par virgule)">
-          <input value={draft.sizes} onChange={(e) => setDraft({ ...draft, sizes: e.target.value })} placeholder="Ex: S, M, L, XL" />
-        </Field>
-        <Field label="URL de l'Image" span={2}>
-          <input value={draft.imageUrl} onChange={(e) => setDraft({ ...draft, imageUrl: e.target.value })} placeholder="https://..." />
-        </Field>
-      </FormShell>
-
-      <DataTable
-        accent={accent}
-        empty="Aucun produit dans la boutique."
-        columns={[
-          { key: "name", label: "NOM DU PRODUIT", flex: 2 },
-          { key: "price", label: "PRIX", flex: 1, render: (r) => `${r.price} €` },
-          { key: "sizes", label: "TAILLES", flex: 1 },
-        ]}
-        rows={list}
-        onEdit={startEdit}
-        onDelete={(id) => window.store.shop.remove(id)}
-      />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+        <div className="nafe-admin__filterBtns" style={{ marginBottom: 0 }}>
+          <button className={`nafe-news__chip ${subTab === 'predictions' ? 'is-active' : ''}`} onClick={() => setSubTab('predictions')}>
+            <span className="nafe-mono">PRÉDICTIONS</span>
+          </button>
+          <button className={`nafe-news__chip ${subTab === 'badges' ? 'is-active' : ''}`} onClick={() => setSubTab('badges')}>
+            <span className="nafe-mono">BADGES</span>
+          </button>
+        </div>
+        <button className="nafe-btn nafe-btn--ghost nafe-btn--sm" onClick={seed}>
+          Seed Engagement Data
+        </button>
+      </div>
+      
+      {subTab === 'predictions' ? <PredictionsAdmin accent={accent} /> : <BadgesAdmin accent={accent} />}
     </div>
   );
 }

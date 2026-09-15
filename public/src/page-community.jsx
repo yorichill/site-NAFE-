@@ -109,9 +109,9 @@ function CommunityPage({ accent }) {
     <div className="nafe-page">
       {/* Hero */}
       <section className="nafe-team__hero">
-        <span className="nafe-eyebrow" style={{ color: accent }}>NAFE · Fan Zone</span>
+        <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>NAFE ESPORT · Fan Zone</span>
         <h1 className="nafe-display nafe-team__title">
-          COMMUNITY<span style={{ color: accent }}>.</span>
+          COMMUNITY<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span>
         </h1>
         <p className="nafe-team__lede">
           Espace d'échange officiel de la communauté NAFE. Partage tes analyses,
@@ -238,7 +238,7 @@ function CommunityPage({ accent }) {
                       onClick={() => toggleLike(post)}
                       style={{ color: isLiked ? accent : "rgba(255,255,255,0.4)" }}
                     >
-                      <span>{isLiked ? "♥" : "♡"}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" style={{ display: "inline-block", verticalAlign: "middle" }}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                       <span className="nafe-mono">{post.likes || 0}</span>
                     </button>
                     <button
@@ -246,7 +246,7 @@ function CommunityPage({ accent }) {
                       onClick={() => toggleComments(post.id)}
                       style={{ color: isOpen ? accent : "rgba(255,255,255,0.4)" }}
                     >
-                      <span>💬</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: "inline-block", verticalAlign: "middle" }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                       <span className="nafe-mono">
                         {postComments.length} réponse{postComments.length !== 1 ? "s" : ""}
                       </span>

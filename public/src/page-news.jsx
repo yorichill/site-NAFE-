@@ -4,10 +4,15 @@ const { useState: useNewsState, useEffect: useNewsEffect } = React;
 const TWEETS_API = "/api/tweets";
 const CATS = ["Tout", "Twitter", "YouTube", "Twitch", "Compétition", "Annonce", "Transfert", "Analyse", "Structure", "Partenariat", "Académie"];
 
-function TweetCard({ tweet, accent }) {
+function TweetCard({ tweet, accent, isPinned }) {
   const date = new Date(tweet.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
   return (
-    <div className="nafe-tweet-card nafe-clip-card">
+    <div className={`nafe-tweet-card nafe-clip-card ${isPinned ? "nafe-hub-tweet-card--pinned" : ""}`}>
+      {isPinned && (
+        <div className="nafe-pinned-badge">
+          <span>TWEET ÉPINGLÉ</span>
+        </div>
+      )}
       <div className="nafe-tweet-header">
         <div className="nafe-tweet-avatar">
           <img src={window.NAFE_TWITTER_AVATAR || "https://pbs.twimg.com/profile_images/2089748890027196416/5diWkPDV_400x400.png"} alt="NAFE" />
@@ -17,7 +22,7 @@ function TweetCard({ tweet, accent }) {
             <span className="nafe-tweet-name">NAFE</span>
             <span className="nafe-tweet-handle">@NafeOfficiel · {date}</span>
           </div>
-          <div className="nafe-tweet-x">𝕏</div>
+          <div className="nafe-tweet-x nafe-mono">X</div>
         </div>
       </div>
       <div className="nafe-tweet-body">
@@ -30,11 +35,11 @@ function TweetCard({ tweet, accent }) {
       </div>
       <div className="nafe-tweet-footer">
         <div className="nafe-tweet-stats nafe-mono">
-          <span className="nafe-tweet-stat">▼ {tweet.public_metrics.like_count}</span>
-          <span className="nafe-tweet-stat">↺ {tweet.public_metrics.retweet_count}</span>
+          <span className="nafe-tweet-stat">{tweet.public_metrics.like_count} LIKES</span>
+          <span className="nafe-tweet-stat">{tweet.public_metrics.retweet_count} RETWEETS</span>
         </div>
-        <a href={`https://x.com/NafeOfficiel/status/${tweet.id}`} target="_blank" rel="noopener" className="nafe-tweet-link nafe-mono">
-          VOIR SUR 𝕏 →
+        <a href={`https://x.com/NafeOfficiel/status/${tweet.id}`} target="_blank" rel="noopener" className="nafe-tweet-link nafe-mono" style={{ color: "var(--nafe-denim-blue)" }}>
+          VOIR SUR TWITTER →
         </a>
       </div>
     </div>
@@ -87,6 +92,15 @@ function NewsPage({ accent }) {
       });
   }, []);
 
+  // Pinned tweet logic for NewsPage
+  const pinnedSettingId = window.store.settings ? window.store.settings.getPinnedTweetId() : null;
+  const pinnedTweet = (pinnedSettingId ? tweets.find(t => t.id === pinnedSettingId) : null)
+    || tweets.find(t => t.pinned)
+    || tweets[0];
+  const sortedTweets = pinnedTweet
+    ? [pinnedTweet, ...tweets.filter(t => t.id !== pinnedTweet.id)]
+    : tweets;
+
   const filteredNews = cat === "Tout" ? allNews : allNews.filter(n => n.cat === cat);
   
   const showTweets = cat === "Tout" || cat === "Twitter";
@@ -96,9 +110,9 @@ function NewsPage({ accent }) {
   return (
     <div className="nafe-page">
       <section className="nafe-news__hero">
-        <span className="nafe-eyebrow" style={{ color: accent }}>Actualité · NAFE TEAM</span>
-        <h1 className="nafe-display nafe-team__title">ACTU<span style={{ color: accent }}>.</span></h1>
-        <p className="nafe-team__lede">Les derniers tweets, vidéos et articles de la structure.</p>
+        <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>Actualité · NAFE ESPORT</span>
+        <h1 className="nafe-display nafe-team__title">ACTU<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span></h1>
+        <p className="nafe-team__lede">Les derniers tweets officiels, vidéos compétitives et annonces du club.</p>
       </section>
 
       <section className="nafe-news__filter">
@@ -106,7 +120,7 @@ function NewsPage({ accent }) {
           <button
             key={c}
             className={`nafe-news__chip ${cat === c ? "is-active" : ""}`}
-            style={cat === c ? { background: accent, color: "#fff", borderColor: accent } : {}}
+            style={cat === c ? { background: accent || "var(--nafe-water-blue)", color: "#fff", borderColor: accent || "var(--nafe-water-blue)" } : {}}
             onClick={() => setCat(c)}
           >
             <span className="nafe-mono">{c.toUpperCase()}</span>
@@ -125,10 +139,17 @@ function NewsPage({ accent }) {
           </div>
         )}
 
-        {/* TWEETS SECTION */}
-        {showTweets && tweets.length > 0 && (
+        {/* TWEETS SECTION (PINNED FIRST) */}
+        {showTweets && sortedTweets.length > 0 && (
           <div className="nafe-tweet-grid" style={{ marginTop: 40 }}>
-            {tweets.map(t => <TweetCard key={t.id} tweet={t} accent={accent} />)}
+            {sortedTweets.map((t, idx) => (
+              <TweetCard 
+                key={t.id} 
+                tweet={t} 
+                accent={accent} 
+                isPinned={idx === 0 && Boolean(pinnedTweet && t.id === pinnedTweet.id)}
+              />
+            ))}
           </div>
         )}
 

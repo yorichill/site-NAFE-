@@ -1,245 +1,207 @@
 // NAFE — News / Actualités page
-
 const { useState: useNewsState, useEffect: useNewsEffect } = React;
 
 const TWEETS_API = "/api/tweets";
-const CATS = ["Tout", "Twitter", "Compétition", "Annonce", "Transfert", "Analyse", "Structure", "Partenariat", "Académie"];
+const CATS = ["Tout", "Twitter", "YouTube", "Twitch", "Compétition", "Annonce", "Transfert", "Analyse", "Structure", "Partenariat", "Académie"];
 
-function TweetCard({ tweet }) {
-  const date = new Date(tweet.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }).toUpperCase();
-  const likes = tweet.public_metrics?.like_count ?? 0;
-  const rts   = tweet.public_metrics?.retweet_count ?? 0;
+function TweetCard({ tweet, accent, isPinned }) {
+  const date = new Date(tweet.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
   return (
-    <a
-      href={`https://x.com/NafeOfficiel/status/${tweet.id}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="nafe-news__card"
-      style={{ textDecoration: "none", display: "flex", flexDirection: "column", cursor: "pointer" }}
-    >
-      <div style={{ padding: "14px 18px 6px", borderBottom: "1px solid rgba(29,155,240,0.15)", display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ color: "#1d9bf0", fontWeight: 700, fontSize: 14, fontFamily: "JetBrains Mono, monospace", letterSpacing: 1 }}>𝕏</span>
-        <span className="nafe-mono" style={{ color: "#1d9bf0", fontSize: 11 }}>@NAFEOFFICIEL</span>
-        <span className="nafe-mono" style={{ opacity: 0.4, fontSize: 11, marginLeft: "auto" }}>{date}</span>
-      </div>
-      <div className="nafe-news__cardBody" style={{ flex: 1 }}>
-        <p className="nafe-news__cardLede" style={{ fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.88)", whiteSpace: "pre-wrap" }}>
-          {tweet.text}
-        </p>
-        {tweet.media && tweet.media.length > 0 && (
-          <div style={{ borderRadius: 8, overflow: "hidden", margin: "12px 0" }}>
-            <img src={tweet.media[0].url} alt="media" style={{ width: "100%", display: "block" }} />
+    <div className={`nafe-tweet-card nafe-clip-card ${isPinned ? "nafe-hub-tweet-card--pinned" : ""}`}>
+      {isPinned && (
+        <div className="nafe-pinned-badge">
+          <span>TWEET ÉPINGLÉ</span>
+        </div>
+      )}
+      <div className="nafe-tweet-header">
+        <div className="nafe-tweet-avatar">
+          <img src={window.NAFE_TWITTER_AVATAR || "https://pbs.twimg.com/profile_images/2089748890027196416/5diWkPDV_400x400.png"} alt="NAFE" />
+        </div>
+        <div className="nafe-tweet-info">
+          <div className="nafe-tweet-user">
+            <span className="nafe-tweet-name">NAFE</span>
+            <span className="nafe-tweet-handle">@NafeOfficiel · {date}</span>
           </div>
-        )}
-        <div className="nafe-news__cardFoot" style={{ marginTop: "auto" }}>
-          <span className="nafe-mono" style={{ opacity: 0.5, fontSize: 11 }}>♥ {likes} · ↺ {rts}</span>
-          <span className="nafe-mono" style={{ color: "#1d9bf0", fontSize: 11 }}>Voir sur 𝕏 →</span>
+          <div className="nafe-tweet-x nafe-mono">X</div>
         </div>
       </div>
-    </a>
+      <div className="nafe-tweet-body">
+        <p className="nafe-tweet-text">{tweet.text}</p>
+        {tweet.media && tweet.media.length > 0 && (
+          <div className="nafe-tweet-media">
+            <img src={tweet.media[0].url} alt="Tweet media" className="nafe-tweet-img" />
+          </div>
+        )}
+      </div>
+      <div className="nafe-tweet-footer">
+        <div className="nafe-tweet-stats nafe-mono">
+          <span className="nafe-tweet-stat">{tweet.public_metrics.like_count} LIKES</span>
+          <span className="nafe-tweet-stat">{tweet.public_metrics.retweet_count} RETWEETS</span>
+        </div>
+        <a href={`https://x.com/NafeOfficiel/status/${tweet.id}`} target="_blank" rel="noopener" className="nafe-tweet-link nafe-mono" style={{ color: "var(--nafe-denim-blue)" }}>
+          VOIR SUR TWITTER →
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function VideoCard({ news, accent }) {
+  const isYoutube = news.cat === "YouTube";
+  const color = isYoutube ? "#FF0000" : "#9146FF";
+  return (
+    <div className="nafe-news__card nafe-video-card nafe-clip-card">
+      <div className="nafe-video-thumb">
+        <div className="nafe-video-play">▶</div>
+        <span className="nafe-video-tag" style={{ background: color }}>{news.cat.toUpperCase()}</span>
+      </div>
+      <div className="nafe-news__cardBody">
+        <div className="nafe-news__meta">
+          <span className="nafe-mono" style={{ color: color }}>NOUVEAU CONTENU</span>
+          <span className="nafe-mono">· {news.date}</span>
+        </div>
+        <h3 className="nafe-display nafe-news__cardTitle">{news.title}</h3>
+        <p className="nafe-news__cardLede">{news.lede}</p>
+        <div className="nafe-news__cardFoot">
+          <a href={news.url} target="_blank" rel="noopener" className="nafe-mono" style={{ color: color, textDecoration: 'none', fontWeight: 700 }}>
+            REGARDER SUR {news.cat.toUpperCase()} →
+          </a>
+        </div>
+      </div>
+    </div>
   );
 }
 
 function NewsPage({ accent }) {
   window.store.useVersion();
-  const all = window.store.news.list()
-    .slice()
-    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const allNews = window.store.news.list().slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
   const [cat, setCat]             = useNewsState("Tout");
   const [tweets, setTweets]       = useNewsState(window.DEFAULT_TWEETS || []);
-  const [tweetsErr, setTweetsErr] = useNewsState(false);
 
   useNewsEffect(() => {
     fetch(TWEETS_API)
       .then(r => r.json())
       .then(d => {
-        if (d.tweets && d.tweets.length > 0) setTweets(d.tweets);
+        if (d.tweets && d.tweets.length > 0) {
+          setTweets(d.tweets);
+        }
       })
       .catch(() => {
         if (window.DEFAULT_TWEETS) setTweets(window.DEFAULT_TWEETS);
-        setTweetsErr(true);
       });
   }, []);
 
-  const showTweets = (cat === "Tout" || cat === "Twitter") && tweets.length > 0;
-  const filtered   = cat === "Tout" || cat === "Twitter"
-    ? all
-    : all.filter(n => n.cat === cat);
-  const featured   = cat !== "Twitter" && (filtered.find(n => n.featured) || filtered[0]);
-  const rest       = cat !== "Twitter" ? filtered.filter(n => (featured ? n.id !== featured.id : true)) : [];
+  // Pinned tweet logic for NewsPage
+  const pinnedSettingId = window.store.settings ? window.store.settings.getPinnedTweetId() : null;
+  const pinnedTweet = (pinnedSettingId ? tweets.find(t => t.id === pinnedSettingId) : null)
+    || tweets.find(t => t.pinned)
+    || tweets[0];
+  const sortedTweets = pinnedTweet
+    ? [pinnedTweet, ...tweets.filter(t => t.id !== pinnedTweet.id)]
+    : tweets;
 
-  const hasContent = all.length > 0 || tweets.length > 0;
+  const filteredNews = cat === "Tout" ? allNews : allNews.filter(n => n.cat === cat);
+  
+  const showTweets = cat === "Tout" || cat === "Twitter";
+  const showVideos = cat === "Tout" || cat === "YouTube" || cat === "Twitch";
+  const showArticles = cat !== "Twitter" && cat !== "YouTube" && cat !== "Twitch";
 
   return (
     <div className="nafe-page">
       <section className="nafe-news__hero">
-        <span className="nafe-eyebrow" style={{ color: accent }}>
-          Actualité · NAFE TEAM
-        </span>
-        <h1 className="nafe-display nafe-team__title">ACTU<span style={{ color: accent }}>.</span></h1>
-        <p className="nafe-team__lede">
-          Tout ce qui fait bouger NAFE TEAM — matchs, transferts, annonces structure
-          et drops. Curation par la rédaction interne.
-        </p>
+        <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>Actualité · NAFE ESPORT</span>
+        <h1 className="nafe-display nafe-team__title">ACTU<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span></h1>
+        <p className="nafe-team__lede">Les derniers tweets officiels, vidéos compétitives et annonces du club.</p>
       </section>
 
-      {!hasContent ? (
-        <div className="nafe-empty nafe-empty--panel">
-          <span className="nafe-mono" style={{ color: accent }}>AUCUN ARTICLE</span>
-          <p className="nafe-empty__text">
-            {window.store.isAdmin()
-              ? "La rédaction n'a encore rien posté. Crée ta première dépêche depuis l'espace admin."
-              : "Les premières dépêches arrivent très bientôt — reste connecté."}
-          </p>
-          {window.store.isAdmin() && (
-            <a className="nafe-btn nafe-btn--accent" style={{ background: accent }} href="#/admin/news">
-              → Poster une actu
-            </a>
-          )}
-        </div>
-      ) : (
-        <>
-          {/* Category filter */}
-          <section className="nafe-news__filter">
-            {CATS.map(c => (
-              <button
-                key={c}
-                className={`nafe-news__chip ${cat === c ? "is-active" : ""}`}
-                style={cat === c
-                  ? { background: c === "Twitter" ? "#1d9bf0" : accent, color: "#fff", borderColor: c === "Twitter" ? "#1d9bf0" : accent }
-                  : {}}
-                onClick={() => setCat(c)}
-              >
-                <span className="nafe-mono">{c.toUpperCase()}</span>
-                {c === "Twitter" && tweets.length > 0 && (
-                  <span className="nafe-news__chipN nafe-mono">{tweets.length}</span>
-                )}
-                {c !== "Tout" && c !== "Twitter" && (
-                  <span className="nafe-news__chipN nafe-mono">
-                    {all.filter(n => n.cat === c).length}
-                  </span>
-                )}
-              </button>
-            ))}
-          </section>
-
-          {/* Tweets */}
-          {showTweets && (
-            <section className="nafe-section" style={{ marginTop: 48 }}>
-              <header className="nafe-section__head" style={{ marginBottom: 24 }}>
-                <div>
-                  <span className="nafe-eyebrow" style={{ color: "#1d9bf0" }}>X · @NafeOfficiel</span>
-                  <h2 className="nafe-display nafe-section__title">Derniers tweets</h2>
-                </div>
-                <a
-                  href="https://x.com/NafeOfficiel"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="nafe-mono"
-                  style={{ color: "#1d9bf0", fontSize: 12, opacity: 0.85 }}
-                >
-                  VOIR LE PROFIL →
-                </a>
-              </header>
-              <div className="nafe-news__grid">
-                {tweets.map(t => <TweetCard key={t.id} tweet={t} />)}
-              </div>
-            </section>
-          )}
-
-          {/* Articles — masqués si filtre Twitter actif */}
-          {cat !== "Twitter" && all.length > 0 && (
-            <>
-              {featured && (
-                <section className="nafe-news__featured nafe-clip-card" style={{ marginTop: showTweets ? 60 : 0 }}>
-                  <div className="nafe-news__featImg" style={{ borderColor: accent }}>
-                    <FeaturedPlaceholder accent={accent} seed={featured.id} />
-                    <span className="nafe-news__featTag" style={{ background: accent }}>À LA UNE</span>
-                  </div>
-                  <div className="nafe-news__featBody">
-                    <div className="nafe-news__meta">
-                      <span className="nafe-mono" style={{ color: accent }}>{(featured.cat || "").toUpperCase()}</span>
-                      <span className="nafe-mono">· {featured.game}</span>
-                      <span className="nafe-mono">· {featured.date}</span>
-                    </div>
-                    <h2 className="nafe-display nafe-news__featTitle">{featured.title}</h2>
-                    <p className="nafe-news__featLede">{featured.lede}</p>
-                    <div className="nafe-news__featFoot">
-                      <span className="nafe-mono">PAR {(featured.author || "").toUpperCase()}</span>
-                      <span className="nafe-mono">{(featured.readTime || "").toUpperCase()}</span>
-                      <span className="nafe-news__featRead" style={{ color: accent }}>LIRE →</span>
-                    </div>
-                  </div>
-                </section>
-              )}
-
-              {rest.length > 0 && (
-                <section className="nafe-section" style={{ marginTop: 60 }}>
-                  <header className="nafe-section__head">
-                    <div>
-                      <span className="nafe-eyebrow">{cat === "Tout" ? "Toutes les dépêches" : cat}</span>
-                      <h2 className="nafe-display nafe-section__title">Archive</h2>
-                    </div>
-                    <span className="nafe-mono nafe-section__count">
-                      {String(rest.length).padStart(2, "0")} ARTICLE{rest.length > 1 ? "S" : ""}
-                    </span>
-                  </header>
-                  <div className="nafe-news__grid">
-                    {rest.map((n) => (
-                      <article key={n.id} className="nafe-news__card">
-                        <div className="nafe-news__cardImg">
-                          <ArticlePlaceholder accent={accent} seed={n.id} />
-                        </div>
-                        <div className="nafe-news__cardBody">
-                          <div className="nafe-news__meta">
-                            <span className="nafe-mono" style={{ color: accent }}>{(n.cat || "").toUpperCase()}</span>
-                            <span className="nafe-mono">· {n.date}</span>
-                          </div>
-                          <h3 className="nafe-display nafe-news__cardTitle">{n.title}</h3>
-                          <p className="nafe-news__cardLede">{n.lede}</p>
-                          <div className="nafe-news__cardFoot">
-                            <span className="nafe-mono">{n.game} · {n.readTime}</span>
-                            <span className="nafe-mono" style={{ color: accent }}>→</span>
-                          </div>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-              )}
-            </>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
-function FeaturedPlaceholder({ accent, seed }) {
-  const s = String(seed || "n");
-  return (
-    <svg viewBox="0 0 600 340" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <pattern id={`fs-${s}`} patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(-28)">
-          <rect width="8" height="8" fill="#0B1228" />
-          <line x1="0" y1="0" x2="0" y2="8" stroke={accent} strokeOpacity="0.25" strokeWidth="1" />
-        </pattern>
-      </defs>
-      <rect width="600" height="340" fill={`url(#fs-${s})`} />
-      <rect x="40" y="260" width="200" height="40" fill={accent} opacity="0.9" />
-      <text x="52" y="286" fontFamily="JetBrains Mono, monospace" fontSize="14" fill="#fff" letterSpacing="3">
-        [ PLACEHOLDER ]
-      </text>
-      <text x="40" y="60" fontFamily="JetBrains Mono, monospace" fontSize="10" fill={accent} letterSpacing="4">
-        IMAGE · ÉDITORIAL
-      </text>
-      <g opacity="0.6">
-        {[0,1,2,3,4].map(i => (
-          <line key={i} x1={40 + i*18} y1="80" x2={40 + i*18} y2="240" stroke={accent} strokeOpacity="0.3" strokeWidth="1" />
+      <section className="nafe-news__filter">
+        {CATS.map(c => (
+          <button
+            key={c}
+            className={`nafe-news__chip ${cat === c ? "is-active" : ""}`}
+            style={cat === c ? { background: accent || "var(--nafe-water-blue)", color: "#fff", borderColor: accent || "var(--nafe-water-blue)" } : {}}
+            onClick={() => setCat(c)}
+          >
+            <span className="nafe-mono">{c.toUpperCase()}</span>
+          </button>
         ))}
-      </g>
-    </svg>
+      </section>
+
+      <div className="nafe-news__layout">
+        
+        {/* VIDEOS SECTION */}
+        {showVideos && (
+          <div className="nafe-news__grid" style={{ marginTop: 40 }}>
+            {allNews.filter(n => (n.cat === "YouTube" || n.cat === "Twitch") && (cat === "Tout" || n.cat === cat)).map(v => (
+              <VideoCard key={v.id} news={v} accent={accent} />
+            ))}
+          </div>
+        )}
+
+        {/* TWEETS SECTION (PINNED FIRST) */}
+        {showTweets && sortedTweets.length > 0 && (
+          <div className="nafe-tweet-grid" style={{ marginTop: 40 }}>
+            {sortedTweets.map((t, idx) => (
+              <TweetCard 
+                key={t.id} 
+                tweet={t} 
+                accent={accent} 
+                isPinned={idx === 0 && Boolean(pinnedTweet && t.id === pinnedTweet.id)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* ARTICLES SECTION */}
+        {showArticles && filteredNews.filter(n => n.cat !== "YouTube" && n.cat !== "Twitch").length > 0 && (
+          <div className="nafe-news__grid" style={{ marginTop: 40 }}>
+            {filteredNews.filter(n => n.cat !== "YouTube" && n.cat !== "Twitch").map(n => (
+              <article key={n.id} className="nafe-news__card">
+                <div className="nafe-news__cardImg">
+                  <ArticlePlaceholder accent={accent} seed={n.id} />
+                </div>
+                <div className="nafe-news__cardBody">
+                  <div className="nafe-news__meta">
+                    <span className="nafe-mono" style={{ color: accent }}>{(n.cat || "").toUpperCase()}</span>
+                    <span className="nafe-mono">· {n.date}</span>
+                  </div>
+                  <h3 className="nafe-display nafe-news__cardTitle">{n.title}</h3>
+                  <p className="nafe-news__cardLede">{n.lede}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        .nafe-tweet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 30px; }
+        .nafe-tweet-card { background: #000; border: 1px solid #1a1a1a; padding: 24px; position: relative; }
+        .nafe-tweet-header { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+        .nafe-tweet-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 1px solid #333; flex-shrink: 0; }
+        .nafe-tweet-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .nafe-tweet-info { flex: 1; display: flex; justify-content: space-between; }
+        .nafe-tweet-user { display: flex; flex-direction: column; }
+        .nafe-tweet-name { font-weight: 700; color: #fff; font-size: 15px; }
+        .nafe-tweet-handle { color: #71767b; font-size: 14px; }
+        .nafe-tweet-x { color: #fff; font-weight: 700; font-size: 14px; opacity: 0.8; }
+        .nafe-tweet-text { font-size: 15px; line-height: 1.5; color: #e7e9ea; margin-bottom: 16px; white-space: pre-wrap; }
+        .nafe-tweet-media { border-radius: 12px; overflow: hidden; border: 1px solid #2f3336; margin-bottom: 16px; }
+        .nafe-tweet-img { width: 100%; display: block; }
+        .nafe-tweet-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #1a1a1a; }
+        .nafe-tweet-stats { display: flex; gap: 20px; color: #71767b; font-size: 12px; }
+        .nafe-tweet-link { color: #1d9bf0; text-decoration: none; font-size: 11px; font-weight: 700; }
+        
+        .nafe-video-thumb { aspect-ratio: 16/9; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .nafe-video-play { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 24px; transition: all 0.3s; }
+        .nafe-video-card:hover .nafe-video-play { background: #fff; color: #000; transform: scale(1.1); }
+        .nafe-video-tag { position: absolute; top: 12px; right: 12px; padding: 6px 12px; font-size: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: #fff; }
+        
+        .nafe-news__cardTitle { font-size: 24px; margin: 12px 0; }
+        .nafe-news__cardLede { opacity: 0.6; font-size: 14px; margin-bottom: 24px; }
+      `}</style>
+    </div>
   );
 }
 
@@ -254,10 +216,6 @@ function ArticlePlaceholder({ accent, seed }) {
         </pattern>
       </defs>
       <rect width="300" height="180" fill={`url(#ap-${s})`} />
-      <rect x="16" y="140" width="120" height="22" fill={accent} opacity="0.85" />
-      <text x="22" y="156" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="#fff" letterSpacing="2">
-        [IMAGE·{s.slice(0,5).toUpperCase()}]
-      </text>
     </svg>
   );
 }

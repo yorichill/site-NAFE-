@@ -2,15 +2,18 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>NAFE TEAM — Esport Premium</title>
+  <title>NAFE ESPORT — Site Officiel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="assets/brand/nafe-symbol.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800;900&family=Space+Grotesk:wght@400;500;700;900&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="src/nafe.css" />
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </head>
 <body>
   <div id="root"></div>
@@ -28,23 +31,67 @@
   <script type="text/babel" src="src/page-community.jsx"></script>
   <script type="text/babel" src="src/page-contact.jsx"></script>
   <script type="text/babel" src="src/page-admin.jsx"></script>
+  <script type="text/babel" src="src/page-locker.jsx"></script>
+  <script type="text/babel" src="src/social-feed.jsx"></script>
   <script type="text/babel" src="src/auth-modal.jsx"></script>
+  <script type="text/babel" src="src/custom-cursor.jsx"></script>
 
   <script type="text/babel" data-presets="env,react">
     const { useState, useEffect } = React;
 
+    // Initialize Supabase Client
+    window.supabase = supabase.createClient(
+      "https://xzdzogpfudjulizjsusy.supabase.co",
+      "sb_publishable_VgpKZ3ocZGzcPAbfEx_2Ag_1dCf-Wcs"
+    );
+
+    // Sync Supabase Auth with local store for visual prototype
+    window.supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user && window.store) {
+        const meta = session.user.user_metadata || {};
+        const email = session.user.email || `${session.user.id.slice(0, 8)}@nafe.gg`;
+        const username = meta.custom_claims?.global_name
+          || meta.full_name
+          || meta.preferred_username
+          || meta.user_name
+          || meta.name
+          || (session.user.email ? session.user.email.split("@")[0] : `user_${session.user.id.slice(0, 5)}`);
+
+        // Check if user exists in local store
+        let localUser = window.store.users.list().find(u => 
+          (u.id && u.id === session.user.id) || 
+          (u.email && u.email.toLowerCase() === email.toLowerCase())
+        );
+        if (!localUser) {
+          // Auto-register in local store to give them a profile
+          const role = window.store.users.list().length === 0 ? "admin" : "user";
+          localUser = window.store.users.add({
+            id: session.user.id,
+            email,
+            username,
+            passwordHash: session.user.app_metadata?.provider || "oauth",
+            role,
+            xp: 0
+          });
+        }
+        window.store.session.set({ userId: localUser.id });
+      } else if (event === 'SIGNED_OUT' && window.store) {
+        window.store.logout();
+      }
+    });
+
     const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-      "accent": "#1E4FD8",
+      "accent": "#0288D1",
       "cardVariant": "tilt"
     }/*EDITMODE-END*/;
 
     const ACCENTS = [
-      { name: "Electric", value: "#1E4FD8", rgb: "30, 79, 216" },
-      { name: "Acid",     value: "#B6F500", rgb: "182, 245, 0" },
-      { name: "Magenta",  value: "#E11D74", rgb: "225, 29, 116" },
-      { name: "Sunset",   value: "#FF6B2C", rgb: "255, 107, 44" },
-      { name: "Mint",     value: "#00D68F", rgb: "0, 214, 143" },
-      { name: "Ice",      value: "#9AB7FF", rgb: "154, 183, 255" },
+      { name: "Water blue", value: "#0288D1", rgb: "2, 136, 209" },
+      { name: "Denim blue", value: "#73BEDE", rgb: "115, 190, 222" },
+      { name: "Green Peas", value: "#8BC34A", rgb: "139, 195, 74" },
+      { name: "Wattle",     value: "#CDDC39", rgb: "205, 220, 57" },
+      { name: "Dune",       value: "#333333", rgb: "51, 51, 51" },
+      { name: "White",      value: "#FFFFFF", rgb: "255, 255, 255" },
     ];
 
     // Migration données : renomme les anciens slugs (lol→rl) dans le localStorage
@@ -105,11 +152,13 @@
       else if (route === "/news") Page = <window.NewsPage accent={accent} />;
       else if (route === "/calendar") Page = <window.CalendarPage accent={accent} />;
       else if (route.startsWith("/admin")) Page = <window.AdminPage accent={accent} />;
+      else if (route === "/locker") Page = <window.LockerPage accent={accent} />;
       else if (route === "/shop") Page = <ShopSoon accent={accent} />;
       else Page = <window.HubPage accent={accent} cardVariant={cardVariant} onNav={nav} />;
 
       return (
         <div className="nafe-app" data-screen-label={route}>
+          <window.CustomCursor />
           <div className="nafe-ambient" />
           <div className="nafe-ambient nafe-ambient--2" />
           <window.ScoreTicker />
@@ -138,16 +187,77 @@
     }
 
     function ShopSoon({ accent }) {
+      const [products, setProducts] = useState([]);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        async function load() {
+          if (!window.supabase) return;
+          const { data, error } = await window.supabase.from("products").select("*").order("created_at", { ascending: false });
+          if (!error && data) setProducts(data);
+          setLoading(false);
+        }
+        load();
+      }, []);
+
+      async function buyProduct(p) {
+        try {
+          const res = await fetch("/api/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              productId: p.id, 
+              name: p.name, 
+              price: p.price, 
+              size: Array.isArray(p.sizes) ? p.sizes[0] : p.sizes // defaulting to first size for simplicity
+            })
+          });
+          const data = await res.json();
+          if (data.url) {
+            window.location.href = data.url;
+          } else {
+            alert(data.error || "Erreur de paiement");
+          }
+        } catch(e) {
+          alert("Erreur: " + e.message);
+        }
+      }
+
       return (
         <div className="nafe-page">
-          <section style={{ padding: "80px 0", minHeight: "60vh", display: "flex", flexDirection: "column", gap: 24 }}>
-            <span className="nafe-eyebrow" style={{ color: accent }}>Shop</span>
-            <h1 className="nafe-display" style={{ fontSize: "120px", lineHeight: 0.85, margin: 0 }}>
-              BIENTÔT<span style={{ color: accent }}>.</span>
-            </h1>
-            <p style={{ maxWidth: 520, color: "rgba(255,255,255,0.7)", fontSize: 18, lineHeight: 1.5 }}>
-              La boutique officielle ouvre prochainement.
-            </p>
+          <section className="nafe-team__hero">
+            <span className="nafe-eyebrow" style={{ color: accent }}>Shop Officiel</span>
+            <h1 className="nafe-display nafe-team__title">BOUTIQUE<span style={{ color: accent }}>.</span></h1>
+            <p className="nafe-team__lede">Drops exclusifs et merch premium. Portez les couleurs de la structure.</p>
+          </section>
+
+          <section className="nafe-section mt-8">
+            {loading ? (
+              <p className="nafe-mono text-steel-grey">Chargement du catalogue...</p>
+            ) : products.length === 0 ? (
+              <div className="nafe-empty nafe-empty--panel">
+                <span className="nafe-mono" style={{ color: accent }}>RUPTURE DE STOCK</span>
+                <p className="nafe-empty__text">La boutique est actuellement vide. Revenez plus tard.</p>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24, marginTop: 32 }}>
+                {products.map(p => (
+                  <div key={p.id} className="nafe-clip-card" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", padding: 24, display: "flex", flexDirection: "column" }}>
+                    {p.image_url && <img src={p.image_url} alt={p.name} style={{ width: "100%", height: 240, objectFit: "contain", marginBottom: 24 }} />}
+                    <h3 className="nafe-display" style={{ fontSize: 24, marginBottom: 8 }}>{p.name}</h3>
+                    <p className="nafe-mono" style={{ color: accent, marginBottom: 16 }}>{p.price} €</p>
+                    <p className="nafe-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>Tailles: {Array.isArray(p.sizes) ? p.sizes.join(", ") : p.sizes}</p>
+                    <button 
+                      className="nafe-btn nafe-btn--accent" 
+                      style={{ background: accent, width: "100%", justifyContent: "center", marginTop: "auto" }}
+                      onClick={() => buyProduct(p)}
+                    >
+                      Acheter maintenant
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         </div>
       );

@@ -35,8 +35,8 @@ function LivePage({ accent }) {
     return (
       <div className="nafe-page">
         <section className="nafe-team__hero">
-          <span className="nafe-eyebrow" style={{ color: accent }}>Live · NAFE TEAM</span>
-          <h1 className="nafe-display nafe-team__title">LIVE<span style={{ color: accent }}>.</span></h1>
+          <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>Live · NAFE ESPORT</span>
+          <h1 className="nafe-display nafe-team__title">LIVE<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span></h1>
           <p className="nafe-team__lede">
             Ici s'affichent le match en cours, le scoreboard et le stream du club.
           </p>
@@ -101,7 +101,7 @@ function LivePage({ accent }) {
     );
   }
 
-  const [a, b] = String(live.result || "").split(/[-–]/).map(s => (s || "").trim());
+  const [a, b] = (live.result || "").split(/[-–]/).map(s => s.trim());
   const seconds = tick % 60;
   const minutes = Math.floor(tick / 60) % 60;
   const timer = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
@@ -110,8 +110,8 @@ function LivePage({ accent }) {
     <div className="nafe-page">
       <section className="nafe-live__hero">
         <div className="nafe-live__banner">
-          <span className="nafe-mono nafe-live__tag" style={{ background: "#E53E3E" }}>
-            <span className="nafe-pulse" /> EN DIRECT
+          <span className="nafe-mono nafe-live__tag" style={{ background: "var(--nafe-green-peas)" }}>
+            <span className="nafe-pulse" style={{ background: "#fff", boxShadow: "0 0 10px #fff" }} /> EN DIRECT
           </span>
           <span className="nafe-mono nafe-live__event">{live.event}</span>
           <span className="nafe-live__spacer" />
@@ -120,15 +120,15 @@ function LivePage({ accent }) {
 
         <div className="nafe-live__main">
           <div className="nafe-live__team nafe-live__team--home">
-            <div className="nafe-live__logo" style={{ borderColor: accent, color: accent }}>
-              NAFE
+            <div className="nafe-live__logo" style={{ borderColor: accent || "var(--nafe-water-blue)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {window.NafeSymbol ? <window.NafeSymbol size={32} color={accent || "var(--nafe-water-blue)"} /> : "NAFE"}
             </div>
             <div>
               <span className="nafe-mono nafe-live__teamMeta">{live.game}</span>
               <h2 className="nafe-display nafe-live__teamName">NAFE</h2>
               <span className="nafe-mono nafe-live__record">{live.event}</span>
             </div>
-            <span className="nafe-display nafe-live__score" style={{ color: accent }}>{a || "—"}</span>
+            <span className="nafe-display nafe-live__score" style={{ color: accent || "var(--nafe-water-blue)" }}>{a || "—"}</span>
           </div>
 
           <div className="nafe-live__mid">

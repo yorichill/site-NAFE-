@@ -286,8 +286,27 @@
       });
     },
 
+    settings: {
+      getPinnedTweetId: () => {
+        try {
+          return localStorage.getItem("nafe:pinned_tweet_id") || "2098488608801935761";
+        } catch {
+          return "2098488608801935761";
+        }
+      },
+      setPinnedTweetId: (id) => {
+        try {
+          localStorage.setItem("nafe:pinned_tweet_id", id);
+          window.dispatchEvent(new CustomEvent("store:update", { detail: { key: "settings" } }));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    },
+
     wipeAll: () => {
       Object.values(KEYS).forEach((k) => localStorage.removeItem(k));
+      localStorage.removeItem("nafe:pinned_tweet_id");
       window.dispatchEvent(new CustomEvent("store:update", { detail: { key: "*" } }));
     },
 

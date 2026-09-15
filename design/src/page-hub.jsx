@@ -1,5 +1,4 @@
 // NAFE — Hub (home) page
-
 function HubPage({ accent, cardVariant, onNav }) {
   window.store.useVersion();
   const roster = window.store.getPlayersByTeam("valorant");
@@ -19,43 +18,60 @@ function HubPage({ accent, cardVariant, onNav }) {
       });
   }, []);
 
+  // Pinned tweet locking logic
+  const pinnedSettingId = window.store.settings ? window.store.settings.getPinnedTweetId() : null;
+  const pinnedTweet = (pinnedSettingId ? tweets.find(t => t.id === pinnedSettingId) : null)
+    || tweets.find(t => t.pinned)
+    || tweets[0];
+
+  const regularTweets = tweets
+    .filter(t => t.id !== pinnedTweet?.id)
+    .slice(0, 2);
+
+  // Position 0 is ALWAYS locked to the pinned tweet
+  const displayTweets = pinnedTweet ? [pinnedTweet, ...regularTweets] : tweets.slice(0, 3);
+
   return (
     <div className="nafe-page">
       {/* HERO — brutalist typographic wall */}
       <section className="nafe-hero">
         <div className="nafe-hero__meta">
-          <span className="nafe-eyebrow" style={{ color: accent }}>
-            Saison 2026 · NAFE TEAM
+          <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>
+            Saison 2026 · NAFE ESPORT
           </span>
           {live && (
             <span className="nafe-eyebrow nafe-hero__ts">
-              <span className="nafe-pulse" /> EN DIRECT
+              <span className="nafe-pulse" style={{ background: "var(--nafe-green-peas)", boxShadow: "0 0 12px var(--nafe-green-peas)" }} /> EN DIRECT
             </span>
           )}
         </div>
 
-        <h1 className="nafe-hero__title nafe-display">
-          NAFE
-          <br />
-          <span style={{ color: accent }}>TEAM<span className="nafe-hero__dot">.</span></span>
-        </h1>
+        <div className="nafe-hero__logo-wrap">
+          <h1 className="sr-only">NAFE ESPORT</h1>
+          <img 
+            src="assets/brand/nafe-logo.png" 
+            alt="NAFE ESPORT" 
+            className="nafe-hero__big-logo" 
+          />
+        </div>
 
         <div className="nafe-hero__grid">
           <p className="nafe-hero__lede">
-            L'héritage compétitif rencontre la direction créative la plus
-            affûtée du game. Nouvelle ère, même obsession&nbsp;: la victoire.
+            L'excellence au cœur du jeu. Bâtir une structure compétitive d'élite
+            portée par l'exigence, l'ambition et le dépassement de soi. 
+            Le phœnix ne meurt jamais.
           </p>
 
           {live ? (
             <div className="nafe-hero__matchCard" onClick={() => onNav("#/live")}>
               <div className="nafe-hero__matchHead">
-                <span className="nafe-mono" style={{ color: accent }}>● LIVE</span>
+                <span className="nafe-mono" style={{ color: "var(--nafe-green-peas)" }}>● LIVE</span>
                 <span className="nafe-mono">{live.event}</span>
               </div>
               <div className="nafe-hero__matchBody">
                 <div className="nafe-hero__side">
                   <span className="nafe-mono">NAFE</span>
-                  <span className="nafe-display nafe-hero__matchScore" style={{ color: accent }}>
+                  <span className="nafe-display nafe-hero__matchScore" style={{ color: accent || "var(--nafe-water-blue)" }}>
                     {(live.result || "").split(/[-–]/)[0]?.trim() || "—"}
                   </span>
                 </div>
@@ -74,7 +90,7 @@ function HubPage({ accent, cardVariant, onNav }) {
             </div>
           ) : (
             <div className="nafe-hero__matchCard nafe-empty nafe-empty--card">
-              <span className="nafe-mono" style={{ color: accent }}>AUCUN MATCH LIVE</span>
+              <span className="nafe-mono" style={{ color: accent || "var(--nafe-water-blue)" }}>AUCUN MATCH LIVE</span>
               <p className="nafe-empty__text">
                 {window.store.isAdmin()
                   ? "Programme un match depuis l'espace admin pour qu'il apparaisse ici en temps réel."
@@ -90,7 +106,7 @@ function HubPage({ accent, cardVariant, onNav }) {
         </div>
 
         <div className="nafe-hero__cta">
-          <button className="nafe-btn nafe-btn--accent nafe-clip-card" style={{ background: accent }}>
+          <button className="nafe-btn nafe-btn--accent nafe-clip-card" style={{ background: accent || "var(--nafe-water-blue)" }} onClick={() => onNav("#/community")}>
             Rejoindre le club
           </button>
           <button className="nafe-btn nafe-btn--ghost nafe-clip-card" onClick={() => onNav("#/calendar")}>
@@ -111,7 +127,7 @@ function HubPage({ accent, cardVariant, onNav }) {
             </div>
             <div>
               <p className="nafe-mono nafe-hero__statL">MATCHS PROG.</p>
-              <p className="nafe-display nafe-hero__statV" style={{ color: accent }}>
+              <p className="nafe-display nafe-hero__statV" style={{ color: accent || "var(--nafe-water-blue)" }}>
                 {String(window.store.matches.list().length).padStart(2, "0")}
               </p>
             </div>
@@ -120,13 +136,41 @@ function HubPage({ accent, cardVariant, onNav }) {
 
       </section>
 
-      {/* SECTION DERNIERS TWEETS @NAFEOFFICIEL */}
+      {/* SECTION VALEURS OFFICIELLES */}
+      <section className="nafe-values-section">
+        <div style={{ textAlign: "center", maxWidth: 640, margin: "0 auto 44px" }}>
+          <span className="nafe-eyebrow" style={{ color: "var(--nafe-denim-blue)" }}>
+            NOTRE PHILOSOPHIE
+          </span>
+          <h2 className="nafe-display" style={{ fontSize: "clamp(28px, 4vw, 44px)", margin: "8px 0 14px", color: "#FFFFFF" }}>
+            NOS VALEURS<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span>
+          </h2>
+          <p style={{ opacity: 0.7, fontSize: 16, lineHeight: 1.6, margin: 0 }}>
+            Quatre piliers fondamentaux qui forgent l'exigence et l'esprit de conquête de NAFE ESPORT.
+          </p>
+        </div>
+
+        <div className="nafe-values-grid">
+          {(window.NAFE_VALUES || []).map((val) => (
+            <div key={val.num} className="nafe-value-card nafe-clip-card">
+              <div className="nafe-value-card__top">
+                <span className="nafe-mono nafe-value-card__num">{val.num} // PILIER</span>
+                <span className="nafe-value-card__dot" />
+              </div>
+              <h3 className="nafe-display nafe-value-card__title">{val.title}</h3>
+              <p className="nafe-value-card__desc">{val.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION DERNIERS TWEETS @NAFEOFFICIEL (AVEC ÉPINGLÉ FIXÉ À GAUCHE) */}
       <section className="nafe-hub-tweets">
         <div className="nafe-hub-tweets__head">
           <div>
-            <span className="nafe-eyebrow" style={{ color: accent }}>FLUX OFFICIEL · 𝕏 TWITTER</span>
+            <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>FLUX OFFICIEL · TWITTER</span>
             <h2 className="nafe-display nafe-hub-tweets__title">
-              DERNIERS TWEETS<span style={{ color: accent }}>.</span>
+              DERNIERS TWEETS<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span>
             </h2>
           </div>
           <div className="nafe-hub-tweets__actions">
@@ -140,13 +184,14 @@ function HubPage({ accent, cardVariant, onNav }) {
               className="nafe-btn nafe-btn--accent nafe-clip-card" 
               style={{ background: "#1d9bf0", textDecoration: "none" }}
             >
-              Suivre @NafeOfficiel 𝕏
+              Suivre @NafeOfficiel
             </a>
           </div>
         </div>
 
         <div className="nafe-hub-tweets__grid">
-          {tweets.slice(0, 3).map(tweet => {
+          {displayTweets.map((tweet, idx) => {
+            const isPinned = idx === 0 && Boolean(pinnedTweet && tweet.id === pinnedTweet.id);
             const date = new Date(tweet.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }).toUpperCase();
             return (
               <a
@@ -154,8 +199,13 @@ function HubPage({ accent, cardVariant, onNav }) {
                 href={`https://x.com/NafeOfficiel/status/${tweet.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="nafe-hub-tweet-card nafe-clip-card"
+                className={`nafe-hub-tweet-card nafe-clip-card ${isPinned ? "nafe-hub-tweet-card--pinned" : ""}`}
               >
+                {isPinned && (
+                  <div className="nafe-pinned-badge">
+                    <span>TWEET ÉPINGLÉ</span>
+                  </div>
+                )}
                 <div className="nafe-hub-tweet-card__top">
                   <div className="nafe-hub-tweet-card__avatar">
                     <img src={window.NAFE_TWITTER_AVATAR || "https://pbs.twimg.com/profile_images/2089748890027196416/5diWkPDV_400x400.png"} alt="NAFE" />
@@ -164,7 +214,7 @@ function HubPage({ accent, cardVariant, onNav }) {
                     <span className="nafe-hub-tweet-card__name">NAFE</span>
                     <span className="nafe-mono nafe-hub-tweet-card__handle">@NafeOfficiel · {date}</span>
                   </div>
-                  <span className="nafe-hub-tweet-card__x">𝕏</span>
+                  <span className="nafe-hub-tweet-card__x nafe-mono">X</span>
                 </div>
 
                 <p className="nafe-hub-tweet-card__text">{tweet.text}</p>
@@ -177,10 +227,10 @@ function HubPage({ accent, cardVariant, onNav }) {
 
                 <div className="nafe-hub-tweet-card__foot nafe-mono">
                   <div className="nafe-hub-tweet-card__stats">
-                    <span>♥ {tweet.public_metrics?.like_count || 0}</span>
-                    <span>↺ {tweet.public_metrics?.retweet_count || 0}</span>
+                    <span>{tweet.public_metrics?.like_count || 0} LIKES</span>
+                    <span>{tweet.public_metrics?.retweet_count || 0} RETWEETS</span>
                   </div>
-                  <span className="nafe-hub-tweet-card__link">VOIR SUR 𝕏 →</span>
+                  <span className="nafe-hub-tweet-card__link">VOIR SUR TWITTER →</span>
                 </div>
               </a>
             );

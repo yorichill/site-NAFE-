@@ -79,24 +79,39 @@ function CommunityPage({ accent }) {
       content:    content.trim(),
       authorId:   user.id,
       authorName: user.username,
-      likes: 0,
+      likedBy:    [],
     });
     setTitle("");
     setContent("");
     setBusy(false);
   }
 
-  function like(post) {
-    window.store.posts.update(post.id, { likes: (post.likes || 0) + 1 });
+  function toggleLike(post) {
+    if (!user) {
+      window.openAuth?.("login");
+      return;
+    }
+    const likedBy = post.likedBy || [];
+    const idx = likedBy.indexOf(user.id);
+    let nextLikedBy;
+    if (idx > -1) {
+      nextLikedBy = likedBy.filter(id => id !== user.id);
+    } else {
+      nextLikedBy = [...likedBy, user.id];
+    }
+    window.store.posts.update(post.id, { 
+      likedBy: nextLikedBy,
+      likes: nextLikedBy.length
+    });
   }
 
   return (
     <div className="nafe-page">
       {/* Hero */}
       <section className="nafe-team__hero">
-        <span className="nafe-eyebrow" style={{ color: accent }}>NAFE · Fan Zone</span>
+        <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>NAFE ESPORT · Fan Zone</span>
         <h1 className="nafe-display nafe-team__title">
-          COMMUNITY<span style={{ color: accent }}>.</span>
+          COMMUNITY<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span>
         </h1>
         <p className="nafe-team__lede">
           Espace d'échange officiel de la communauté NAFE. Partage tes analyses,
@@ -161,17 +176,15 @@ function CommunityPage({ accent }) {
         )}
       </section>
 
-      {/* Feed de posts */}
-      <section className="nafe-section">
-        <header className="nafe-section__head">
-          <div>
-            <span className="nafe-eyebrow">Discussions</span>
-            <h2 className="nafe-display nafe-section__title">Posts récents</h2>
-          </div>
-          <span className="nafe-mono nafe-section__count">
-            {String(posts.length).padStart(2, "0")} POST{posts.length !== 1 ? "S" : ""}
-          </span>
-        </header>
+      <div className="nafe-community-layout">
+        {/* Colonne gauche : Posts communautaires */}
+        <div className="nafe-community-main">
+          <header className="nafe-section__head">
+            <div>
+              <span className="nafe-eyebrow">Discussions</span>
+              <h2 className="nafe-display nafe-section__title">Fan Posts</h2>
+            </div>
+          </header>
 
         {posts.length === 0 ? (
           <div className="nafe-empty nafe-empty--panel">
@@ -186,6 +199,7 @@ function CommunityPage({ accent }) {
                 .filter((c) => c.postId === post.id)
                 .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
               const isOpen = openPosts.has(post.id);
+              const isLiked = user && post.likedBy && post.likedBy.includes(user.id);
 
               return (
                 <article key={post.id} className="nafe-post nafe-clip-card">
@@ -205,8 +219,8 @@ function CommunityPage({ accent }) {
                           if (confirm("Supprimer ce post et tous ses commentaires ?")) {
                             // supprimer les commentaires liés
                             window.store.comments.list()
-                              .filter((c) => c.postId === post.id)
-                              .forEach((c) => window.store.comments.remove(c.id));
+                               .filter((c) => c.postId === post.id)
+                               .forEach((c) => window.store.comments.remove(c.id));
                             window.store.posts.remove(post.id);
                           }
                         }}
@@ -221,10 +235,10 @@ function CommunityPage({ accent }) {
                   <div className="nafe-post__foot">
                     <button
                       className="nafe-post__like"
-                      onClick={() => like(post)}
-                      style={{ color: accent }}
+                      onClick={() => toggleLike(post)}
+                      style={{ color: isLiked ? accent : "rgba(255,255,255,0.4)" }}
                     >
-                      <span>♥</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" style={{ display: "inline-block", verticalAlign: "middle" }}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                       <span className="nafe-mono">{post.likes || 0}</span>
                     </button>
                     <button
@@ -232,7 +246,7 @@ function CommunityPage({ accent }) {
                       onClick={() => toggleComments(post.id)}
                       style={{ color: isOpen ? accent : "rgba(255,255,255,0.4)" }}
                     >
-                      <span>💬</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: "inline-block", verticalAlign: "middle" }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                       <span className="nafe-mono">
                         {postComments.length} réponse{postComments.length !== 1 ? "s" : ""}
                       </span>
@@ -289,7 +303,29 @@ function CommunityPage({ accent }) {
             })}
           </div>
         )}
-      </section>
+        </div>
+
+        {/* Colonne droite : Live Feed */}
+        <aside className="nafe-community-sidebar">
+          <header className="nafe-section__head">
+            <div>
+              <span className="nafe-eyebrow">Direct</span>
+              <h2 className="nafe-display nafe-section__title" style={{ fontSize: 32 }}>Live Feed</h2>
+            </div>
+          </header>
+          <window.SocialFeed accent={accent} />
+        </aside>
+      </div>
+
+      <style>{`
+        .nafe-community-layout { display: grid; grid-template-columns: 1fr 400px; gap: 60px; margin-top: 60px; }
+        .nafe-community-main { display: flex; flex-direction: column; gap: 40px; }
+        .nafe-community-sidebar { position: sticky; top: 100px; height: fit-content; }
+        @media (max-width: 1200px) {
+          .nafe-community-layout { grid-template-columns: 1fr; }
+          .nafe-community-sidebar { position: static; }
+        }
+      `}</style>
     </div>
   );
 }

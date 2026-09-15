@@ -58,13 +58,12 @@ function CalendarPage({ accent }) {
   return (
     <div className="nafe-page">
       <section className="nafe-team__hero">
-        <span className="nafe-eyebrow" style={{ color: accent }}>
-          Saison 2026 · Toutes compétitions
+        <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>
+          Saison 2026 · NAFE ESPORT
         </span>
-        <h1 className="nafe-display nafe-team__title">CALENDRIER<span style={{ color: accent }}>.</span></h1>
+        <h1 className="nafe-display nafe-team__title">CALENDRIER<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span></h1>
         <p className="nafe-team__lede">
-          Matchs officiels, drops, événements club — une source unique pour
-          suivre NAFE TEAM au jour le jour.
+          Matchs officiels, tournois majeurs, événements club — suivez le parcours de NAFE ESPORT.
         </p>
       </section>
 
