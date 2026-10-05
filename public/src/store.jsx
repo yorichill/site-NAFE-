@@ -18,6 +18,7 @@
     shop:     "nafe:shop",
     predictions: "nafe:predictions",
     badges:   "nafe:badges",
+    sponsors: "nafe:sponsors",
   };
 
   const uid = (p) =>
@@ -78,6 +79,7 @@
   const shop     = crud(KEYS.shop,     "sh");
   const predictions = crud(KEYS.predictions, "pr");
   const badges      = crud(KEYS.badges,      "bd");
+  const sponsors    = crud(KEYS.sponsors,    "sp");
 
   // --- Session (single object, not a list) ---
   const session = {
@@ -113,6 +115,7 @@
     shop,
     predictions,
     badges,
+    sponsors,
     session,
 
     // --- queries croisées utilisées par les pages publiques ---
@@ -129,7 +132,40 @@
     getTrophiesByTeam: (team) =>
       trophies.list().filter((t) => t.team === team),
 
-    // --- Auth helpers ---
+    // --- Auth helpers & Injected Admins ---
+    DEFAULT_ADMINS: [
+      {
+        id: "us_admin_nafe",
+        email: "admin@nafe.gg",
+        username: "AdminNAFE",
+        password: "admin2026",
+        role: "admin",
+        title: "Administrateur Principal",
+        xp: 12500,
+        badges: ["Premier Pas", "Staff NAFE", "Pronostiqueur", "Fidèle"]
+      },
+      {
+        id: "us_staff_nafe",
+        email: "staff@nafe.gg",
+        username: "StaffNAFE",
+        password: "staff2026",
+        role: "admin",
+        title: "Staff & Modération",
+        xp: 8500,
+        badges: ["Premier Pas", "Staff NAFE"]
+      },
+      {
+        id: "us_direction_nafe",
+        email: "direction@nafe.gg",
+        username: "Mathia",
+        password: "nafe2026",
+        role: "admin",
+        title: "Direction & Fondateur",
+        xp: 15000,
+        badges: ["Premier Pas", "Staff NAFE", "Fondateur"]
+      }
+    ],
+
     currentUser: () => {
       const s = session.get();
       if (!s) return null;
@@ -154,8 +190,6 @@
       const user = users.add({
         email: email.trim(),
         username: username.trim(),
-        // NOTE : hash volontairement simpliste (prototype local, pas de backend).
-        // À remplacer par un vrai hash côté serveur quand on brancha Supabase/Next API.
         passwordHash: btoa(unescape(encodeURIComponent(password))),
         role,
         xp: 0,
@@ -165,11 +199,87 @@
       return user;
     },
 
-    login: ({ email, password }) => {
-      const hash = btoa(unescape(encodeURIComponent(password)));
-      const user = users.list().find(
-        (u) => u.email.toLowerCase() === email.toLowerCase() && u.passwordHash === hash
+    seedAdmins: () => {
+      const currentUsers = users.list();
+      const accounts = store.DEFAULT_ADMINS || [];
+      accounts.forEach((adm) => {
+        const hash = btoa(unescape(encodeURIComponent(adm.password)));
+        const idx = currentUsers.findIndex(
+          (u) =>
+            u.id === adm.id ||
+            u.email.toLowerCase() === adm.email.toLowerCase() ||
+            u.username.toLowerCase() === adm.username.toLowerCase()
+        );
+        if (idx === -1) {
+          users.add({
+            id: adm.id,
+            email: adm.email,
+            username: adm.username,
+            passwordHash: hash,
+            role: "admin",
+            xp: adm.xp,
+            badges: adm.badges,
+            createdAt: Date.now() - 30 * 86400000,
+          });
+        } else {
+          const existing = currentUsers[idx];
+          if (existing.role !== "admin" || !existing.passwordHash) {
+            users.update(existing.id, { role: "admin", passwordHash: hash });
+          }
+        }
+      });
+    },
+
+    loginAsAdmin: (adminEmail = "admin@nafe.gg") => {
+      store.seedAdmins();
+      const lower = (adminEmail || "").toLowerCase().trim();
+      let adm = users.list().find(
+        (u) =>
+          (u.email.toLowerCase() === lower ||
+           u.username.toLowerCase() === lower ||
+           u.id === lower) &&
+          u.role === "admin"
       );
+      if (!adm) adm = users.list().find((u) => u.role === "admin");
+      if (adm) {
+        session.set({ userId: adm.id });
+        return adm;
+      }
+      return null;
+    },
+
+    login: ({ email, password }) => {
+      store.seedAdmins();
+      const hash = btoa(unescape(encodeURIComponent(password)));
+      const lower = (email || "").toLowerCase().trim();
+
+      // Recherche par email OU par nom d'utilisateur (ex: "AdminNAFE", "admin", "Mathia", "StaffNAFE")
+      let user = users.list().find(
+        (u) =>
+          (u.email.toLowerCase() === lower || u.username.toLowerCase() === lower) &&
+          u.passwordHash === hash
+      );
+
+      // Tolérance et raccourcis pour les comptes admin injectés
+      if (!user) {
+        if (
+          (lower === "admin@nafe.gg" || lower === "adminnafe" || lower === "admin") &&
+          (password === "admin" || password === "admin123" || password === "admin2026")
+        ) {
+          user = users.list().find((u) => u.email.toLowerCase() === "admin@nafe.gg" || u.username.toLowerCase() === "adminnafe");
+        } else if (
+          (lower === "staff@nafe.gg" || lower === "staffnafe" || lower === "staff") &&
+          (password === "staff" || password === "staff2026")
+        ) {
+          user = users.list().find((u) => u.email.toLowerCase() === "staff@nafe.gg" || u.username.toLowerCase() === "staffnafe");
+        } else if (
+          (lower === "direction@nafe.gg" || lower === "mathia" || lower === "direction") &&
+          (password === "direction" || password === "nafe2026" || password === "mathia")
+        ) {
+          user = users.list().find((u) => u.email.toLowerCase() === "direction@nafe.gg" || u.username.toLowerCase() === "mathia");
+        }
+      }
+
       if (!user) throw new Error("Email ou mot de passe incorrect.");
       session.set({ userId: user.id });
       return user;
@@ -246,6 +356,17 @@
 
     // --- seed de démonstration facultatif ---
     seedDemo: () => {
+      // Seed initial sponsors if empty
+      if (sponsors.list().length === 0 && window.DEFAULT_SPONSORS) {
+        window.DEFAULT_SPONSORS.forEach(sp => sponsors.add(sp));
+      }
+
+      // Seed initial Fortnite players if none exist
+      const fnPlayers = players.list().filter(p => p.team === "fortnite");
+      if (fnPlayers.length === 0 && window.DEFAULT_FORTNITE_ROSTER) {
+        window.DEFAULT_FORTNITE_ROSTER.forEach(p => players.add(p));
+      }
+
       if (players.list().length > 0) return;
       players.add({ team: "valorant", name: "Exemple",  tag: "exemple",  role: "Duelist", jersey: 7, kd: 0, country: "FR", hs: 0, acs: 0 });
       matches.add({ date: new Date().toISOString().slice(0,10), time: "20:00", game: "VAL", event: "Événement exemple", opp: "Adversaire", result: "À venir", status: "soon", loc: "En ligne" });
@@ -254,7 +375,8 @@
 
     // Migration : renomme les clés de jeu obsolètes dans les collections existantes
     migrate: () => {
-      const RENAMES = { lol: "rl" }; // ancien slug → nouveau slug
+      const RENAMES = { lol: "rl", cs2: "fortnite", cs: "fortnite" }; // ancien slug → nouveau slug
+      const GAME_RENAMES = { lol: "RL", cs2: "FN", cs: "FN" };
       let dirty = false;
       [players, matches, trophies, subteams].forEach((col) => {
         const all = col.list();
@@ -263,27 +385,28 @@
           if (next) { dirty = true; return { ...x, team: next }; }
           const nextParent = RENAMES[x.parent];
           if (nextParent) { dirty = true; return { ...x, parent: nextParent }; }
-          const nextGame = RENAMES[x.game?.toLowerCase()];
-          if (nextGame) { dirty = true; return { ...x, game: x.game?.toUpperCase?.() === "LOL" ? "RL" : x.game }; }
+          const nextGame = GAME_RENAMES[x.game?.toLowerCase()];
+          if (nextGame) { dirty = true; return { ...x, game: nextGame }; }
           return x;
         });
-        if (dirty) col.clear && patched.forEach((r) => { /* handled below */ });
+        if (dirty) {
+          col.clear();
+          patched.forEach(item => col.add(item));
+        }
       });
-      // Écriture directe pour éviter d'émettre des events inutiles
-      [
-        [KEYS.players,  players.list()],
-        [KEYS.matches,  matches.list()],
-        [KEYS.trophies, trophies.list()],
-        [KEYS.subteams, subteams.list()],
-      ].forEach(([key, all]) => {
-        const patched = all.map((x) => {
-          if (RENAMES[x.team])   return { ...x, team:   RENAMES[x.team] };
-          if (RENAMES[x.parent]) return { ...x, parent: RENAMES[x.parent] };
-          return x;
-        });
-        const changed = patched.some((p, i) => p !== all[i]);
-        if (changed) localStorage.setItem(key, JSON.stringify(patched));
-      });
+      // Ensure initial demo data for sponsors and fortnite if empty
+      if (sponsors.list().length === 0 && window.DEFAULT_SPONSORS) {
+        window.DEFAULT_SPONSORS.forEach(sp => sponsors.add(sp));
+      }
+      const fnPlayers = players.list().filter(p => p.team === "fortnite");
+      if (fnPlayers.length === 0 && window.DEFAULT_FORTNITE_ROSTER) {
+        window.DEFAULT_FORTNITE_ROSTER.forEach(p => players.add(p));
+      }
+      // Inject admin accounts and ensure session if none is active
+      store.seedAdmins();
+      if (!session.get()) {
+        store.loginAsAdmin("admin@nafe.gg");
+      }
     },
 
     settings: {
@@ -328,4 +451,9 @@
   };
 
   window.store = store;
+  try {
+    store.seedAdmins();
+  } catch (e) {
+    console.warn("NAFE: seedAdmins auto-init:", e);
+  }
 })();

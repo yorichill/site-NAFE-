@@ -34,6 +34,8 @@
   <script type="text/babel" src="src/page-locker.jsx"></script>
   <script type="text/babel" src="src/social-feed.jsx"></script>
   <script type="text/babel" src="src/auth-modal.jsx"></script>
+  <script type="text/babel" src="src/page-sponsors.jsx"></script>
+  <script type="text/babel" src="src/page-association.jsx"></script>
   <script type="text/babel" src="src/custom-cursor.jsx"></script>
 
   <script type="text/babel" data-presets="env,react">
@@ -96,6 +98,7 @@
 
     // Migration données : renomme les anciens slugs (lol→rl) dans le localStorage
     window.store.migrate();
+    try { window.store.seedAdmins(); } catch (e) {}
 
     function parseRoute() {
       const h = location.hash.replace(/^#/, "") || "/";
@@ -151,6 +154,8 @@
       else if (route === "/live") Page = <window.LivePage accent={accent} />;
       else if (route === "/news") Page = <window.NewsPage accent={accent} />;
       else if (route === "/calendar") Page = <window.CalendarPage accent={accent} />;
+      else if (route === "/sponsors") Page = <window.SponsorsPage accent={accent} />;
+      else if (route === "/association") Page = <window.AssociationPage accent={accent} />;
       else if (route.startsWith("/admin")) Page = <window.AdminPage accent={accent} />;
       else if (route === "/locker") Page = <window.LockerPage accent={accent} />;
       else if (route === "/shop") Page = <ShopSoon accent={accent} />;

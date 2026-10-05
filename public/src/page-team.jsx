@@ -6,9 +6,11 @@ function TeamPage({ accent, cardVariant, initialGame = "valorant" }) {
   window.store.useVersion();
   const [game, setGame] = useTeamState(initialGame);
   const [subteam, setSubteam] = useTeamState("all"); // "all" | subteam.id | "" (sans sous-équipe)
+  const [formatFilter, setFormatFilter] = useTeamState("all"); // "all" | "Solo" | "Duo" | "Trio"
 
   useTeamEffect(() => {
     setSubteam("all");
+    setFormatFilter("all");
   }, [game]);
 
   const meta = window.TEAMS_META[game];
@@ -23,15 +25,20 @@ function TeamPage({ accent, cardVariant, initialGame = "valorant" }) {
 
   // "all" = roster principal (joueurs sans sous-équipe)
   // st.id = uniquement les joueurs de cette sous-équipe
-  const roster =
+  const baseRoster =
     subteam === "all"
       ? window.store.getPlayersByTeam(game, "")
       : window.store.getPlayersByTeam(game, subteam);
 
+  // Filtrage par format spécifique à Fortnite (Solo, Duo, Trio)
+  const roster = (game === "fortnite" && formatFilter !== "all")
+    ? baseRoster.filter(p => (p.format || "Solo").toLowerCase() === formatFilter.toLowerCase())
+    : baseRoster;
+
   const trophies = window.store.getTrophiesByTeam(game);
 
-  const GAME_KEY = { valorant: "VAL", rl: "RL", cs2: "CS2" };
-  const gameKey = GAME_KEY[game];
+  const GAME_KEY = { valorant: "VAL", rl: "RL", fortnite: "FN" };
+  const gameKey = GAME_KEY[game] || game.toUpperCase();
   const recordWins   = window.store.matches.list().filter(m => m.status === "won"  && m.game === gameKey).length;
   const recordLosses = window.store.matches.list().filter(m => m.status === "lost" && m.game === gameKey).length;
   const record = `${recordWins}–${recordLosses}`;
@@ -106,6 +113,37 @@ function TeamPage({ accent, cardVariant, initialGame = "valorant" }) {
             </div>
           </div>
         )}
+
+        {/* Fortnite Format Filter Chips (Solo, Duo, Trio) */}
+        {game === "fortnite" && (
+          <div className="nafe-subteams nafe-fortnite-formats" style={{ marginTop: 24 }}>
+            <span className="nafe-mono nafe-subteams__label" style={{ color: "#C084FC" }}>
+              FORMAT COMPÉTITION FORTNITE
+            </span>
+            <div className="nafe-subteams__list">
+              {["all", "Solo", "Duo", "Trio"].map((fmt) => {
+                const isAct = formatFilter === fmt;
+                const count = fmt === "all"
+                  ? baseRoster.length
+                  : baseRoster.filter(p => (p.format || "Solo").toLowerCase() === fmt.toLowerCase()).length;
+                return (
+                  <button
+                    key={fmt}
+                    className={`nafe-subteam ${isAct ? "is-active" : ""}`}
+                    style={isAct
+                      ? { borderColor: "#A855F7", background: "rgba(168, 85, 247, 0.22)", color: "#fff" }
+                      : { color: "#C084FC", borderColor: "rgba(168, 85, 247, 0.35)" }}
+                    onClick={() => setFormatFilter(fmt)}
+                  >
+                    <span className="nafe-subteam__dot" style={{ background: "#A855F7" }} />
+                    <span className="nafe-mono">{fmt === "all" ? "TOUS FORMATS" : fmt.toUpperCase()}</span>
+                    <span className="nafe-subteam__count nafe-mono">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Roster */}
@@ -114,9 +152,11 @@ function TeamPage({ accent, cardVariant, initialGame = "valorant" }) {
           <div>
             <span className="nafe-eyebrow">Effectif</span>
             <h2 className="nafe-display nafe-section__title">
-              {subteam === "all"
-                ? "Roster global"
-                : subteams.find((s) => s.id === subteam)?.name || "Roster"}
+              {game === "fortnite" && formatFilter !== "all"
+                ? `Roster ${formatFilter}`
+                : subteam === "all"
+                  ? "Roster global"
+                  : subteams.find((s) => s.id === subteam)?.name || "Roster"}
             </h2>
           </div>
           <span className="nafe-mono nafe-section__count">
@@ -128,7 +168,7 @@ function TeamPage({ accent, cardVariant, initialGame = "valorant" }) {
             <span className="nafe-mono" style={{ color: activeColor }}>AUCUN JOUEUR</span>
             <p className="nafe-empty__text">
               {window.store.isAdmin()
-                ? "Aucun joueur dans cette sélection. Ajoute un joueur (et rattache-le éventuellement à une sous-équipe) depuis l'espace admin."
+                ? "Aucun joueur dans cette sélection. Ajoute un joueur (et sélectionne le format Solo/Duo/Trio) depuis l'espace admin."
                 : "Le roster sera bientôt dévoilé. Reviens vite !"}
             </p>
             {window.store.isAdmin() && (

@@ -12,6 +12,10 @@ function AuthModal({ accent, mode, onClose, onSuccess }) {
   const [error, setError] = useAuthState("");
   const [busy, setBusy] = useAuthState(false);
 
+  React.useEffect(() => {
+    try { window.store.seedAdmins(); } catch (e) {}
+  }, []);
+
   const usersExist = window.store.users.list().length > 0;
 
   function submit(e) {
@@ -92,10 +96,56 @@ function AuthModal({ accent, mode, onClose, onSuccess }) {
         </p>
 
         <form className="nafe-modal__form" onSubmit={submit}>
+          {tab === "login" && (
+            <div className="nafe-auth-admin-box">
+              <div className="nafe-auth-admin-box__head">
+                <span className="nafe-mono" style={{ color: accent, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em" }}>
+                  ⚡ ACCÈS RAPIDE ADMINS INJECTÉS
+                </span>
+                <span className="nafe-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
+                  (Clique pour te connecter)
+                </span>
+              </div>
+              <div className="nafe-auth-admin-box__list">
+                {(window.store.DEFAULT_ADMINS || []).map((adm) => (
+                  <div key={adm.id} className="nafe-auth-admin-box__item">
+                    <button
+                      type="button"
+                      className="nafe-auth-admin-box__fill"
+                      onClick={() => {
+                        setEmail(adm.email);
+                        setPassword(adm.password);
+                        setError("");
+                      }}
+                      title="Pré-remplir ce compte dans le formulaire"
+                    >
+                      <span className="nafe-auth-admin-box__name">{adm.username}</span>
+                      <span className="nafe-mono nafe-auth-admin-box__meta">{adm.email} · {adm.password}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="nafe-auth-admin-box__instant"
+                      style={{ borderColor: accent, color: accent }}
+                      onClick={() => {
+                        const u = window.store.loginAsAdmin(adm.email);
+                        onSuccess && onSuccess(u);
+                        onClose && onClose();
+                      }}
+                      title={`Connexion instantanée en tant que ${adm.username}`}
+                    >
+                      ⚡ 1-Clic
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <label className="nafe-field">
-            <span className="nafe-mono nafe-field__label">Email</span>
-            <input type="email" required autoComplete="email"
-              value={email} onChange={(e) => setEmail(e.target.value)} />
+            <span className="nafe-mono nafe-field__label">Email ou Identifiant</span>
+            <input type="text" required autoComplete="email"
+              value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="ex: admin@nafe.gg ou AdminNAFE" />
           </label>
 
           {tab === "register" && (
@@ -110,7 +160,8 @@ function AuthModal({ accent, mode, onClose, onSuccess }) {
             <span className="nafe-mono nafe-field__label">Mot de passe</span>
             <input type="password" required minLength={4}
               autoComplete={tab === "register" ? "new-password" : "current-password"}
-              value={password} onChange={(e) => setPassword(e.target.value)} />
+              value={password} onChange={(e) => setPassword(e.target.value)}
+              placeholder="ex: admin2026" />
           </label>
 
           {error && <p className="nafe-modal__error">{error}</p>}

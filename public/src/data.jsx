@@ -3,9 +3,9 @@
 // vit dans window.store (cf. store.jsx). Vide par défaut — rempli via /admin.
 
 const TEAMS_META = {
-  valorant: { slug: "valorant", game: "VALORANT",          title: "NAFE Valorant", region: "EMEA", color: "#FF4655" },
-  rl:       { slug: "rl",       game: "ROCKET LEAGUE",      title: "NAFE Rocket League", region: "RLCS", color: "#1B9EF0" },
-  cs2:      { slug: "cs2",      game: "COUNTER-STRIKE 2",  title: "NAFE CS2",      region: "EU",   color: "#F5A623" },
+  valorant: { slug: "valorant", game: "VALORANT",       title: "NAFE Valorant",       region: "EMEA", color: "#FF4655" },
+  rl:       { slug: "rl",       game: "ROCKET LEAGUE",   title: "NAFE Rocket League",  region: "RLCS", color: "#1B9EF0" },
+  fortnite: { slug: "fortnite", game: "FORTNITE",        title: "NAFE Fortnite",       region: "EU · FNCS", color: "#8B5CF6", formats: ["Solo", "Duo", "Trio"] },
 };
 
 // Helpers HSL pour dériver des teintes à partir de la couleur signature du jeu
@@ -90,14 +90,16 @@ const REWARDS = [
 ];
 
 const NAV = [
-  { key: "home",      label: "Hub",        icon: "◉", href: "#/" },
-  { key: "teams",     label: "Teams",      icon: "▣", href: "#/teams/valorant" },
-  { key: "live",      label: "Live",       icon: "▶", href: "#/live" },
-  { key: "calendar",  label: "Calendrier", icon: "▦", href: "#/calendar" },
-  { key: "news",      label: "Actu",       icon: "▤", href: "#/news" },
-  { key: "community", label: "Community",  icon: "✦", href: "#/community" },
-  { key: "contact",   label: "Contact",    icon: "⊙", href: "#/contact" },
-  { key: "admin",     label: "Admin",      icon: "⚙", href: "#/admin" },
+  { key: "home",        label: "Hub",           icon: "◉", href: "#/" },
+  { key: "teams",       label: "Teams",         icon: "▣", href: "#/teams/valorant" },
+  { key: "sponsors",    label: "Sponsors",      icon: "★", href: "#/sponsors" },
+  { key: "association", label: "L'Association", icon: "⚑", href: "#/association" },
+  { key: "live",        label: "Live",          icon: "▶", href: "#/live" },
+  { key: "calendar",    label: "Calendrier",    icon: "▦", href: "#/calendar" },
+  { key: "news",        label: "Actu",          icon: "▤", href: "#/news" },
+  { key: "community",   label: "Community",     icon: "✦", href: "#/community" },
+  { key: "contact",     label: "Contact",       icon: "⊙", href: "#/contact" },
+  { key: "admin",       label: "Admin",         icon: "⚙", href: "#/admin" },
 ];
 
 const NAFE_TWITTER_AVATAR = "https://pbs.twimg.com/profile_images/2089748890027196416/5diWkPDV_400x400.png";
@@ -353,6 +355,191 @@ const BRAND_COLORS = {
   white:     { name: "White",      hex: "#FFFFFF", rgb: "255, 255, 255" }
 };
 
+// DEFAULT SPONSORS — Partenaires officiels NAFE
+const DEFAULT_SPONSORS = [
+  {
+    id: "sp_1",
+    name: "AERO PERFORMANCE",
+    tier: "Partenaire Titre",
+    category: "Nutrition & Énergie",
+    logo: "assets/brand/nafe-symbol.png",
+    banner: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1400&q=80",
+    description: "Aero Performance accompagne tous les athlètes de NAFE ESPORT au quotidien avec des solutions de nutrition et d'hydratation spécialement conçues pour l'endurance cognitive, la précision des réflexes et la récupération après les sessions compétitives intenses.",
+    websiteUrl: "https://nafe.gg",
+    promoCode: "NAFE20",
+    order: 1,
+    active: true
+  },
+  {
+    id: "sp_2",
+    name: "CYBERPULSE GEAR",
+    tier: "Équipementier Officiel",
+    category: "Périphériques Gaming",
+    logo: "assets/brand/nafe-symbol.png",
+    banner: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1400&q=80",
+    description: "Fournisseur exclusif des claviers mécaniques ultra-réactifs et des casques audio spatialisés de nos rosters Valorant, Rocket League et Fortnite. Chaque produit est testé et validé par nos compétiteurs pour garantir des performances optimales en tournoi.",
+    websiteUrl: "https://nafe.gg",
+    promoCode: "PULSENAFE",
+    order: 2,
+    active: true
+  },
+  {
+    id: "sp_3",
+    name: "NEXUS CLOUD SERVERS",
+    tier: "Partenaire Infrastructure",
+    category: "Hébergement & Réseau",
+    logo: "assets/brand/nafe-symbol.png",
+    banner: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1400&q=80",
+    description: "Nexus Cloud assure la stabilité et la très faible latence de tous nos serveurs de scrimmage (scrims), bootcamps virtuels et bots d'automatisation communautaires. Une infrastructure fiable sans compromis pour nos joueurs d'élite.",
+    websiteUrl: "https://nafe.gg",
+    promoCode: "NEXUS15",
+    order: 3,
+    active: true
+  },
+  {
+    id: "sp_4",
+    name: "PHOENIX APPAREL",
+    tier: "Partenaire Textile",
+    category: "Vêtements & Merch",
+    logo: "assets/brand/nafe-symbol.png",
+    banner: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1400&q=80",
+    description: "Confectionneur des maillots officiels 2026 de NAFE ESPORT et de la gamme streetwear club. Matières respirantes haute performance conçues pour la scène LAN et le confort quotidien de la communauté.",
+    websiteUrl: "https://nafe.gg",
+    promoCode: "PHOENIX10",
+    order: 4,
+    active: true
+  }
+];
+
+// DEFAULT FORTNITE ROSTER (tiré des annonces et perfs officielles de NAFE)
+const DEFAULT_FORTNITE_ROSTER = [
+  {
+    id: "pl_fn_twigz",
+    team: "fortnite",
+    subteam: "",
+    name: "Twigz",
+    tag: "Twigzfn",
+    role: "Fragger",
+    format: "Duo",
+    partner: "Rezpaaan",
+    pr: 12450,
+    bestRank: "Top 11 Solo · Top 4000 EU",
+    jersey: 12,
+    country: "FR",
+    kd: 3.42,
+    hs: 48,
+    gear: { mouse: "Logitech G Pro X Superlight", keyboard: "Wooting 60HE", headset: "HyperX Cloud II" }
+  },
+  {
+    id: "pl_fn_rezpaaan",
+    team: "fortnite",
+    subteam: "",
+    name: "Rezpaaan",
+    tag: "Rezpaaan",
+    role: "Tarper / IGL",
+    format: "Duo",
+    partner: "Twigz",
+    pr: 11800,
+    bestRank: "Top 42 EU - FNCS Div 1 Practice",
+    jersey: 14,
+    country: "FR",
+    kd: 3.15,
+    hs: 44,
+    gear: { mouse: "Razer Viper V2 Pro", keyboard: "Apex Pro Mini", headset: "Sennheiser HD 560S" }
+  },
+  {
+    id: "pl_fn_vexski",
+    team: "fortnite",
+    subteam: "",
+    name: "Vexski",
+    tag: "vexskifn",
+    role: "Soloist",
+    format: "Solo",
+    partner: "Solo",
+    pr: 9940,
+    bestRank: "Top 130 EU - FNCS Div 1",
+    jersey: 21,
+    country: "FR",
+    kd: 2.92,
+    hs: 42,
+    gear: { mouse: "Finalmouse Starlight", keyboard: "Wooting 60HE", headset: "Logitech G Pro X" }
+  },
+  {
+    id: "pl_fn_ksawii",
+    team: "fortnite",
+    subteam: "",
+    name: "Ksawii",
+    tag: "KsawiiFN",
+    role: "Anchor / Support",
+    format: "Trio",
+    partner: "Lineup Trio",
+    pr: 8750,
+    bestRank: "Top 326 EU - FNCS Div 2",
+    jersey: 77,
+    country: "FR",
+    kd: 2.68,
+    hs: 39,
+    gear: { mouse: "Glorious Model O", keyboard: "Ducky One 3 Mini", headset: "SteelSeries Arctis Nova 7" }
+  }
+];
+
+// ASSOCIATION NAFE — Présentation, Termes, Missions et Soutien
+const NAFE_ASSOCIATION_DATA = {
+  name: "NAFE ESPORT",
+  legalType: "Association Loi 1901 à but non lucratif",
+  creationYear: "2024",
+  rnaNumber: "W922018472",
+  motto: "L'excellence au cœur du jeu · Le phœnix ne meurt jamais",
+  intro: "NAFE ESPORT est une association française régie par la loi du 1er juillet 1901. Fondée par des passionnés de compétition vidéoludique, notre mission est de structurer, former et accompagner les talents de l'esport amateur et semi-professionnel dans un cadre éthique, performant et bienveillant.",
+  pillars: [
+    {
+      title: "Encadrement & Pédagogie",
+      desc: "Suivi personnalisé de chaque joueur : analyse tactique, préparation mentale, ergonomie et équilibre de vie face aux écrans."
+    },
+    {
+      title: "Accès à la Compétition",
+      desc: "Financement des inscriptions aux tournois majeurs, frais de déplacement et logistique lors des finales et LANs physiques partout en France et en Europe."
+    },
+    {
+      title: "Matériel & Infrastructure",
+      desc: "Mise à disposition de maillots officiels, serveurs d'entraînement dédiés et accompagnement matériel pour les joueurs méritants."
+    },
+    {
+      title: "Transparence & Gestion Associative",
+      desc: "100% des fonds perçus (cotisations, dons, gains de tournois réinvestis) sont alloués au projet sportif et au bien-être de nos membres."
+    }
+  ],
+  terms: [
+    {
+      num: "Article 1",
+      title: "Engagement & Esprit Sportif",
+      text: "Tout membre représentant NAFE s'engage à respecter les principes du fair-play, de courtoisie et de respect mutuel en jeu et sur les réseaux sociaux. Aucune forme de toxicité, harcèlement ou discrimination n'est tolérée."
+    },
+    {
+      num: "Article 2",
+      title: "Transparence Financière",
+      text: "L'association garantit la stricte affectation de chaque euro perçu au développement de la structure, des joueurs et des événements du club. Les comptes sont approuvés annuellement en assemblée générale."
+    },
+    {
+      num: "Article 3",
+      title: "Statut des Joueurs & Staff",
+      text: "Les membres associatifs contribuent bénévolement à la vie du club. Les gains obtenus en compétition sont redistribués selon la charte d'équipe approuvée avant chaque saison sportive."
+    },
+    {
+      num: "Article 4",
+      title: "Adhésion & Révocation",
+      text: "L'adhésion est ouverte à toute personne partageant les valeurs du club. Le bureau directeur se réserve le droit d'exclure tout membre manquant gravement au règlement intérieur de l'association."
+    }
+  ],
+  fundingImpact: [
+    { label: "Déplacements LAN", desc: "Transport & hébergement pour les compétitions physiques", pct: 45 },
+    { label: "Équipement & Maillots", desc: "Jerseys officiels personnalisés & matériel gaming", pct: 30 },
+    { label: "Infrastructures & Serveurs", desc: "Serveurs d'entraînement, scrims & outils de tracking", pct: 15 },
+    { label: "Vie du Club & Événements", desc: "Animation de la communauté, tournois ouverts & streams", pct: 10 }
+  ],
+  donationUrl: "https://www.helloasso.com" // Lien HelloAsso ou plateforme officielle
+};
+
 Object.assign(window, { 
   TEAMS_META, 
   getTeam, 
@@ -367,5 +554,8 @@ Object.assign(window, {
   NAFE_VALUES,
   NAFE_VISION,
   NAFE_MISSION,
-  BRAND_COLORS
+  BRAND_COLORS,
+  DEFAULT_SPONSORS,
+  DEFAULT_FORTNITE_ROSTER,
+  NAFE_ASSOCIATION_DATA
 });

@@ -10,6 +10,7 @@ const ADMIN_TABS = [
   { k: "news",      label: "Actualités",          icon: "▤" },
   { k: "scores",    label: "Ticker scores",       icon: "▲" },
   { k: "trophies",  label: "Palmarès",            icon: "✦" },
+  { k: "sponsors",  label: "Sponsors",            icon: "★" },
   { k: "socials",   label: "Réseaux sociaux",     icon: "●" },
   { k: "community", label: "Communauté",          icon: "◆" },
   { k: "users",     label: "Utilisateurs",        icon: "⚙" },
@@ -27,6 +28,7 @@ function AdminPage({ accent }) {
   const [tab, setTab] = useAdminState(adminRoute());
 
   useAdminEffect(() => {
+    try { window.store.seedAdmins(); } catch (e) {}
     const onHash = () => setTab(adminRoute());
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
@@ -34,37 +36,109 @@ function AdminPage({ accent }) {
 
   // ---- Guard : seuls les admins connectés accèdent à la console ----
   const user = window.store.currentUser();
+  const defaultAdmins = window.store.DEFAULT_ADMINS || [];
+
   if (!user) {
     return (
       <div className="nafe-page">
-        <div className="nafe-empty nafe-empty--panel" style={{ marginTop: 80 }}>
-          <span className="nafe-mono" style={{ color: accent }}>ACCÈS RESTREINT</span>
-          <p className="nafe-empty__text">
-            La console admin est réservée au staff NAFE. Connecte-toi avec un compte admin
-            pour continuer.
+        <div className="nafe-empty nafe-empty--panel" style={{ marginTop: 60, maxWidth: 700, marginInline: "auto" }}>
+          <span className="nafe-mono" style={{ color: accent, fontSize: 13, fontWeight: 700, letterSpacing: "0.12em" }}>
+            ACCÈS RESTREINT · STAFF NAFE
+          </span>
+          <h2 className="nafe-display" style={{ fontSize: 28, margin: "10px 0 6px" }}>
+            AUTHENTIFICATION REQUISE<span style={{ color: accent }}>.</span>
+          </h2>
+          <p className="nafe-empty__text" style={{ maxWidth: 560, marginInline: "auto" }}>
+            La console admin est réservée aux administrateurs NAFE. Des comptes admin avec accès complet ont été injectés dans le système :
           </p>
-          <button
-            className="nafe-btn nafe-btn--accent"
-            style={{ background: accent }}
-            onClick={() => window.openAuth && window.openAuth("login")}
-          >
-            Se connecter
-          </button>
+
+          {/* Cartes des identifiants admin injectés */}
+          <div className="nafe-injected-admin-card nafe-clip-card" style={{ marginTop: 22, textAlign: "left", width: "100%" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <span className="nafe-mono" style={{ fontSize: 11, color: accent, letterSpacing: "0.1em" }}>
+                ◈ COMPTES ADMINISTRATEURS INJECTÉS
+              </span>
+              <span className="nafe-badge nafe-badge--sm" style={{ borderColor: "rgba(255,255,255,0.2)" }}>
+                3 Comptes Prêts
+              </span>
+            </div>
+
+            <div className="nafe-injected-admin-grid">
+              {defaultAdmins.map((adm) => (
+                <div key={adm.id} className="nafe-injected-admin-item">
+                  <div className="nafe-injected-admin-item__info">
+                    <span className="nafe-injected-admin-item__title">{adm.title}</span>
+                    <strong className="nafe-injected-admin-item__user">{adm.username}</strong>
+                    <span className="nafe-mono nafe-injected-admin-item__cred">
+                      {adm.email} · <span style={{ color: accent }}>{adm.password}</span>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="nafe-btn nafe-btn--sm nafe-btn--accent"
+                    style={{ background: accent }}
+                    onClick={() => window.store.loginAsAdmin(adm.email)}
+                    title={`Connexion immédiate en tant que ${adm.username}`}
+                  >
+                    ⚡ Se connecter
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap", justifyContent: "center" }}>
+            <button
+              className="nafe-btn nafe-btn--accent"
+              style={{ background: accent }}
+              onClick={() => window.store.loginAsAdmin("admin@nafe.gg")}
+            >
+              ⚡ Déverrouiller la console admin (AdminNAFE)
+            </button>
+            <button
+              className="nafe-btn nafe-btn--ghost"
+              onClick={() => window.openAuth && window.openAuth("login")}
+            >
+              Formulaire de connexion
+            </button>
+          </div>
         </div>
       </div>
     );
   }
+
   if (user.role !== "admin") {
     return (
       <div className="nafe-page">
-        <div className="nafe-empty nafe-empty--panel" style={{ marginTop: 80 }}>
-          <span className="nafe-mono" style={{ color: "#E53E3E" }}>ACCÈS REFUSÉ</span>
+        <div className="nafe-empty nafe-empty--panel" style={{ marginTop: 60, maxWidth: 640, marginInline: "auto" }}>
+          <span className="nafe-mono" style={{ color: "#E53E3E", fontSize: 13, fontWeight: 700, letterSpacing: "0.12em" }}>
+            ACCÈS REFUSÉ · RÔLE INSUFFISANT
+          </span>
+          <h2 className="nafe-display" style={{ fontSize: 26, margin: "10px 0 6px" }}>
+            COMPTE FAN ACTIF<span style={{ color: "#E53E3E" }}>.</span>
+          </h2>
           <p className="nafe-empty__text">
-            Tu es connecté en tant que <strong>{user.username}</strong> (rôle : fan).
-            Cette console est réservée au staff. Un admin peut te promouvoir depuis
-            l'onglet Utilisateurs.
+            Tu es actuellement connecté avec <strong>{user.username}</strong> (rôle : {user.role}).
+            Pour administrer le site, promeus ce compte ou bascule sur l'un des comptes admin injectés.
           </p>
-          <a className="nafe-btn nafe-btn--ghost" href="#/club">← Retour au dashboard</a>
+          <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap", justifyContent: "center" }}>
+            <button
+              className="nafe-btn nafe-btn--accent"
+              style={{ background: accent }}
+              onClick={() => window.store.promoteToAdmin(user.id)}
+            >
+              ⚡ Promouvoir mon compte "{user.username}" en Admin
+            </button>
+            <button
+              className="nafe-btn nafe-btn--ghost"
+              onClick={() => window.store.loginAsAdmin("admin@nafe.gg")}
+            >
+              ⚡ Basculer sur AdminNAFE
+            </button>
+            <a className="nafe-btn nafe-btn--ghost" href="#/">
+              ← Accueil
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -77,6 +151,7 @@ function AdminPage({ accent }) {
     news:      window.store.news.list().length,
     scores:    window.store.scores.list().length,
     trophies:  window.store.trophies.list().length,
+    sponsors:  window.store.sponsors ? window.store.sponsors.list().length : 0,
     socials:   window.store.socials.list().length,
     community: window.store.posts.list().length,
     users:     window.store.users.list().length,
@@ -86,14 +161,42 @@ function AdminPage({ accent }) {
   return (
     <div className="nafe-page">
       <section className="nafe-team__hero">
-        <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>
-          Admin · Staff NAFE ESPORT uniquement
-        </span>
+        <div className="nafe-admin-session-bar">
+          <div className="nafe-admin-session-bar__left">
+            <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)", margin: 0 }}>
+              ● Admin Actif : <strong>{user.username}</strong> ({user.email})
+            </span>
+          </div>
+          <div className="nafe-admin-session-bar__right">
+            <span className="nafe-mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>
+              Basculer vers :
+            </span>
+            {defaultAdmins.filter(a => a.id !== user.id).map(a => (
+              <button
+                key={a.id}
+                type="button"
+                className="nafe-admin-switcher-btn"
+                onClick={() => window.store.loginAsAdmin(a.email)}
+                title={`Passer sur ${a.username}`}
+              >
+                {a.username}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="nafe-admin-switcher-btn nafe-admin-switcher-btn--logout"
+              onClick={() => window.store.logout()}
+            >
+              Déconnexion
+            </button>
+          </div>
+        </div>
+
         <h1 className="nafe-display nafe-team__title">
           CONSOLE ADMIN<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span>
         </h1>
         <p className="nafe-team__lede">
-          Gérez l'ensemble des rosters, matchs, trophées, actus et le flux officiel de la structure.
+          Gérez l'ensemble des rosters, sponsors, matchs, trophées, actus et le flux officiel de la structure.
         </p>
 
 
@@ -110,7 +213,7 @@ function AdminPage({ accent }) {
                 <span className="nafe-admin__tabIcon">{t.icon}</span>
                 <span className="nafe-display nafe-admin__tabLabel">{t.label}</span>
                 <span className="nafe-mono nafe-admin__tabCount" style={active ? { color: accent } : {}}>
-                  {String(counts[t.k]).padStart(2, "0")}
+                  {String(counts[t.k] || 0).padStart(2, "0")}
                 </span>
               </a>
             );
@@ -125,6 +228,7 @@ function AdminPage({ accent }) {
         {tab === "news"      && <NewsAdmin      accent={accent} />}
         {tab === "scores"    && <ScoresAdmin    accent={accent} />}
         {tab === "trophies"  && <TrophiesAdmin  accent={accent} />}
+        {tab === "sponsors"  && <SponsorsAdmin  accent={accent} />}
         {tab === "socials"   && <SocialsAdmin   accent={accent} />}
         {tab === "community" && <CommunityAdmin accent={accent} />}
         {tab === "users"     && <UsersAdmin     accent={accent} currentUser={user} />}
@@ -231,7 +335,22 @@ function PlayersAdmin({ accent }) {
   const [draft, setDraft] = useAdminState(emptyPlayer());
 
   function emptyPlayer() {
-    return { team: "valorant", subteam: "", name: "", tag: "", role: "Duelist", jersey: 1, country: "FR", kd: 0, hs: 0, gear: { mouse: "", keyboard: "", headset: "" } };
+    return {
+      team: "fortnite",
+      subteam: "",
+      name: "",
+      tag: "",
+      role: "Fragger",
+      format: "Duo",
+      partner: "",
+      pr: 0,
+      bestRank: "",
+      jersey: 1,
+      country: "FR",
+      kd: 0,
+      hs: 0,
+      gear: { mouse: "", keyboard: "", headset: "" }
+    };
   }
 
   // Sous-équipes : d'abord celles du jeu sélectionné, puis les autres en fallback
@@ -247,7 +366,13 @@ function PlayersAdmin({ accent }) {
   function submit() {
     if (!draft.name.trim()) return alert("Le nom est requis");
     if (!draft.tag.trim()) return alert("Le pseudo est requis");
-    const payload = { ...draft, jersey: +draft.jersey || 0, kd: +draft.kd || 0, hs: +draft.hs || 0 };
+    const payload = {
+      ...draft,
+      jersey: +draft.jersey || 0,
+      kd: +draft.kd || 0,
+      hs: +draft.hs || 0,
+      pr: +draft.pr || 0
+    };
     if (editing) {
       window.store.players.update(editing, payload);
     } else {
@@ -292,15 +417,48 @@ function PlayersAdmin({ accent }) {
             ) : null}
           </select>
         </Field>
+        {draft.team === "fortnite" && (
+          <>
+            <Field label="Format Fortnite (Solo / Duo / Trio)">
+              <select value={draft.format || "Duo"} onChange={(e) => setDraft({ ...draft, format: e.target.value })}>
+                <option value="Solo">Solo</option>
+                <option value="Duo">Duo</option>
+                <option value="Trio">Trio</option>
+              </select>
+            </Field>
+            <Field label="Coéquipier(s) / Lineup">
+              <input
+                value={draft.partner || ""}
+                onChange={(e) => setDraft({ ...draft, partner: e.target.value })}
+                placeholder="Ex: Rezpaaan (si Duo ou Trio)"
+              />
+            </Field>
+            <Field label="Power Ranking (PR)">
+              <input
+                type="number"
+                value={draft.pr || 0}
+                onChange={(e) => setDraft({ ...draft, pr: e.target.value })}
+                placeholder="Ex: 12450"
+              />
+            </Field>
+            <Field label="Meilleure Perf / Classement">
+              <input
+                value={draft.bestRank || ""}
+                onChange={(e) => setDraft({ ...draft, bestRank: e.target.value })}
+                placeholder="Ex: Top 42 EU - FNCS Div 1"
+              />
+            </Field>
+          </>
+        )}
         <Field label="Numéro">
           <input type="number" min={0} max={99} value={draft.jersey}
             onChange={(e) => setDraft({ ...draft, jersey: e.target.value })} />
         </Field>
         <Field label="Nom de scène">
-          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex: Derke" />
+          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex: Derke ou Twigz" />
         </Field>
         <Field label="Pseudo (@tag)">
-          <input value={draft.tag} onChange={(e) => setDraft({ ...draft, tag: e.target.value })} placeholder="Ex: derke" />
+          <input value={draft.tag} onChange={(e) => setDraft({ ...draft, tag: e.target.value })} placeholder="Ex: derke ou twigzfn" />
         </Field>
         <Field label="Rôle">
           <select value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })}>
@@ -334,8 +492,18 @@ function PlayersAdmin({ accent }) {
           { key: "jersey", label: "N°", flex: 0.3, render: (r) => String(r.jersey).padStart(2, "0") },
           { key: "name", label: "NOM", flex: 1 },
           { key: "tag", label: "PSEUDO", flex: 1, render: (r) => `@${r.tag}` },
-          { key: "team", label: "ÉQUIPE", flex: 1, render: (r) => window.TEAMS_META[r.team]?.game || r.team },
-          { key: "subteam", label: "SOUS-ÉQUIPE", flex: 0.9, render: (r) => {
+          { key: "team", label: "ÉQUIPE", flex: 0.9, render: (r) => window.TEAMS_META[r.team]?.game || r.team },
+          { key: "subteam", label: "SOUS-ÉQUIPE / FORMAT", flex: 1.1, render: (r) => {
+            if (r.team === "fortnite") {
+              return (
+                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                  <span className="nafe-mono" style={{ fontSize: 10, padding: "2px 6px", background: "rgba(139, 92, 246, 0.2)", color: "#C084FC", border: "1px solid rgba(139, 92, 246, 0.4)", borderRadius: 2 }}>
+                    {(r.format || "SOLO").toUpperCase()}
+                  </span>
+                  {r.partner && <span style={{ fontSize: 11, opacity: 0.8 }}>({r.partner})</span>}
+                </div>
+              );
+            }
             if (!r.subteam) return "—";
             const st = window.store.subteams.get(r.subteam);
             if (!st) return "—";
@@ -361,7 +529,7 @@ function PlayersAdmin({ accent }) {
 // ============================================================
 //  Matches
 // ============================================================
-const GAMES = ["VAL", "LOL", "CS2", "DROP", "EVENT"];
+const GAMES = ["VAL", "RL", "FN", "DROP", "EVENT"];
 const STATUSES = [
   { k: "soon",  label: "À venir" },
   { k: "live",  label: "En direct" },
@@ -883,25 +1051,50 @@ function UsersAdmin({ accent, currentUser }) {
     .slice()
     .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 
+  const defaultAdmins = window.store.DEFAULT_ADMINS || [];
+
   return (
     <div className="nafe-admin__section">
+      <div className="nafe-admin__card" style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <h3 className="nafe-display" style={{ margin: 0, fontSize: 18 }}>
+              COMPTES ADMINISTRATEURS INJECTÉS<span style={{ color: accent }}>.</span>
+            </h3>
+            <p className="nafe-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", margin: "4px 0 0" }}>
+              3 comptes officiels injectés dans le store (AdminNAFE, StaffNAFE, Mathia).
+            </p>
+          </div>
+          <button
+            type="button"
+            className="nafe-btn nafe-btn--sm nafe-btn--accent"
+            style={{ background: accent }}
+            onClick={() => {
+              window.store.seedAdmins();
+              alert("Comptes administrateurs vérifiés et réinjectés avec succès !");
+            }}
+          >
+            ⚡ Réinjecter / Synchroniser les Admins
+          </button>
+        </div>
+      </div>
 
       <DataTable
         accent={accent}
         empty="Aucun utilisateur."
         columns={[
-          { key: "username", label: "PSEUDO", flex: 1 },
-          { key: "email", label: "EMAIL", flex: 1.4 },
+          { key: "username", label: "PSEUDO", flex: 0.9 },
+          { key: "email", label: "EMAIL", flex: 1.2 },
           { key: "role", label: "RÔLE", flex: 0.5, render: (r) => (
             <span className="nafe-mono" style={{ color: r.role === "admin" ? accent : "rgba(255,255,255,0.6)" }}>
               {r.role === "admin" ? "ADMIN" : "FAN"}
             </span>
           )},
           { key: "xp", label: "XP", flex: 0.4, render: (r) => r.xp || 0 },
-          { key: "createdAt", label: "INSCRIT LE", flex: 0.8, render: (r) =>
+          { key: "createdAt", label: "INSCRIT LE", flex: 0.7, render: (r) =>
             r.createdAt ? new Date(r.createdAt).toLocaleDateString("fr-FR") : "—"
           },
-          { key: "actions2", label: "RÔLE ACTION", flex: 0.9, render: (r) =>
+          { key: "actions2", label: "RÔLE ACTION", flex: 1.2, render: (r) =>
             r.id === currentUser.id ? (
               <span className="nafe-mono" style={{ color: "rgba(255,255,255,0.4)" }}>(toi)</span>
             ) : r.role === "admin" ? (
@@ -1239,6 +1432,184 @@ function EngagementAdmin({ accent }) {
       </div>
       
       {subTab === 'predictions' ? <PredictionsAdmin accent={accent} /> : <BadgesAdmin accent={accent} />}
+    </div>
+  );
+}
+
+// ============================================================
+//  Sponsors
+// ============================================================
+const SPONSOR_TIERS = [
+  "Partenaire Titre",
+  "Partenaire Majeur",
+  "Équipementier Officiel",
+  "Partenaire Infrastructure",
+  "Partenaire Textile",
+  "Partenaire Média",
+  "Supporter Officiel",
+  "Partenaire Technique"
+];
+
+function emptySponsor() {
+  return {
+    name: "",
+    tier: "Partenaire Majeur",
+    category: "",
+    logo: "",
+    banner: "",
+    description: "",
+    websiteUrl: "",
+    promoCode: "",
+    order: 1,
+    active: true,
+  };
+}
+
+function SponsorsAdmin({ accent }) {
+  window.store.useVersion();
+  const list = window.store.sponsors ? window.store.sponsors.list() : [];
+  const [editing, setEditing] = useAdminState(null);
+  const [draft, setDraft] = useAdminState(emptySponsor());
+
+  function startEdit(s) {
+    setEditing(s.id);
+    setDraft({ ...emptySponsor(), ...s });
+  }
+
+  function submit() {
+    if (!draft.name.trim()) return alert("Le nom du sponsor est requis");
+    const payload = {
+      ...draft,
+      order: +draft.order || 1,
+      active: draft.active !== false
+    };
+    if (editing) {
+      window.store.sponsors.update(editing, payload);
+    } else {
+      window.store.sponsors.add(payload);
+    }
+    setEditing(null);
+    setDraft(emptySponsor());
+  }
+
+  return (
+    <div className="nafe-admin__section">
+      <FormShell
+        title={editing ? "Modifier le sponsor" : "Nouveau sponsor partenaire"}
+        onSubmit={submit}
+        onCancel={editing ? () => { setEditing(null); setDraft(emptySponsor()); } : null}
+        submitLabel={editing ? "Mettre à jour" : "Ajouter le sponsor"}
+        accent={accent}
+      >
+        <Field label="Nom du sponsor / Marque" span={2}>
+          <input
+            value={draft.name}
+            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+            placeholder="Ex: Razer, Red Bull, etc."
+          />
+        </Field>
+        <Field label="Palier de partenariat">
+          <select
+            value={draft.tier}
+            onChange={(e) => setDraft({ ...draft, tier: e.target.value })}
+          >
+            {SPONSOR_TIERS.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Secteur d'activité">
+          <input
+            value={draft.category || ""}
+            onChange={(e) => setDraft({ ...draft, category: e.target.value })}
+            placeholder="Ex: Nutrition, Périphériques Gaming..."
+          />
+        </Field>
+        <Field label="URL de la bannière (1200x400 approx)" span={2}>
+          <input
+            value={draft.banner || ""}
+            onChange={(e) => setDraft({ ...draft, banner: e.target.value })}
+            placeholder="https://..."
+          />
+          {draft.banner && (
+            <div style={{ marginTop: 8, height: 70, overflow: "hidden", borderRadius: 4, border: "1px solid rgba(255,255,255,0.1)" }}>
+              <img src={draft.banner} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { e.target.style.display = 'none'; }} />
+            </div>
+          )}
+        </Field>
+        <Field label="URL du logo / Icône">
+          <input
+            value={draft.logo || ""}
+            onChange={(e) => setDraft({ ...draft, logo: e.target.value })}
+            placeholder="https://... ou assets/brand/..."
+          />
+        </Field>
+        <Field label="Lien du site officiel">
+          <input
+            value={draft.websiteUrl || ""}
+            onChange={(e) => setDraft({ ...draft, websiteUrl: e.target.value })}
+            placeholder="https://..."
+          />
+        </Field>
+        <Field label="Code promo communautaire (optionnel)">
+          <input
+            value={draft.promoCode || ""}
+            onChange={(e) => setDraft({ ...draft, promoCode: e.target.value })}
+            placeholder="Ex: NAFE10"
+          />
+        </Field>
+        <Field label="Ordre d'affichage">
+          <input
+            type="number"
+            min={1}
+            value={draft.order}
+            onChange={(e) => setDraft({ ...draft, order: e.target.value })}
+          />
+        </Field>
+        <Field label="Statut actif" span={2}>
+          <label style={{ display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer", color: "#fff" }}>
+            <input
+              type="checkbox"
+              checked={draft.active !== false}
+              onChange={(e) => setDraft({ ...draft, active: e.target.checked })}
+              style={{ width: 18, height: 18 }}
+            />
+            <span>Afficher ce sponsor publiquement sur la page Sponsors</span>
+          </label>
+        </Field>
+        <Field label="Description détaillée du partenariat" span={2}>
+          <textarea
+            rows={4}
+            value={draft.description}
+            onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+            placeholder="Présentation des offres, de l'accompagnement des joueurs NAFE..."
+          />
+        </Field>
+      </FormShell>
+
+      <DataTable
+        accent={accent}
+        empty="Aucun sponsor enregistré. Remplissez le formulaire ci-dessus pour en ajouter un."
+        columns={[
+          { key: "order", label: "N°", flex: 0.3, render: (r) => `#${r.order || 1}` },
+          { key: "logo", label: "LOGO", flex: 0.5, render: (r) => (
+            r.logo ? <img src={r.logo} alt={r.name} style={{ width: 28, height: 28, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; }} /> : "—"
+          )},
+          { key: "name", label: "NOM", flex: 1.2 },
+          { key: "tier", label: "PALIER", flex: 1, render: (r) => (
+            <span className="nafe-mono" style={{ color: accent, fontSize: 11 }}>{r.tier}</span>
+          )},
+          { key: "promoCode", label: "CODE PROMO", flex: 0.8, render: (r) => r.promoCode ? <span className="nafe-mono" style={{ background: "rgba(255,255,255,0.06)", padding: "2px 6px" }}>{r.promoCode}</span> : "—" },
+          { key: "active", label: "STATUT", flex: 0.6, render: (r) => (
+            <span style={{ color: r.active !== false ? "var(--nafe-green-peas)" : "#FF5252" }}>
+              {r.active !== false ? "● Actif" : "○ Inactif"}
+            </span>
+          )},
+        ]}
+        rows={list.sort((a, b) => (a.order || 0) - (b.order || 0))}
+        onEdit={startEdit}
+        onDelete={(id) => window.store.sponsors.remove(id)}
+      />
     </div>
   );
 }

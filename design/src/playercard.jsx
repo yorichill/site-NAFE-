@@ -73,8 +73,15 @@ function PlayerCardTilt({ p, accent }) {
       onMouseLeave={() => setHover(false)}
     >
       <span className="nafe-card__jersey">{String(p.jersey).padStart(2, "0")}</span>
-      <div className="nafe-card__head">
-        <span className="nafe-eyebrow">{p.role}</span>
+      <div className="nafe-card__head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span className="nafe-eyebrow">{p.role}</span>
+          {p.format && (
+            <span className="nafe-mono" style={{ fontSize: 9, padding: "2px 6px", background: `${accent}25`, color: accent, border: `1px solid ${accent}55`, borderRadius: 2 }}>
+              {p.format.toUpperCase()}
+            </span>
+          )}
+        </div>
         <span className="nafe-pulse" />
       </div>
       <div className="nafe-card__mug">
@@ -82,14 +89,27 @@ function PlayerCardTilt({ p, accent }) {
       </div>
       <div className="nafe-card__body">
         <h3 className="nafe-display nafe-card__name">{p.name}</h3>
-        <p className="nafe-mono nafe-card__tag">@{p.tag}</p>
+        <p className="nafe-mono nafe-card__tag">
+          @{p.tag} {p.partner && p.partner !== "Solo" ? `· ${p.partner}` : ""}
+        </p>
       </div>
       <div className="nafe-card__foot">
         <div>
-          <span className="nafe-card__statLabel">K/D</span>
-          <p className="nafe-card__statVal">{p.kd.toFixed(2)}</p>
+          <span className="nafe-card__statLabel">{p.pr > 0 ? "POWER RANKING" : "K/D"}</span>
+          <p className="nafe-card__statVal">
+            {p.pr > 0 ? `${p.pr.toLocaleString("fr-FR")} PR` : p.kd.toFixed(2)}
+          </p>
         </div>
-        <button className="nafe-card__cta">Profil →</button>
+        {p.bestRank ? (
+          <div style={{ textAlign: "right", maxWidth: 120 }}>
+            <span className="nafe-card__statLabel">MEILLEUR TOP</span>
+            <p className="nafe-mono" style={{ fontSize: 10, margin: "2px 0 0", color: accent, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {p.bestRank}
+            </p>
+          </div>
+        ) : (
+          <button className="nafe-card__cta">Profil →</button>
+        )}
       </div>
     </article>
   );
@@ -121,10 +141,31 @@ function PlayerCardID({ p, accent }) {
             <span className="nafe-id__label">RÔLE</span>
             <span className="nafe-id__value nafe-mono">{p.role}</span>
           </div>
-          <div className="nafe-id__row">
-            <span className="nafe-id__label">CLEAR.</span>
-            <span className="nafe-id__value nafe-mono">AAA/26</span>
-          </div>
+          {p.format && (
+            <div className="nafe-id__row">
+              <span className="nafe-id__label">FORMAT</span>
+              <span className="nafe-id__value nafe-mono" style={{ color: accent, fontWeight: 700 }}>
+                {p.format.toUpperCase()}
+              </span>
+            </div>
+          )}
+          {p.partner && p.partner !== "Solo" && (
+            <div className="nafe-id__row">
+              <span className="nafe-id__label">TEAM</span>
+              <span className="nafe-id__value nafe-mono">{p.partner}</span>
+            </div>
+          )}
+          {p.pr > 0 ? (
+            <div className="nafe-id__row">
+              <span className="nafe-id__label">RANKING</span>
+              <span className="nafe-id__value nafe-mono" style={{ color: accent }}>{p.pr} PR</span>
+            </div>
+          ) : (
+            <div className="nafe-id__row">
+              <span className="nafe-id__label">CLEAR.</span>
+              <span className="nafe-id__value nafe-mono">AAA/26</span>
+            </div>
+          )}
         </div>
       </div>
       <footer className="nafe-id__foot">
@@ -146,7 +187,14 @@ function PlayerCardStat({ p, accent }) {
     <article className="nafe-card nafe-card--stat nafe-clip-card" style={{ "--accent": accent }}>
       <div className="nafe-stat__top">
         <div>
-          <span className="nafe-eyebrow">{p.role}</span>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <span className="nafe-eyebrow">{p.role}</span>
+            {p.format && (
+              <span className="nafe-mono" style={{ fontSize: 9, padding: "1px 5px", background: `${accent}25`, color: accent }}>
+                {p.format.toUpperCase()}
+              </span>
+            )}
+          </div>
           <h3 className="nafe-display nafe-stat__name">{p.name}</h3>
           <p className="nafe-mono nafe-stat__tag">@{p.tag} · {p.country}</p>
         </div>
@@ -154,6 +202,7 @@ function PlayerCardStat({ p, accent }) {
       </div>
       <div className="nafe-stat__grid">
         <StatBar label="K/D" value={p.kd} max={2} accent={accent} />
+        {p.pr > 0 && <StatBar label="PR" value={p.pr} max={15000} accent={accent} />}
         {p.hs > 0 && <StatBar label="HS%" value={p.hs} max={60} accent={accent} suffix="%" />}
         {p.acs > 0 && <StatBar label="ACS" value={p.acs} max={300} accent={accent} />}
       </div>
@@ -161,7 +210,8 @@ function PlayerCardStat({ p, accent }) {
         <MugPlaceholder tag={p.tag} size={80} accent={accent} />
         <div className="nafe-stat__meta">
           <p className="nafe-mono">SAISON 2026</p>
-          <p className="nafe-mono">ROSTER TITULAIRE</p>
+          <p className="nafe-mono">{p.format ? `FORMAT ${p.format.toUpperCase()}` : "ROSTER TITULAIRE"}</p>
+          {p.bestRank && <p className="nafe-mono" style={{ color: accent }}>{p.bestRank}</p>}
           <p className="nafe-mono">·································</p>
         </div>
       </div>
