@@ -148,82 +148,44 @@
   };
 
   const DEFAULT_ASSOCIATION_SETTINGS = {
-    heroBadge: "STRUCTURE ASSOCIATIVE OFFICIELLE",
-    heroTitle: "L'ASSOCIATION NAFE",
-    heroLede: "NAFE ESPORT est une association française régie par la loi du 1er juillet 1901. Fondée par des passionnés, notre mission est de structurer, former et accompagner les talents de l'esport.",
-    statutLegal: "Loi 1901",
-    devise: "Le Phœnix ne meurt jamais",
-    transparence: "100% Réinvesti",
-    donationActive: true,
-    donationEyebrow: "// IMPACT DIRECT & SOLIDAIRE",
-    donationTitle: "SOUTENIR L'ASSOCIATION FINANCIÈREMENT",
-    donationDesc: "NAFE ESPORT fonctionne grâce à la passion de ses bénévoles et à la générosité de ses supporters. Vos contributions permettent directement de financer les déplacements en LAN, les maillots et les entraînements.",
-    donationUrl: "https://www.helloasso.com",
-    donationButtonLabel: "Accéder au formulaire de don sécurisé ↗",
-    donationNotice: "Paiement 100% sécurisé via HelloAsso · Reçu et attestation fournis",
-    donationPledges: [
-      { id: "p1", amount: 10, label: "Supporter", perk: "Badge Discord exclusif & accès aux salons privés" },
-      { id: "p2", amount: 25, label: "Adhérent", perk: "Pack stickers officiels + vote consultatif assemblée" },
-      { id: "p3", amount: 50, label: "Bienfaiteur", perk: "Nom crédité au générique des vidéos + jersey dédicacé" },
-      { id: "custom", amount: 25, label: "Don libre", perk: "Chaque euro contribue directement aux déplacements" }
+    badge: "ASSOCIATION LOI 1901",
+    title: "L'ASSOCIATION NAFE",
+    subtitle: "Structure esportive & club associatif d'élite",
+    bannerImage: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1400&q=80",
+    mainText: "Fondée par des passionnés de jeux vidéo et de compétition, l'association NAFE ESPORT (régie par la loi du 1er juillet 1901) a pour vocation d'encadrer, d'entraîner et de propulser les jeunes talents vers le plus haut niveau de l'esport francophone et international.\n\nNotre mission repose sur des valeurs fortes : respect mutuel, dépassement de soi, esprit d'équipe et rigueur sportive. Nous offrons à nos rosters (Valorant, Rocket League, Fortnite) un encadrement tactique et humain adapté pour performer sereinement.\n\nEn tant qu'organisation à but non lucratif, la transparence est absolue : 100% des dons, cotisations et gains de tournois réinvestis sont alloués au financement des déplacements en LAN, des équipements officiels et des serveurs d'entraînement.",
+    images: [
+      {
+        id: "img_nafe_banner",
+        url: "assets/brand/banner_nafe.png",
+        caption: "Bannière officielle de la structure associative NAFE ESPORT",
+        layout: "banner"
+      },
+      {
+        id: "img_nafe_bootcamp",
+        url: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1000&q=80",
+        caption: "Bootcamp et séances d'entraînement tactique en conditions réelles",
+        layout: "center"
+      }
     ],
-    donationImpact: [
-      { label: "Déplacements LAN", desc: "Transport & hébergement pour les compétitions physiques", pct: 45 },
-      { label: "Équipement & Maillots", desc: "Jerseys officiels personnalisés & matériel gaming", pct: 30 },
-      { label: "Infrastructures & Serveurs", desc: "Serveurs d'entraînement, scrims & outils", pct: 15 },
-      { label: "Vie du Club", desc: "Animation de la communauté, tournois ouverts & streams", pct: 10 }
-    ]
+    textSections: [
+      {
+        id: "ts_termes",
+        title: "TERMES & RÈGLEMENT INTÉRIEUR",
+        text: "L'adhésion ou la participation aux projets de NAFE ESPORT implique le respect scrupuleux de notre charte d'éthique :\n\n• Fair-play & Non-toxicité : Le respect des adversaires, des organisateurs et de la communauté est la priorité absolue. Tout comportement injurieux ou toxique entraîne l'exclusion immédiate.\n• Gestion Bénévolat : L'ensemble du staff œuvre bénévolement dans un esprit de solidarité et de transmission de compétences.\n• Droit à l'Image & Esprit Club : Les joueurs s'engagent à représenter dignement les couleurs du club lors de leurs streams et événements officiels."
+      },
+      {
+        id: "ts_rejoindre",
+        title: "REJOINDRE L'ASSOCIATION NAFE",
+        text: "Joueurs prometteurs, coachs, managers, créateurs de contenu ou bénévoles passionnés : l'association accueille régulièrement de nouveaux talents pour développer ses projets esportifs. Contactez-nous pour candidater !"
+      }
+    ],
+    donationActive: true,
+    donationUrl: "https://www.helloasso.com",
+    donationButtonText: "Soutenir l'Association (HelloAsso) ↗",
+    donationNote: "Association à but non lucratif (Loi 1901) · Vos dons contribuent directement aux déplacements de nos équipes en tournoi et à leurs équipements."
   };
 
-  const DEFAULT_ASSOCIATION_BLOCKS = [
-    {
-      id: "ab_pillars",
-      order: 1,
-      active: true,
-      type: "pillars",
-      eyebrow: "Objectifs 2026",
-      title: "NOS MISSIONS",
-      subtitle: "4 PILIERS ASSOCIATIFS",
-      content: "",
-      items: [
-        { num: "01 //", title: "Encadrement & Pédagogie", desc: "Suivi personnalisé de chaque joueur : analyse tactique, préparation mentale et équilibre de vie face aux écrans." },
-        { num: "02 //", title: "Accès à la Compétition", desc: "Financement des inscriptions aux tournois majeurs, frais de déplacement et logistique lors des LANs physiques en France et en Europe." },
-        { num: "03 //", title: "Matériel & Infrastructure", desc: "Mise à disposition de maillots officiels, serveurs d'entraînement dédiés et accompagnement pour les joueurs méritants." },
-        { num: "04 //", title: "Transparence & Gestion", desc: "100% des fonds perçus (cotisations, dons, gains de tournois réinvestis) sont alloués au projet sportif et au bien-être de nos membres." }
-      ]
-    },
-    {
-      id: "ab_terms",
-      order: 2,
-      active: true,
-      type: "terms",
-      eyebrow: "Règlement Intérieur & Statuts",
-      title: "TERMES DE L'ASSOCIATION",
-      subtitle: "CHARTE LOI 1901",
-      content: "Toute adhésion, partenariat ou participation aux activités de NAFE ESPORT implique l'adhésion pleine et entière à notre charte éthique et à nos statuts déposés.",
-      items: [
-        { num: "Article 1", title: "Engagement & Esprit Sportif", text: "Tout membre représentant NAFE s'engage à respecter les principes du fair-play, de courtoisie et de respect mutuel en jeu et sur les réseaux sociaux. Aucune forme de toxicité, harcèlement ou discrimination n'est tolérée." },
-        { num: "Article 2", title: "Transparence Financière", text: "L'association garantit la stricte affectation de chaque euro perçu au développement de la structure, des joueurs et des événements du club. Les comptes sont approuvés annuellement en assemblée générale." },
-        { num: "Article 3", title: "Statut des Joueurs & Staff", text: "Les membres associatifs contribuent bénévolement à la vie du club. Les gains obtenus en compétition sont redistribués selon la charte d'équipe approuvée avant chaque saison sportive." },
-        { num: "Article 4", title: "Adhésion & Révocation", text: "L'adhésion est ouverte à toute personne partageant les valeurs du club. Le bureau directeur se réserve le droit d'exclure tout membre manquant gravement au règlement intérieur de l'association." }
-      ]
-    },
-    {
-      id: "ab_cta",
-      order: 3,
-      active: true,
-      type: "cta",
-      eyebrow: "Rejoindre l'aventure",
-      title: "Envie de vous investir comme bénévole ou membre ?",
-      subtitle: "",
-      content: "Coachs, managers, casters, graphistes et bénévoles : notre association recrute constamment pour développer ses projets esportifs.",
-      buttonLabel: "Nous Contacter →",
-      buttonUrl: "#/contact",
-      button2Label: "Faire un don à l'association ↗",
-      button2Url: "https://www.helloasso.com",
-      items: []
-    }
-  ];
+  const DEFAULT_ASSOCIATION_BLOCKS = [];
 
   const store = {
     KEYS,
@@ -264,12 +226,11 @@
       sponsors_settings.clear();
     },
     seedAssociationTemplate: () => {
-      association_blocks.clear();
+      if (association_blocks) association_blocks.clear();
       association_settings.set(DEFAULT_ASSOCIATION_SETTINGS);
-      DEFAULT_ASSOCIATION_BLOCKS.forEach(b => association_blocks.add(b));
     },
     clearAssociation: () => {
-      association_blocks.clear();
+      if (association_blocks) association_blocks.clear();
       association_settings.clear();
     },
 
