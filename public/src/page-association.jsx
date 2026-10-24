@@ -19,7 +19,7 @@ function AssociationPage({ accent }) {
   // Bouton de soutien financier / don
   const donationActive = settings.donationActive !== false && (settings.donationUrl || settings.donationButtonText || settings.donationButtonLabel);
   const donationUrl = settings.donationUrl || "https://www.helloasso.com";
-  const donationButtonText = settings.donationButtonText || settings.donationButtonLabel || "Soutenir l'Association (HelloAsso) ↗";
+  const donationButtonText = settings.donationButtonText || settings.donationButtonLabel || "Soutenir l'Association (HelloAsso) ";
   const donationNote = settings.donationNote || settings.donationDesc || "NAFE ESPORT est une association régie par la loi du 1er juillet 1901. Vos dons sont réinvestis dans le projet sportif et les déplacements en LAN de nos joueurs.";
 
   // Vérifier si la page a du contenu
@@ -86,7 +86,7 @@ function AssociationPage({ accent }) {
             className="nafe-btn nafe-btn--ghost nafe-btn--sm nafe-clip-card"
             style={{ borderColor: accent || "var(--nafe-water-blue)", color: accent || "var(--nafe-water-blue)" }}
           >
-            ⚙ Modifier la page Association (Admin)
+            Modifier la page Association (Admin)
           </a>
         </div>
       )}
@@ -169,7 +169,7 @@ function AssociationPage({ accent }) {
                       boxShadow: "0 0 20px rgba(2, 136, 209, 0.25)"
                     }}
                   >
-                    ♥ {donationButtonText}
+                    {donationButtonText}
                   </button>
                 </div>
               )}
@@ -348,7 +348,7 @@ function AssociationPage({ accent }) {
                   boxShadow: "0 0 25px rgba(2, 136, 209, 0.35)"
                 }}
               >
-                ♥ {donationButtonText}
+                {donationButtonText}
               </button>
               <span className="nafe-mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", marginTop: 14 }}>
                 Paiement direct et sécurisé via HelloAsso · Association à but non lucratif

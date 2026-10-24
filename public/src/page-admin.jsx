@@ -9,12 +9,12 @@ const ADMIN_TABS = [
   { k: "matches",   label: "Matchs & calendrier", icon: "▦" },
   { k: "news",      label: "Actualités",          icon: "▤" },
   { k: "scores",    label: "Ticker scores",       icon: "▲" },
-  { k: "trophies",    label: "Palmarès",            icon: "✦" },
-  { k: "sponsors",    label: "Sponsors",            icon: "★" },
-  { k: "association", label: "L'Association",       icon: "⚑" },
+  { k: "trophies",    label: "Palmarès",            icon: "" },
+  { k: "sponsors",    label: "Sponsors",            icon: "" },
+  { k: "association", label: "L'Association",       icon: "◈" },
   { k: "socials",     label: "Réseaux sociaux",     icon: "●" },
   { k: "community", label: "Communauté",          icon: "◆" },
-  { k: "users",     label: "Utilisateurs",        icon: "⚙" },
+  { k: "users",     label: "Utilisateurs",        icon: "" },
 ];
 
 // Route helper : renvoie la sous-page courante depuis le hash
@@ -81,7 +81,7 @@ function AdminPage({ accent }) {
                     onClick={() => window.store.loginAsAdmin(adm.email)}
                     title={`Connexion immédiate en tant que ${adm.username}`}
                   >
-                    ⚡ Se connecter
+                    Se connecter
                   </button>
                 </div>
               ))}
@@ -94,7 +94,7 @@ function AdminPage({ accent }) {
               style={{ background: accent }}
               onClick={() => window.store.loginAsAdmin("admin@nafe.gg")}
             >
-              ⚡ Déverrouiller la console admin (AdminNAFE)
+              Déverrouiller la console admin (AdminNAFE)
             </button>
             <button
               className="nafe-btn nafe-btn--ghost"
@@ -128,13 +128,13 @@ function AdminPage({ accent }) {
               style={{ background: accent }}
               onClick={() => window.store.promoteToAdmin(user.id)}
             >
-              ⚡ Promouvoir mon compte "{user.username}" en Admin
+              Promouvoir mon compte "{user.username}" en Admin
             </button>
             <button
               className="nafe-btn nafe-btn--ghost"
               onClick={() => window.store.loginAsAdmin("admin@nafe.gg")}
             >
-              ⚡ Basculer sur AdminNAFE
+              Basculer sur AdminNAFE
             </button>
             <a className="nafe-btn nafe-btn--ghost" href="#/">
               ← Accueil
@@ -311,14 +311,13 @@ function DataTable({ columns, rows, onEdit, onDelete, empty, accent }) {
               className="nafe-admin__iconBtn"
               onClick={() => { onEdit(r); scrollToForm(); }}
               title="Modifier"
-            >✎</button>
+            ></button>
             <button
               className="nafe-admin__iconBtn nafe-admin__iconBtn--danger"
               onClick={() => { if (confirm("Supprimer cette entrée ?")) onDelete(r.id); }}
               title="Supprimer"
             >
-              ✕
-            </button>
+              </button>
           </div>
         </div>
       ))}
@@ -433,7 +432,7 @@ function PlayersAdmin({ accent }) {
               <input
                 value={draft.partner || ""}
                 onChange={(e) => setDraft({ ...draft, partner: e.target.value })}
-                placeholder="Ex: Rezpaaan (si Duo ou Trio)"
+                
               />
             </Field>
             <Field label="Power Ranking (PR)">
@@ -441,14 +440,14 @@ function PlayersAdmin({ accent }) {
                 type="number"
                 value={draft.pr || 0}
                 onChange={(e) => setDraft({ ...draft, pr: e.target.value })}
-                placeholder="Ex: 12450"
+                
               />
             </Field>
             <Field label="Meilleure Perf / Classement">
               <input
                 value={draft.bestRank || ""}
                 onChange={(e) => setDraft({ ...draft, bestRank: e.target.value })}
-                placeholder="Ex: Top 42 EU - FNCS Div 1"
+                
               />
             </Field>
           </>
@@ -458,10 +457,10 @@ function PlayersAdmin({ accent }) {
             onChange={(e) => setDraft({ ...draft, jersey: e.target.value })} />
         </Field>
         <Field label="Nom de scène">
-          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex: Derke ou Twigz" />
+          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })}  />
         </Field>
         <Field label="Pseudo (@tag)">
-          <input value={draft.tag} onChange={(e) => setDraft({ ...draft, tag: e.target.value })} placeholder="Ex: derke ou twigzfn" />
+          <input value={draft.tag} onChange={(e) => setDraft({ ...draft, tag: e.target.value })}  />
         </Field>
         <Field label="Rôle">
           <select value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })}>
@@ -596,16 +595,16 @@ function MatchesAdmin({ accent }) {
           </select>
         </Field>
         <Field label="Compétition / événement" span={2}>
-          <input value={draft.event} onChange={(e) => setDraft({ ...draft, event: e.target.value })} placeholder="Ex: VCT EMEA Stage 2" />
+          <input value={draft.event} onChange={(e) => setDraft({ ...draft, event: e.target.value })}  />
         </Field>
         <Field label="Adversaire">
-          <input value={draft.opp} onChange={(e) => setDraft({ ...draft, opp: e.target.value })} placeholder="Laisser vide pour un drop/event" />
+          <input value={draft.opp} onChange={(e) => setDraft({ ...draft, opp: e.target.value })}  />
         </Field>
         <Field label="Lieu">
-          <input value={draft.loc} onChange={(e) => setDraft({ ...draft, loc: e.target.value })} placeholder="Ex: Berlin / En ligne" />
+          <input value={draft.loc} onChange={(e) => setDraft({ ...draft, loc: e.target.value })}  />
         </Field>
         <Field label="Résultat" span={2}>
-          <input value={draft.result} onChange={(e) => setDraft({ ...draft, result: e.target.value })} placeholder='Ex: "13-9 / 13-7" ou "À venir"' />
+          <input value={draft.result} onChange={(e) => setDraft({ ...draft, result: e.target.value })}  />
         </Field>
       </FormShell>
 
@@ -706,12 +705,12 @@ function NewsAdmin({ accent }) {
           </Field>
           
           <Field label="Titre" span={2}>
-            <input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="Ex: NAFE VALORANT : LE DOCUMENTAIRE" />
+            <input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })}  />
           </Field>
 
           {isVideo && (
             <Field label="Lien Vidéo (URL)" span={2}>
-              <input value={draft.url || ""} onChange={(e) => setDraft({ ...draft, url: e.target.value })} placeholder="https://youtube.com/watch?v=..." />
+              <input value={draft.url || ""} onChange={(e) => setDraft({ ...draft, url: e.target.value })}  />
             </Field>
           )}
 
@@ -779,9 +778,9 @@ function NewsAdmin({ accent }) {
               {r.title}
             </div>
           )},
-          { key: "url", label: "URL", flex: 1, render: (r) => r.url ? <a href={r.url} target="_blank" style={{ color: accent }}>Lien ↗</a> : "—" },
+          { key: "url", label: "URL", flex: 1, render: (r) => r.url ? <a href={r.url} target="_blank" style={{ color: accent }}>Lien </a> : "—" },
           { key: "author", label: "AUTEUR", flex: 0.8 },
-          { key: "featured", label: "UNE", flex: 0.3, render: (r) => r.featured ? "★" : "" },
+          { key: "featured", label: "UNE", flex: 0.3, render: (r) => r.featured ? "" : "" },
         ]}
         rows={list}
         onEdit={startEdit}
@@ -792,13 +791,1003 @@ function NewsAdmin({ accent }) {
 }
 
 // ============================================================
-//  Association Admin (Page Simple Unifiée : Titre, Textes, Images PNG)
+//  Scores ticker
+// ============================================================
+function ScoresAdmin({ accent }) {
+  const list = window.store.scores.list();
+  const [editing, setEditing] = useAdminState(null);
+  const [draft, setDraft] = useAdminState(emptyScore());
+
+  function emptyScore() {
+    return { game: "VALORANT", match: "", score: "", live: false };
+  }
+
+  function startEdit(s) { setEditing(s.id); setDraft({ ...emptyScore(), ...s }); }
+  function submit() {
+    if (!draft.match.trim()) return alert("Match requis");
+    if (editing) window.store.scores.update(editing, draft);
+    else window.store.scores.add(draft);
+    setEditing(null);
+    setDraft(emptyScore());
+  }
+
+  return (
+    <div className="nafe-admin__section">
+      <FormShell
+        title={editing ? "Modifier l'entrée ticker" : "Nouvelle entrée ticker"}
+        onSubmit={submit}
+        onCancel={editing ? () => { setEditing(null); setDraft(emptyScore()); } : null}
+        submitLabel={editing ? "Mettre à jour" : "Ajouter au ticker"}
+        accent={accent}
+      >
+        <Field label="Jeu / rubrique">
+          <input value={draft.game} onChange={(e) => setDraft({ ...draft, game: e.target.value })}  />
+        </Field>
+        <Field label="Match">
+          <input value={draft.match} onChange={(e) => setDraft({ ...draft, match: e.target.value })}  />
+        </Field>
+        <Field label="Score / libellé">
+          <input value={draft.score} onChange={(e) => setDraft({ ...draft, score: e.target.value })}  />
+        </Field>
+        <Field label="En direct">
+          <label className="nafe-field__checkbox">
+            <input type="checkbox" checked={!!draft.live}
+              onChange={(e) => setDraft({ ...draft, live: e.target.checked })} />
+            <span>Afficher un point rouge clignotant</span>
+          </label>
+        </Field>
+      </FormShell>
+
+      <DataTable
+        accent={accent}
+        empty="Aucune entrée dans le ticker. Le bandeau du haut de page reste masqué tant qu'il est vide."
+        columns={[
+          { key: "game", label: "JEU", flex: 0.8 },
+          { key: "match", label: "MATCH", flex: 1.5 },
+          { key: "score", label: "SCORE", flex: 0.8 },
+          { key: "live", label: "LIVE", flex: 0.4, render: (r) => r.live ? "●" : "" },
+        ]}
+        rows={list}
+        onEdit={startEdit}
+        onDelete={(id) => window.store.scores.remove(id)}
+      />
+    </div>
+  );
+}
+
+// ============================================================
+//  Trophies
+// ============================================================
+function TrophiesAdmin({ accent }) {
+  const list = window.store.trophies.list()
+    .slice()
+    .sort((a, b) => (b.year || 0) - (a.year || 0));
+  const [editing, setEditing] = useAdminState(null);
+  const [draft, setDraft] = useAdminState(emptyTrophy());
+
+  function emptyTrophy() {
+    return { team: "valorant", year: new Date().getFullYear(), event: "", place: "Champion" };
+  }
+
+  function startEdit(t) { setEditing(t.id); setDraft({ ...emptyTrophy(), ...t }); }
+  function submit() {
+    if (!draft.event.trim()) return alert("Événement requis");
+    const payload = { ...draft, year: +draft.year || new Date().getFullYear() };
+    if (editing) window.store.trophies.update(editing, payload);
+    else window.store.trophies.add(payload);
+    setEditing(null);
+    setDraft(emptyTrophy());
+  }
+
+  return (
+    <div className="nafe-admin__section">
+      <FormShell
+        title={editing ? "Modifier le trophée" : "Ajouter au palmarès"}
+        onSubmit={submit}
+        onCancel={editing ? () => { setEditing(null); setDraft(emptyTrophy()); } : null}
+        submitLabel={editing ? "Mettre à jour" : "Ajouter"}
+        accent={accent}
+      >
+        <Field label="Équipe">
+          <select value={draft.team} onChange={(e) => setDraft({ ...draft, team: e.target.value })}>
+            {Object.entries(window.TEAMS_META).map(([k, t]) => (
+              <option key={k} value={k}>{t.game}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Année">
+          <input type="number" value={draft.year} onChange={(e) => setDraft({ ...draft, year: e.target.value })} />
+        </Field>
+        <Field label="Événement" span={2}>
+          <input value={draft.event} onChange={(e) => setDraft({ ...draft, event: e.target.value })}  />
+        </Field>
+        <Field label="Placement">
+          <input value={draft.place} onChange={(e) => setDraft({ ...draft, place: e.target.value })}  />
+        </Field>
+      </FormShell>
+
+      <DataTable
+        accent={accent}
+        empty="Aucun trophée enregistré."
+        columns={[
+          { key: "year", label: "ANNÉE", flex: 0.5 },
+          { key: "team", label: "ÉQUIPE", flex: 0.8, render: (r) => window.TEAMS_META[r.team]?.game || r.team },
+          { key: "event", label: "ÉVÉNEMENT", flex: 1.8 },
+          { key: "place", label: "PLACEMENT", flex: 0.8 },
+        ]}
+        rows={list}
+        onEdit={startEdit}
+        onDelete={(id) => window.store.trophies.remove(id)}
+      />
+    </div>
+  );
+}
+
+// ============================================================
+//  Sub-teams
+// ============================================================
+function SubteamsAdmin({ accent }) {
+  const list = window.store.subteams.list();
+  const [editing, setEditing] = useAdminState(null);
+  const [team, setTeam] = useAdminState("valorant");
+  const [draft, setDraft] = useAdminState(emptySubteam("valorant"));
+
+  function emptySubteam(parent) {
+    const base = window.TEAMS_META[parent]?.color || "#1E4FD8";
+    const siblings = window.store.getSubteamsByTeam(parent);
+    const palette = window.tintPalette(base, 8);
+    // Pioche la prochaine teinte non déjà prise
+    const taken = new Set(siblings.map((s) => (s.color || "").toLowerCase()));
+    const next = palette.find((c) => !taken.has(c.toLowerCase())) || palette[siblings.length % palette.length];
+    return { parent, name: "", color: next };
+  }
+
+  function startEdit(st) {
+    setEditing(st.id);
+    setTeam(st.parent);
+    setDraft({ ...emptySubteam(st.parent), ...st });
+  }
+
+  function submit() {
+    if (!draft.name.trim()) return alert("Nom de sous-équipe requis");
+    const payload = { ...draft, parent: team };
+    if (editing) window.store.subteams.update(editing, payload);
+    else window.store.subteams.add(payload);
+    setEditing(null);
+    setDraft(emptySubteam(team));
+  }
+
+  const palette = window.tintPalette(window.TEAMS_META[team]?.color || accent, 8);
+  const filtered = list.filter((s) => s.parent === team);
+
+  return (
+    <div className="nafe-admin__section">
+      <div className="nafe-admin__filter">
+        <span className="nafe-mono nafe-field__label">ÉQUIPE PARENTE</span>
+        <div className="nafe-admin__filterBtns">
+          {Object.entries(window.TEAMS_META).map(([k, t]) => (
+            <button
+              key={k}
+              className={`nafe-news__chip ${team === k ? "is-active" : ""}`}
+              style={team === k ? { background: t.color, color: "#fff", borderColor: t.color } : { borderColor: `${t.color}55`, color: t.color }}
+              onClick={() => { setTeam(k); setDraft(emptySubteam(k)); setEditing(null); }}
+            >
+              <span className="nafe-mono">{t.game}</span>
+              <span className="nafe-news__chipN nafe-mono">
+                {list.filter((s) => s.parent === k).length}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <FormShell
+        title={editing ? "Modifier la sous-équipe" : `Nouvelle sous-équipe · ${window.TEAMS_META[team]?.game}`}
+        onSubmit={submit}
+        onCancel={editing ? () => { setEditing(null); setDraft(emptySubteam(team)); } : null}
+        submitLabel={editing ? "Mettre à jour" : "Créer la sous-équipe"}
+        accent={accent}
+      >
+        <Field label="Nom" span={2}>
+          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                  />
+        </Field>
+        <Field label="Couleur (hex)">
+          <input value={draft.color} onChange={(e) => setDraft({ ...draft, color: e.target.value })}
+                  />
+        </Field>
+        <Field label="Aperçu">
+          <div className="nafe-admin__colorPreview" style={{ background: draft.color, borderColor: draft.color }}>
+            <span className="nafe-mono">{draft.color.toUpperCase()}</span>
+          </div>
+        </Field>
+        <Field label="Teintes suggérées (dérivées de la couleur du jeu)" span={4}>
+          <div className="nafe-admin__swatches">
+            {palette.map((c) => (
+              <button
+                type="button"
+                key={c}
+                className={`nafe-admin__swatch ${draft.color.toLowerCase() === c.toLowerCase() ? "is-active" : ""}`}
+                style={{ background: c, borderColor: draft.color.toLowerCase() === c.toLowerCase() ? "#fff" : "transparent" }}
+                onClick={() => setDraft({ ...draft, color: c })}
+                title={c}
+              />
+            ))}
+          </div>
+        </Field>
+      </FormShell>
+
+      <DataTable
+        accent={accent}
+        empty={`Aucune sous-équipe pour ${window.TEAMS_META[team]?.game}. Crée la première ci-dessus.`}
+        columns={[
+          { key: "color", label: "TEINTE", flex: 0.4, render: (r) => (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <span style={{ display: "inline-block", width: 20, height: 20, background: r.color, border: "1px solid rgba(255,255,255,0.15)" }} />
+              <span className="nafe-mono" style={{ fontSize: 11 }}>{r.color}</span>
+            </span>
+          )},
+          { key: "name", label: "NOM", flex: 1.2 },
+          { key: "parent", label: "PARENT", flex: 0.8, render: (r) => window.TEAMS_META[r.parent]?.game || r.parent },
+          { key: "count", label: "JOUEURS", flex: 0.5, render: (r) => window.store.getPlayersByTeam(r.parent, r.id).length },
+        ]}
+        rows={filtered}
+        onEdit={startEdit}
+        onDelete={(id) => {
+          // détache les joueurs rattachés avant suppression
+          window.store.players.list()
+            .filter((p) => p.subteam === id)
+            .forEach((p) => window.store.players.update(p.id, { subteam: "" }));
+          window.store.subteams.remove(id);
+        }}
+      />
+    </div>
+  );
+}
+
+// ============================================================
+//  Users
+// ============================================================
+function UsersAdmin({ accent, currentUser }) {
+  const list = window.store.users.list()
+    .slice()
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+  const defaultAdmins = window.store.DEFAULT_ADMINS || [];
+
+  return (
+    <div className="nafe-admin__section">
+      <div className="nafe-admin__card" style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <h3 className="nafe-display" style={{ margin: 0, fontSize: 18 }}>
+              COMPTES ADMINISTRATEURS INJECTÉS<span style={{ color: accent }}>.</span>
+            </h3>
+            <p className="nafe-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", margin: "4px 0 0" }}>
+              3 comptes officiels injectés dans le store (AdminNAFE, StaffNAFE, Mathia).
+            </p>
+          </div>
+          <button
+            type="button"
+            className="nafe-btn nafe-btn--sm nafe-btn--accent"
+            style={{ background: accent }}
+            onClick={() => {
+              window.store.seedAdmins();
+              alert("Comptes administrateurs vérifiés et réinjectés avec succès !");
+            }}
+          >
+            Réinjecter / Synchroniser les Admins
+          </button>
+        </div>
+      </div>
+
+      <DataTable
+        accent={accent}
+        empty="Aucun utilisateur."
+        columns={[
+          { key: "username", label: "PSEUDO", flex: 0.9 },
+          { key: "email", label: "EMAIL", flex: 1.2 },
+          { key: "role", label: "RÔLE", flex: 0.5, render: (r) => (
+            <span className="nafe-mono" style={{ color: r.role === "admin" ? accent : "rgba(255,255,255,0.6)" }}>
+              {r.role === "admin" ? "ADMIN" : "FAN"}
+            </span>
+          )},
+          { key: "xp", label: "XP", flex: 0.4, render: (r) => r.xp || 0 },
+          { key: "createdAt", label: "INSCRIT LE", flex: 0.7, render: (r) =>
+            r.createdAt ? new Date(r.createdAt).toLocaleDateString("fr-FR") : "—"
+          },
+          { key: "actions2", label: "RÔLE ACTION", flex: 1.2, render: (r) =>
+            r.id === currentUser.id ? (
+              <span className="nafe-mono" style={{ color: "rgba(255,255,255,0.4)" }}>(toi)</span>
+            ) : r.role === "admin" ? (
+              <button className="nafe-admin__iconBtn" onClick={() => window.store.demoteToUser(r.id)}>
+                Rétrograder
+              </button>
+            ) : (
+              <button className="nafe-admin__iconBtn" style={{ borderColor: accent, color: accent }}
+                      onClick={() => window.store.promoteToAdmin(r.id)}>
+                Promouvoir admin
+              </button>
+            )
+          },
+        ]}
+        rows={list}
+        onEdit={() => alert("Édition manuelle désactivée — utilise les boutons de rôle.")}
+        onDelete={(id) => {
+          if (id === currentUser.id) return alert("Tu ne peux pas supprimer ton propre compte.");
+          window.store.users.remove(id);
+        }}
+      />
+    </div>
+  );
+}
+
+// ============================================================
+//  Pinned Tweet Manager (Gestion du tweet épinglé à gauche)
+// ============================================================
+function PinnedTweetManager({ accent }) {
+  window.store.useVersion();
+  const [tweets, setTweets] = useAdminState(window.DEFAULT_TWEETS || []);
+  const [pinnedId, setPinnedId] = useAdminState(
+    window.store.settings ? window.store.settings.getPinnedTweetId() : "2098488608801935761"
+  );
+  const [customId, setCustomId] = useAdminState("");
+
+  useAdminEffect(() => {
+    fetch("/api/tweets")
+      .then(r => r.json())
+      .then(d => {
+        if (d.tweets && d.tweets.length > 0) setTweets(d.tweets);
+      })
+      .catch(() => {});
+  }, []);
+
+  const currentPinned = tweets.find(t => t.id === pinnedId) || tweets[0];
+
+  function handlePin(id) {
+    if (!id) return;
+    if (window.store.settings) {
+      window.store.settings.setPinnedTweetId(id);
+      setPinnedId(id);
+    }
+  }
+
+  return (
+    <div className="nafe-admin-pinned-panel nafe-clip-card">
+      <div className="nafe-admin-pinned-panel__head">
+        <div>
+          <span className="nafe-eyebrow" style={{ color: "var(--nafe-denim-blue)" }}>Twitter · Position Gauche Verrouillée</span>
+          <h3 className="nafe-display" style={{ margin: "6px 0 0", fontSize: 22, color: "#FFFFFF" }}>
+            TWEET ÉPINGLÉ SUR L'ACCUEIL
+          </h3>
+        </div>
+        <span className="nafe-pinned-badge">
+          <span>POSITION GAUCHE VERROUILLÉE</span>
+        </span>
+      </div>
+
+      <p style={{ fontSize: 13, opacity: 0.7, lineHeight: 1.5, margin: "0 0 20px" }}>
+        Le tweet sélectionné ci-dessous reste verrouillé en première position (à gauche) sur l'accueil. Si Nafe publie un nouveau tweet épinglé, choisissez-le ci-dessous pour qu'il prenne immédiatement sa place.
+      </p>
+
+      {/* Tweet actuellement épinglé */}
+      {currentPinned && (
+        <div style={{
+          background: "linear-gradient(135deg, rgba(2, 136, 209, 0.12) 0%, rgba(51, 51, 51, 0.35) 100%)",
+          border: "1px solid var(--nafe-denim-blue)",
+          padding: 20,
+          marginBottom: 20
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+            <span className="nafe-mono" style={{ color: "var(--nafe-denim-blue)", fontSize: 11, fontWeight: 700 }}>
+              ACTUELLEMENT AFFICHÉ À GAUCHE (ID: {currentPinned.id})
+            </span>
+            <span className="nafe-mono" style={{ opacity: 0.5, fontSize: 11 }}>
+              {new Date(currentPinned.created_at).toLocaleDateString("fr-FR")}
+            </span>
+          </div>
+          <p style={{ margin: 0, fontSize: 14, color: "#fff", whiteSpace: "pre-wrap" }}>{currentPinned.text}</p>
+        </div>
+      )}
+
+      {/* Remplacer par un autre tweet */}
+      <div style={{ marginTop: 20 }}>
+        <h4 className="nafe-display" style={{ fontSize: 15, margin: "0 0 12px", color: "var(--nafe-denim-blue)" }}>
+          Changer le tweet fixé à gauche :
+        </h4>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 240, overflowY: "auto", paddingRight: 8 }}>
+          {tweets.map(t => {
+            const isThisPinned = t.id === currentPinned?.id;
+            return (
+              <div 
+                key={t.id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "10px 14px",
+                  background: isThisPinned ? "rgba(2, 136, 209, 0.15)" : "rgba(255,255,255,0.02)",
+                  border: isThisPinned ? "1px solid var(--nafe-denim-blue)" : "1px solid rgba(255,255,255,0.06)",
+                  gap: 16
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="nafe-mono" style={{ fontSize: 10, opacity: 0.5, marginBottom: 2 }}>
+                    {new Date(t.created_at).toLocaleDateString("fr-FR")} · ID: {t.id}
+                  </div>
+                  <p style={{ margin: 0, fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", opacity: 0.9 }}>
+                    {t.text}
+                  </p>
+                </div>
+                {isThisPinned ? (
+                  <span className="nafe-mono" style={{ color: "var(--nafe-denim-blue)", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap" }}>
+                    ACTIF
+                  </span>
+                ) : (
+                  <button 
+                    className="nafe-btn nafe-btn--ghost nafe-btn--sm"
+                    style={{ whiteSpace: "nowrap", padding: "6px 12px", fontSize: 10 }}
+                    onClick={() => handlePin(t.id)}
+                  >
+                    Fixer à gauche
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Option saisie manuelle d'un ID de tweet */}
+        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+          <input 
+            type="text" 
+             
+            value={customId}
+            onChange={(e) => setCustomId(e.target.value)}
+            style={{ flex: 1, padding: "10px 14px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontFamily: "JetBrains Mono", fontSize: 12 }}
+          />
+          <button 
+            className="nafe-btn nafe-btn--accent nafe-btn--sm"
+            style={{ background: accent || "var(--nafe-water-blue)" }}
+            onClick={() => {
+              if (!customId.trim()) return alert("Veuillez saisir un ID de tweet valide");
+              handlePin(customId.trim());
+              setCustomId("");
+            }}
+          >
+            Définir comme épinglé
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+//  Socials (réseaux sociaux)
+// ============================================================
+const PLATFORM_OPTIONS = ["discord","twitch","youtube","twitter","instagram","tiktok","kick","snapchat"];
+
+function SocialsAdmin({ accent }) {
+  const list = window.store.socials.list();
+  const [editing, setEditing] = useAdminState(null);
+  const [draft, setDraft] = useAdminState(emptySocial());
+
+  function emptySocial() {
+    return { platform: "discord", handle: "", url: "", description: "" };
+  }
+  function startEdit(s) { setEditing(s.id); setDraft({ ...emptySocial(), ...s }); }
+  function submit() {
+    if (!draft.handle.trim()) return alert("Le handle / nom est requis");
+    if (!draft.url.trim()) return alert("L'URL est requise");
+    if (editing) window.store.socials.update(editing, draft);
+    else window.store.socials.add(draft);
+    setEditing(null);
+    setDraft(emptySocial());
+  }
+
+  const meta = window.PLATFORM_META?.[draft.platform];
+  const previewColor = meta?.bg || meta?.color || accent;
+
+  return (
+    <div className="nafe-admin__section">
+      {/* Panneau de verrouillage du Tweet Épinglé */}
+      <PinnedTweetManager accent={accent} />
+
+      <div className="nafe-admin__note">
+        <span className="nafe-mono" style={{ color: accent }}>ⓘ RÉSEAUX</span>
+        <p>Ajoute ici les liens vers vos réseaux sociaux. Ils s'affichent sur la page <strong>Contact</strong>.
+        Discord bénéficie d'une carte héro mise en avant.</p>
+      </div>
+      <FormShell
+        title={editing ? "Modifier le réseau" : "Ajouter un réseau social"}
+        onSubmit={submit}
+        onCancel={editing ? () => { setEditing(null); setDraft(emptySocial()); } : null}
+        submitLabel={editing ? "Mettre à jour" : "Ajouter"}
+        accent={accent}
+      >
+        <Field label="Plateforme">
+          <select value={draft.platform} onChange={(e) => setDraft({ ...draft, platform: e.target.value })}>
+            {PLATFORM_OPTIONS.map((p) => (
+              <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Aperçu logo">
+          <div style={{ display:"flex", alignItems:"center", gap:12, padding:"8px 0" }}>
+            <div style={{ width:40, height:40, background: previewColor, display:"flex", alignItems:"center", justifyContent:"center" }}>
+              {window.PlatformIcon && <window.PlatformIcon platform={draft.platform} size={24} />}
+            </div>
+            <span className="nafe-mono" style={{ color: previewColor, fontSize:11 }}>{draft.platform.toUpperCase()}</span>
+          </div>
+        </Field>
+        <Field label="Handle / Nom affiché" span={2}>
+          <input value={draft.handle} onChange={(e) => setDraft({ ...draft, handle: e.target.value })}
+                  />
+        </Field>
+        <Field label="URL du lien" span={2}>
+          <input type="url" value={draft.url} onChange={(e) => setDraft({ ...draft, url: e.target.value })}
+                  />
+        </Field>
+        <Field label="Description (optionnel)" span={4}>
+          <input value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                  />
+        </Field>
+      </FormShell>
+      <DataTable
+        accent={accent}
+        empty="Aucun réseau configuré. Ajoute le premier ci-dessus."
+        columns={[
+          { key: "platform", label: "PLATEFORME", flex: 0.7, render: (r) => {
+            const m = window.PLATFORM_META?.[r.platform];
+            const c = m?.bg || m?.color || accent;
+            return (
+              <span style={{ display:"flex", alignItems:"center", gap:8 }}>
+                <span style={{ width:20, height:20, background:c, display:"inline-flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  {window.PlatformIcon && <window.PlatformIcon platform={r.platform} size={12} />}
+                </span>
+                <span className="nafe-mono" style={{ color:c, fontSize:11 }}>{r.platform.toUpperCase()}</span>
+              </span>
+            );
+          }},
+          { key: "handle",      label: "HANDLE",      flex: 1 },
+          { key: "url",         label: "URL",         flex: 1.4, render: (r) => <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: accent, wordBreak:"break-all", fontSize:11 }}>{r.url}</a> },
+          { key: "description", label: "DESCRIPTION", flex: 1.5 },
+        ]}
+        rows={list}
+        onEdit={startEdit}
+        onDelete={(id) => window.store.socials.remove(id)}
+      />
+    </div>
+  );
+}
+
+// ============================================================
+//  Community (modération des posts)
+// ============================================================
+function CommunityAdmin({ accent }) {
+  const list = window.store.posts.list()
+    .slice()
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+  return (
+    <div className="nafe-admin__section">
+      <div className="nafe-admin__note">
+        <span className="nafe-mono" style={{ color: accent }}>ⓘ MODÉRATION</span>
+        <p>Voici tous les posts publiés par les fans. Tu peux supprimer un post inapproprié
+        via le bouton . Les fans gèrent eux-mêmes la création depuis la page Community.</p>
+      </div>
+      <DataTable
+        accent={accent}
+        empty="Aucun post publié pour l'instant."
+        columns={[
+          { key: "authorName", label: "AUTEUR",  flex: 0.7 },
+          { key: "title",      label: "TITRE",   flex: 1.4 },
+          { key: "content",    label: "CONTENU", flex: 2,   render: (r) => r.content?.slice(0, 80) + (r.content?.length > 80 ? "…" : "") },
+          { key: "likes",      label: "LIKES",   flex: 0.3, render: (r) => r.likes || 0 },
+          { key: "createdAt",  label: "DATE",    flex: 0.7, render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleDateString("fr-FR") : "—" },
+        ]}
+        rows={list}
+        onEdit={() => {}}
+        onDelete={(id) => { if (confirm("Supprimer ce post ?")) window.store.posts.remove(id); }}
+      />
+    </div>
+  );
+}
+
+function EngagementAdmin({ accent }) {
+  const [subTab, setSubTab] = useAdminState("predictions");
+  
+  function seed() {
+    if (window.store.badges.list().length > 0) return alert("Données déjà présentes.");
+    window.store.badges.add({ name: "Premier Pas", description: "Inscrit sur le portail NAFE", icon: "", color: "#B6F500" });
+    window.store.badges.add({ name: "Pronostiqueur", description: "A voté sur son premier match", icon: "◈", color: "#1E4FD8" });
+    window.store.badges.add({ name: "Fidèle", description: "Membre actif de la communauté", icon: "▲", color: "#E11D74" });
+    
+    const match = window.store.matches.list()[0];
+    if (match) {
+      window.store.predictions.add({ 
+        title: "Qui remportera la map 1 ?", 
+        matchId: match.id, 
+        matchTitle: `${match.opp} (${match.date})`,
+        status: "active", 
+        options: [{ id: "o1", label: "NAFE" }, { id: "o2", label: match.opp }] 
+      });
+    }
+    alert("Données d'engagement générées !");
+  }
+
+  return (
+    <div className="nafe-admin__section">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+        <div className="nafe-admin__filterBtns" style={{ marginBottom: 0 }}>
+          <button className={`nafe-news__chip ${subTab === 'predictions' ? 'is-active' : ''}`} onClick={() => setSubTab('predictions')}>
+            <span className="nafe-mono">PRÉDICTIONS</span>
+          </button>
+          <button className={`nafe-news__chip ${subTab === 'badges' ? 'is-active' : ''}`} onClick={() => setSubTab('badges')}>
+            <span className="nafe-mono">BADGES</span>
+          </button>
+        </div>
+        <button className="nafe-btn nafe-btn--ghost nafe-btn--sm" onClick={seed}>
+          Seed Engagement Data
+        </button>
+      </div>
+      
+      {subTab === 'predictions' ? <PredictionsAdmin accent={accent} /> : <BadgesAdmin accent={accent} />}
+    </div>
+  );
+}
+
+// ============================================================
+//  Sponsors
+// ============================================================
+const SPONSOR_TIERS = [
+  "Partenaire Titre",
+  "Partenaire Majeur",
+  "Équipementier Officiel",
+  "Partenaire Infrastructure",
+  "Partenaire Textile",
+  "Partenaire Média",
+  "Supporter Officiel",
+  "Partenaire Technique"
+];
+
+function emptySponsor() {
+  return {
+    name: "",
+    tier: "Partenaire Majeur",
+    category: "",
+    logo: "",
+    banner: "",
+    description: "",
+    websiteUrl: "",
+    promoCode: "",
+    order: 1,
+    active: true,
+  };
+}
+
+function SponsorsAdmin({ accent }) {
+  window.store.useVersion();
+  const list = window.store.sponsors ? window.store.sponsors.list() : [];
+  const settings = (window.store.sponsors_settings && window.store.sponsors_settings.get()) || {};
+
+  const [editing, setEditing] = useAdminState(null);
+  const [draft, setDraft] = useAdminState(emptySponsor());
+  const [settingsDraft, setSettingsDraft] = useAdminState({
+    heroEyebrow: settings.heroEyebrow || "",
+    heroTitle: settings.heroTitle || "",
+    heroLede: settings.heroLede || "",
+    ctaTitle: settings.ctaTitle || "",
+    ctaDesc: settings.ctaDesc || "",
+    ctaButtonLabel: settings.ctaButtonLabel || "",
+    ctaButtonUrl: settings.ctaButtonUrl || "",
+    footerNotice: settings.footerNotice || "",
+  });
+
+  const [activeSection, setActiveSection] = useAdminState("sponsors"); // "sponsors" | "header"
+
+  function startEdit(s) {
+    setEditing(s.id);
+    setDraft({ ...emptySponsor(), ...s });
+    setActiveSection("sponsors");
+  }
+
+  function submitSponsor() {
+    if (!draft.name.trim()) return alert("Le nom du sponsor est requis");
+    const payload = {
+      ...draft,
+      order: +draft.order || 1,
+      active: draft.active !== false
+    };
+    if (editing) {
+      window.store.sponsors.update(editing, payload);
+    } else {
+      window.store.sponsors.add(payload);
+    }
+    setEditing(null);
+    setDraft(emptySponsor());
+  }
+
+  function saveSettings(e) {
+    e.preventDefault();
+    window.store.sponsors_settings.set(settingsDraft);
+    alert("Textes de la page Sponsors enregistrés avec succès !");
+  }
+
+  return (
+    <div className="nafe-admin__section">
+      {/* Barre d'action rapide */}
+      <div className="nafe-admin__card" style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <h3 className="nafe-display" style={{ margin: 0, fontSize: 18 }}>
+              ESPACE SPONSORS & PARTENAIRES<span style={{ color: accent }}>.</span>
+            </h3>
+            <p className="nafe-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", margin: "4px 0 0" }}>
+              Tous les blocs et fiches partenaires sont entièrement configurables et dynamiques.
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="nafe-btn nafe-btn--sm nafe-btn--accent"
+              style={{ background: accent }}
+              onClick={() => {
+                if (confirm("Charger les exemples de sponsors et de textes par défaut ?")) {
+                  window.store.seedSponsorsTemplate();
+                  setSettingsDraft(window.store.sponsors_settings.get());
+                }
+              }}
+            >
+              Charger un modèle d'exemple
+            </button>
+            <button
+              type="button"
+              className="nafe-btn nafe-btn--sm nafe-btn--ghost"
+              style={{ borderColor: "#FF5252", color: "#FF8A80" }}
+              onClick={() => {
+                if (confirm("Voulez-vous vraiment vider TOUS les sponsors et textes de la page ?")) {
+                  window.store.clearSponsors();
+                  setSettingsDraft({
+                    heroEyebrow: "", heroTitle: "", heroLede: "",
+                    ctaTitle: "", ctaDesc: "", ctaButtonLabel: "", ctaButtonUrl: "", footerNotice: ""
+                  });
+                }
+              }}
+            >
+              Vider tous les sponsors & textes
+            </button>
+          </div>
+        </div>
+
+        {/* Sous-onglets */}
+        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+          <button
+            type="button"
+            className={`nafe-btn nafe-btn--sm ${activeSection === "sponsors" ? "nafe-btn--accent" : "nafe-btn--ghost"}`}
+            style={activeSection === "sponsors" ? { background: accent } : {}}
+            onClick={() => setActiveSection("sponsors")}
+          >
+            Fiches Partenaires ({list.length})
+          </button>
+          <button
+            type="button"
+            className={`nafe-btn nafe-btn--sm ${activeSection === "header" ? "nafe-btn--accent" : "nafe-btn--ghost"}`}
+            style={activeSection === "header" ? { background: accent } : {}}
+            onClick={() => setActiveSection("header")}
+          >
+            Textes d'en-tête & CTA Partenaire
+          </button>
+        </div>
+      </div>
+
+      {activeSection === "header" ? (
+        <form onSubmit={saveSettings} className="nafe-admin__card" style={{ marginBottom: 24 }}>
+          <h4 className="nafe-display" style={{ margin: "0 0 16px", fontSize: 16 }}>
+            PERSONNALISATION DES TEXTES DE LA PAGE SPONSORS
+          </h4>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+            <Field label="Surtitre Hero (Eyebrow)" span={2}>
+              <input
+                value={settingsDraft.heroEyebrow}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, heroEyebrow: e.target.value })}
+                
+              />
+            </Field>
+            <Field label="Titre Principal">
+              <input
+                value={settingsDraft.heroTitle}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, heroTitle: e.target.value })}
+                
+              />
+            </Field>
+            <Field label="Légende de bas de page (Footer notice)">
+              <input
+                value={settingsDraft.footerNotice}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, footerNotice: e.target.value })}
+                
+              />
+            </Field>
+            <Field label="Introduction / Lede du Hero" span={2}>
+              <textarea
+                rows={2}
+                value={settingsDraft.heroLede}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, heroLede: e.target.value })}
+                
+              />
+            </Field>
+
+            <Field label="Titre du bloc 'Devenir Partenaire'">
+              <input
+                value={settingsDraft.ctaTitle}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, ctaTitle: e.target.value })}
+                
+              />
+            </Field>
+            <Field label="Label du bouton CTA">
+              <input
+                value={settingsDraft.ctaButtonLabel}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, ctaButtonLabel: e.target.value })}
+                
+              />
+            </Field>
+            <Field label="Lien du bouton CTA">
+              <input
+                value={settingsDraft.ctaButtonUrl}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, ctaButtonUrl: e.target.value })}
+                
+              />
+            </Field>
+            <Field label="Description du bloc 'Devenir Partenaire'" span={2}>
+              <textarea
+                rows={2}
+                value={settingsDraft.ctaDesc}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, ctaDesc: e.target.value })}
+                
+              />
+            </Field>
+          </div>
+
+          <div style={{ marginTop: 18, display: "flex", justifyContent: "flex-end" }}>
+            <button type="submit" className="nafe-btn nafe-btn--accent" style={{ background: accent }}>
+              Enregistrer les textes de la page Sponsors
+            </button>
+          </div>
+        </form>
+      ) : (
+        <>
+          <FormShell
+            title={editing ? "Modifier la fiche sponsor" : "Créer une nouvelle fiche sponsor"}
+            onSubmit={submitSponsor}
+            onCancel={editing ? () => { setEditing(null); setDraft(emptySponsor()); } : null}
+            submitLabel={editing ? "Mettre à jour" : "Ajouter le sponsor"}
+            accent={accent}
+          >
+            <Field label="Nom du sponsor / Marque" span={2}>
+              <input
+                value={draft.name}
+                onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                
+              />
+            </Field>
+            <Field label="Palier de partenariat">
+              <select
+                value={draft.tier}
+                onChange={(e) => setDraft({ ...draft, tier: e.target.value })}
+              >
+                {SPONSOR_TIERS.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Secteur / Catégorie">
+              <input
+                value={draft.category || ""}
+                onChange={(e) => setDraft({ ...draft, category: e.target.value })}
+                
+              />
+            </Field>
+            <Field label="URL de la bannière (grande image)" span={2}>
+              <input
+                value={draft.banner || ""}
+                onChange={(e) => setDraft({ ...draft, banner: e.target.value })}
+                
+              />
+              {draft.banner && (
+                <div style={{ marginTop: 8, height: 70, overflow: "hidden", borderRadius: 4, border: "1px solid rgba(255,255,255,0.1)" }}>
+                  <img src={draft.banner} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { e.target.style.display = 'none'; }} />
+                </div>
+              )}
+            </Field>
+            <Field label="URL du logo / Icône">
+              <input
+                value={draft.logo || ""}
+                onChange={(e) => setDraft({ ...draft, logo: e.target.value })}
+                
+              />
+            </Field>
+            <Field label="Lien du site officiel">
+              <input
+                value={draft.websiteUrl || ""}
+                onChange={(e) => setDraft({ ...draft, websiteUrl: e.target.value })}
+                
+              />
+            </Field>
+            <Field label="Code promo communautaire (optionnel)">
+              <input
+                value={draft.promoCode || ""}
+                onChange={(e) => setDraft({ ...draft, promoCode: e.target.value })}
+                
+              />
+            </Field>
+            <Field label="Ordre d'affichage">
+              <input
+                type="number"
+                min={1}
+                value={draft.order}
+                onChange={(e) => setDraft({ ...draft, order: e.target.value })}
+              />
+            </Field>
+            <Field label="Statut actif" span={2}>
+              <label style={{ display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer", color: "#fff" }}>
+                <input
+                  type="checkbox"
+                  checked={draft.active !== false}
+                  onChange={(e) => setDraft({ ...draft, active: e.target.checked })}
+                  style={{ width: 18, height: 18 }}
+                />
+                <span>Afficher ce sponsor publiquement sur la page Sponsors</span>
+              </label>
+            </Field>
+            <Field label="Description détaillée du partenariat" span={2}>
+              <textarea
+                rows={4}
+                value={draft.description}
+                onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                
+              />
+            </Field>
+          </FormShell>
+
+          <DataTable
+            accent={accent}
+            empty="Aucun sponsor enregistré. Utilisez le formulaire ci-dessus pour créer vos partenaires."
+            columns={[
+              { key: "order", label: "N°", flex: 0.3, render: (r) => `#${r.order || 1}` },
+              { key: "logo", label: "LOGO", flex: 0.5, render: (r) => (
+                r.logo ? <img src={r.logo} alt={r.name} style={{ width: 28, height: 28, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; }} /> : "—"
+              )},
+              { key: "name", label: "NOM", flex: 1.2 },
+              { key: "tier", label: "PALIER", flex: 1, render: (r) => (
+                <span className="nafe-mono" style={{ color: accent, fontSize: 11 }}>{r.tier}</span>
+              )},
+              { key: "promoCode", label: "CODE PROMO", flex: 0.8, render: (r) => r.promoCode ? <span className="nafe-mono" style={{ background: "rgba(255,255,255,0.06)", padding: "2px 6px" }}>{r.promoCode}</span> : "—" },
+              { key: "active", label: "STATUT", flex: 0.6, render: (r) => (
+                <span style={{ color: r.active !== false ? "var(--nafe-green-peas)" : "#FF5252" }}>
+                  {r.active !== false ? "● Actif" : "○ Inactif"}
+                </span>
+              )},
+            ]}
+            rows={list.sort((a, b) => (a.order || 0) - (b.order || 0))}
+            onEdit={startEdit}
+            onDelete={(id) => window.store.sponsors.remove(id)}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+//  Association Admin (Page Simple Unifiee : Titre, Textes, Images PNG)
 // ============================================================
 function AssociationAdmin({ accent }) {
   window.store.useVersion();
   const settings = (window.store.association_settings && window.store.association_settings.get()) || {};
 
-  // État local du formulaire de la page
+  // Etat local du formulaire de la page
   const [draft, setDraft] = useAdminState({
     badge: settings.badge || settings.heroBadge || "",
     title: settings.title || settings.heroTitle || "",
@@ -809,18 +1798,18 @@ function AssociationAdmin({ accent }) {
     textSections: Array.isArray(settings.textSections) ? settings.textSections : [],
     donationActive: settings.donationActive !== false,
     donationUrl: settings.donationUrl || "https://www.helloasso.com",
-    donationButtonText: settings.donationButtonText || settings.donationButtonLabel || "Soutenir l'Association (HelloAsso) ↗",
+    donationButtonText: settings.donationButtonText || settings.donationButtonLabel || "Soutenir l'Association (HelloAsso)",
     donationNote: settings.donationNote || settings.donationDesc || "",
   });
 
-  // État pour ajouter une nouvelle image PNG
+  // Etat pour ajouter une nouvelle image PNG
   const [newImage, setNewImage] = useAdminState({
     url: "",
     caption: "",
     layout: "center", // "banner" | "center" | "grid"
   });
 
-  // État pour ajouter une section de texte complémentaire (ex: Termes, Règlement...)
+  // Etat pour ajouter une section de texte complementaire (Termes, Reglement...)
   const [newSection, setNewSection] = useAdminState({
     title: "",
     text: "",
@@ -828,7 +1817,7 @@ function AssociationAdmin({ accent }) {
 
   const [saveSuccess, setSaveSuccess] = useAdminState(false);
 
-  // Synchroniser si le store change (ex: suite à un seed ou clear)
+  // Synchroniser si le store change
   React.useEffect(() => {
     setDraft({
       badge: settings.badge || settings.heroBadge || "",
@@ -840,7 +1829,7 @@ function AssociationAdmin({ accent }) {
       textSections: Array.isArray(settings.textSections) ? settings.textSections : [],
       donationActive: settings.donationActive !== false,
       donationUrl: settings.donationUrl || "https://www.helloasso.com",
-      donationButtonText: settings.donationButtonText || settings.donationButtonLabel || "Soutenir l'Association (HelloAsso) ↗",
+      donationButtonText: settings.donationButtonText || settings.donationButtonLabel || "Soutenir l'Association (HelloAsso)",
       donationNote: settings.donationNote || settings.donationDesc || "",
     });
   }, [
@@ -905,7 +1894,7 @@ function AssociationAdmin({ accent }) {
 
   return (
     <div className="nafe-admin__section">
-      {/* Barre d'action et d'en-tête */}
+      {/* Barre d'action et d'en-tete */}
       <div className="nafe-admin__card" style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 }}>
           <div>
@@ -913,7 +1902,7 @@ function AssociationAdmin({ accent }) {
               PAGE ASSOCIATION (LOI 1901)
             </h3>
             <p className="nafe-empty__text" style={{ margin: "4px 0 0", fontSize: 13 }}>
-              Page unique et directe : configurez le titre, rédigez vos textes, placez vos images PNG et activez le bouton de don.
+              Page unique et directe : configurez le titre, redigez vos textes, placez vos images PNG et activez le bouton de don.
             </p>
           </div>
 
@@ -924,7 +1913,7 @@ function AssociationAdmin({ accent }) {
               rel="noreferrer"
               className="nafe-btn nafe-btn--ghost nafe-btn--sm"
             >
-              ↗ Voir la page publique
+              Voir la page publique
             </a>
             <button
               type="button"
@@ -936,7 +1925,7 @@ function AssociationAdmin({ accent }) {
                 setDraft({ ...fresh });
               }}
             >
-              ⚡ Charger un exemple complet
+              Charger un exemple complet
             </button>
             <button
               type="button"
@@ -951,7 +1940,7 @@ function AssociationAdmin({ accent }) {
                 });
               }}
             >
-              🗑 Vider toute la page
+              Vider toute la page
             </button>
           </div>
         </div>
@@ -969,16 +1958,16 @@ function AssociationAdmin({ accent }) {
               fontWeight: 600
             }}
           >
-            ✓ Modifications de la page Association enregistrées avec succès !
+            Modifications de la page Association enregistrees avec succes !
           </div>
         )}
       </div>
 
       <form onSubmit={saveAll}>
-        {/* 1. TITRE ET EN-TÊTE DE LA PAGE */}
+        {/* 1. TITRE ET EN-TETE DE LA PAGE */}
         <div className="nafe-admin__card" style={{ marginBottom: 20 }}>
           <h4 className="nafe-display" style={{ margin: "0 0 16px", fontSize: 16, color: accent }}>
-            1. TITRE ET EN-TÊTE DE LA PAGE
+            1. TITRE ET EN-TETE DE LA PAGE
           </h4>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
@@ -986,7 +1975,6 @@ function AssociationAdmin({ accent }) {
               <input
                 value={draft.badge}
                 onChange={(e) => setDraft({ ...draft, badge: e.target.value })}
-                placeholder="Ex: ASSOCIATION LOI 1901"
               />
             </Field>
 
@@ -994,7 +1982,6 @@ function AssociationAdmin({ accent }) {
               <input
                 value={draft.title}
                 onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-                placeholder="Ex: L'ASSOCIATION NAFE"
               />
             </Field>
 
@@ -1002,21 +1989,19 @@ function AssociationAdmin({ accent }) {
               <input
                 value={draft.subtitle}
                 onChange={(e) => setDraft({ ...draft, subtitle: e.target.value })}
-                placeholder="Ex: Structure esportive associative & communauté compétitive"
               />
             </Field>
 
-            <Field label="Image Bannière PNG (en haut de page)" span={2}>
+            <Field label="Image Banniere PNG (en haut de page)" span={2}>
               <input
                 value={draft.bannerImage}
                 onChange={(e) => setDraft({ ...draft, bannerImage: e.target.value })}
-                placeholder="URL de l'image PNG (ex: assets/brand/banner_nafe.png ou https://...)"
               />
               {draft.bannerImage && (
                 <div style={{ marginTop: 10, maxHeight: 140, overflow: "hidden", borderRadius: 4, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.4)", textAlign: "center" }}>
                   <img
                     src={draft.bannerImage}
-                    alt="Aperçu bannière"
+                    alt="Apercu banniere"
                     style={{ maxWidth: "100%", maxHeight: 140, objectFit: "contain" }}
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
@@ -1032,7 +2017,7 @@ function AssociationAdmin({ accent }) {
             2. TEXTE PRINCIPAL DE L'ASSOCIATION
           </h4>
           <p className="nafe-empty__text" style={{ fontSize: 12, margin: "0 0 12px" }}>
-            Rédigez ici la présentation de l'association, son histoire et ses objectifs. Les doubles retours à la ligne créent des paragraphes nets. Les lignes débutant par <code>•</code> créent des puces et les lignes avec <code>## Titre</code> créent des sous-titres.
+            Redigez ici la presentation de l'association, son histoire et ses objectifs.
           </p>
 
           <Field label="Contenu du texte principal">
@@ -1040,7 +2025,6 @@ function AssociationAdmin({ accent }) {
               rows={8}
               value={draft.mainText}
               onChange={(e) => setDraft({ ...draft, mainText: e.target.value })}
-              placeholder="Rédigez la présentation de l'association..."
               style={{ fontSize: 14, lineHeight: 1.6 }}
             />
           </Field>
@@ -1055,7 +2039,7 @@ function AssociationAdmin({ accent }) {
           </div>
 
           <p className="nafe-empty__text" style={{ fontSize: 12, margin: "0 0 16px" }}>
-            Ajoutez des images PNG (logos, affiches, photos d'équipe découpées) qui seront disposées élégamment sur la page.
+            Ajoutez des images PNG qui seront disposees sur la page.
           </p>
 
           {/* Formulaire d'ajout rapide d'image PNG */}
@@ -1073,15 +2057,13 @@ function AssociationAdmin({ accent }) {
                 <input
                   value={newImage.url}
                   onChange={(e) => setNewImage({ ...newImage, url: e.target.value })}
-                  placeholder="https://... ou assets/brand/..."
                 />
               </Field>
 
-              <Field label="Légende / Description">
+              <Field label="Legende / Description">
                 <input
                   value={newImage.caption}
                   onChange={(e) => setNewImage({ ...newImage, caption: e.target.value })}
-                  placeholder="Ex: Logo officiel de l'association"
                 />
               </Field>
 
@@ -1090,9 +2072,9 @@ function AssociationAdmin({ accent }) {
                   value={newImage.layout}
                   onChange={(e) => setNewImage({ ...newImage, layout: e.target.value })}
                 >
-                  <option value="center">Centré / Format standard</option>
-                  <option value="banner">Pleine largeur (Bannière)</option>
-                  <option value="grid">Grille côte à côte</option>
+                  <option value="center">Centre / Format standard</option>
+                  <option value="banner">Pleine largeur (Banniere)</option>
+                  <option value="grid">Grille cote a cote</option>
                 </select>
               </Field>
 
@@ -1108,15 +2090,15 @@ function AssociationAdmin({ accent }) {
               </div>
             </div>
 
-            {/* Prévisualisation immédiate lors de la saisie */}
+            {/* Previsualisation immediate lors de la saisie */}
             {newImage.url && (
               <div style={{ marginTop: 12, padding: 10, background: "rgba(0,0,0,0.5)", borderRadius: 4, textAlign: "center" }}>
                 <span className="nafe-mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", display: "block", marginBottom: 6 }}>
-                  Aperçu de l'image :
+                  Apercu de l'image :
                 </span>
                 <img
                   src={newImage.url}
-                  alt="Aperçu"
+                  alt="Apercu"
                   style={{ maxHeight: 120, maxWidth: "100%", objectFit: "contain" }}
                   onError={(e) => { e.target.style.display = 'none'; }}
                 />
@@ -1124,10 +2106,10 @@ function AssociationAdmin({ accent }) {
             )}
           </div>
 
-          {/* Liste des images déjà placées */}
+          {/* Liste des images deja placees */}
           {draft.images.length === 0 ? (
             <div style={{ textAlign: "center", padding: "16px 0", color: "rgba(255,255,255,0.4)", fontSize: 13 }}>
-              Aucune image PNG placée pour le moment.
+              Aucune image PNG placee pour le moment.
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
@@ -1157,7 +2139,7 @@ function AssociationAdmin({ accent }) {
                       {img.caption || "Image " + (idx + 1)}
                     </span>
                     <span className="nafe-mono" style={{ fontSize: 10, color: accent }}>
-                      {img.layout === "banner" ? "Pleine largeur" : img.layout === "grid" ? "Grille" : "Centré"}
+                      {img.layout === "banner" ? "Pleine largeur" : img.layout === "grid" ? "Grille" : "Centre"}
                     </span>
                   </div>
                   <button
@@ -1166,7 +2148,7 @@ function AssociationAdmin({ accent }) {
                     className="nafe-btn nafe-btn--ghost nafe-btn--sm"
                     style={{ borderColor: "rgba(255,82,82,0.4)", color: "#FF5252", fontSize: 11, width: "100%" }}
                   >
-                    ✕ Retirer l'image
+                    Retirer l'image
                   </button>
                 </div>
               ))}
@@ -1174,13 +2156,13 @@ function AssociationAdmin({ accent }) {
           )}
         </div>
 
-        {/* 4. SECTIONS DE TEXTE SUPPLÉMENTAIRES (Termes, Statuts, Règlement...) */}
+        {/* 4. SECTIONS DE TEXTE SUPPLEMENTAIRES */}
         <div className="nafe-admin__card" style={{ marginBottom: 20 }}>
           <h4 className="nafe-display" style={{ margin: "0 0 16px", fontSize: 16, color: accent }}>
-            4. SECTIONS DE TEXTE COMPLÉMENTAIRES (Termes, Règlement, etc.) ({draft.textSections.length})
+            4. SECTIONS DE TEXTE COMPLEMENTAIRES ({draft.textSections.length})
           </h4>
           <p className="nafe-empty__text" style={{ fontSize: 12, margin: "0 0 16px" }}>
-            Ajoutez d'autres parties de texte avec leur titre (par exemple pour détailler les termes légaux ou les modalités d'adhésion).
+            Ajoutez d'autres parties de texte avec leur titre.
           </p>
 
           {/* Formulaire pour ajouter une section */}
@@ -1198,7 +2180,6 @@ function AssociationAdmin({ accent }) {
                 <input
                   value={newSection.title}
                   onChange={(e) => setNewSection({ ...newSection, title: e.target.value })}
-                  placeholder="Ex: TERMES ET CONDITIONS / RÈGLEMENT INTÉRIEUR"
                 />
               </Field>
               <Field label="Texte de la section">
@@ -1206,7 +2187,6 @@ function AssociationAdmin({ accent }) {
                   rows={4}
                   value={newSection.text}
                   onChange={(e) => setNewSection({ ...newSection, text: e.target.value })}
-                  placeholder="Contenu de la section (accepte retours à la ligne et puces •)..."
                 />
               </Field>
             </div>
@@ -1252,17 +2232,17 @@ function AssociationAdmin({ accent }) {
                 className="nafe-btn nafe-btn--ghost nafe-btn--sm"
                 style={{ borderColor: "rgba(255,82,82,0.4)", color: "#FF5252", fontSize: 11 }}
               >
-                ✕ Supprimer
+                Supprimer
               </button>
             </div>
           ))}
         </div>
 
-        {/* 5. BOUTON DE SOUTIEN FINANCIER (DON HELLOASSO) */}
+        {/* 5. BOUTON DE SOUTIEN FINANCIER */}
         <div className="nafe-admin__card" style={{ marginBottom: 24 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
             <h4 className="nafe-display" style={{ margin: 0, fontSize: 16, color: accent }}>
-              5. BOUTON DE SOUTIEN FINANCIER (DON LOI 1901)
+              5. BOUTON DE SOUTIEN FINANCIER
             </h4>
             <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#fff" }}>
               <input
@@ -1280,15 +2260,13 @@ function AssociationAdmin({ accent }) {
               <input
                 value={draft.donationUrl}
                 onChange={(e) => setDraft({ ...draft, donationUrl: e.target.value })}
-                placeholder="https://www.helloasso.com/associations/..."
               />
             </Field>
 
-            <Field label="Libellé du bouton de soutien">
+            <Field label="Libelle du bouton de soutien">
               <input
                 value={draft.donationButtonText}
                 onChange={(e) => setDraft({ ...draft, donationButtonText: e.target.value })}
-                placeholder="Ex: Soutenir l'Association (HelloAsso) ↗"
               />
             </Field>
 
@@ -1296,7 +2274,6 @@ function AssociationAdmin({ accent }) {
               <input
                 value={draft.donationNote}
                 onChange={(e) => setDraft({ ...draft, donationNote: e.target.value })}
-                placeholder="Ex: Association à but non lucratif · 100% réinvesti dans nos équipes"
               />
             </Field>
           </div>
@@ -1309,7 +2286,7 @@ function AssociationAdmin({ accent }) {
             className="nafe-btn nafe-btn--accent"
             style={{ background: accent, padding: "14px 36px", fontSize: 15, fontWeight: 700 }}
           >
-            💾 Enregistrer les modifications de la page Association
+            Enregistrer les modifications de la page Association
           </button>
         </div>
       </form>
@@ -1319,4 +2296,3 @@ function AssociationAdmin({ accent }) {
 
 
 window.AdminPage = AdminPage;
-

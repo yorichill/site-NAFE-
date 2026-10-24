@@ -63,7 +63,7 @@ function SponsorsPage({ accent }) {
                 className="nafe-btn nafe-btn--ghost nafe-btn--sm nafe-clip-card"
                 style={{ borderColor: accent, color: accent }}
               >
-                ⚙ Gérer les sponsors & blocs (Admin)
+                Gérer les sponsors & blocs (Admin)
               </a>
             </div>
           )}
@@ -257,7 +257,7 @@ function SponsorsPage({ accent }) {
                         className="nafe-btn nafe-btn--ghost nafe-btn--sm"
                         onClick={() => handleCopy(currentSponsor.promoCode)}
                       >
-                        {copiedCode ? "✓ Copié !" : "Copier"}
+                        {copiedCode ? "Copié !" : "Copier"}
                       </button>
                     </div>
                   </div>
@@ -274,7 +274,7 @@ function SponsorsPage({ accent }) {
                       className="nafe-mono"
                       style={{ color: accent, textDecoration: "underline" }}
                     >
-                      ✎ Modifier cette fiche dans l'Admin
+                      Modifier cette fiche dans l'Admin
                     </a>
                   )}
                 </div>
