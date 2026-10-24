@@ -9,9 +9,10 @@ const ADMIN_TABS = [
   { k: "matches",   label: "Matchs & calendrier", icon: "▦" },
   { k: "news",      label: "Actualités",          icon: "▤" },
   { k: "scores",    label: "Ticker scores",       icon: "▲" },
-  { k: "trophies",  label: "Palmarès",            icon: "✦" },
-  { k: "sponsors",  label: "Sponsors",            icon: "★" },
-  { k: "socials",   label: "Réseaux sociaux",     icon: "●" },
+  { k: "trophies",    label: "Palmarès",            icon: "✦" },
+  { k: "sponsors",    label: "Sponsors",            icon: "★" },
+  { k: "association", label: "L'Association",       icon: "⚑" },
+  { k: "socials",     label: "Réseaux sociaux",     icon: "●" },
   { k: "community", label: "Communauté",          icon: "◆" },
   { k: "users",     label: "Utilisateurs",        icon: "⚙" },
 ];
@@ -150,12 +151,13 @@ function AdminPage({ accent }) {
     matches:   window.store.matches.list().length,
     news:      window.store.news.list().length,
     scores:    window.store.scores.list().length,
-    trophies:  window.store.trophies.list().length,
-    sponsors:  window.store.sponsors ? window.store.sponsors.list().length : 0,
-    socials:   window.store.socials.list().length,
-    community: window.store.posts.list().length,
-    users:     window.store.users.list().length,
-    engagement: (window.store.predictions.list().length + window.store.badges.list().length),
+    trophies:    window.store.trophies.list().length,
+    sponsors:    window.store.sponsors ? window.store.sponsors.list().length : 0,
+    association: window.store.association_blocks ? window.store.association_blocks.list().length : 0,
+    socials:     window.store.socials.list().length,
+    community:   window.store.posts.list().length,
+    users:       window.store.users.list().length,
+    engagement:  (window.store.predictions.list().length + window.store.badges.list().length),
   };
 
   return (
@@ -196,7 +198,7 @@ function AdminPage({ accent }) {
           CONSOLE ADMIN<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span>
         </h1>
         <p className="nafe-team__lede">
-          Gérez l'ensemble des rosters, sponsors, matchs, trophées, actus et le flux officiel de la structure.
+          Gérez l'ensemble des rosters, sponsors, l'association, matchs, trophées, actus et le flux officiel de la structure.
         </p>
 
 
@@ -222,17 +224,18 @@ function AdminPage({ accent }) {
       </section>
 
       <section className="nafe-admin__panel">
-        {tab === "players"   && <PlayersAdmin   accent={accent} />}
-        {tab === "subteams"  && <SubteamsAdmin  accent={accent} />}
-        {tab === "matches"   && <MatchesAdmin   accent={accent} />}
-        {tab === "news"      && <NewsAdmin      accent={accent} />}
-        {tab === "scores"    && <ScoresAdmin    accent={accent} />}
-        {tab === "trophies"  && <TrophiesAdmin  accent={accent} />}
-        {tab === "sponsors"  && <SponsorsAdmin  accent={accent} />}
-        {tab === "socials"   && <SocialsAdmin   accent={accent} />}
-        {tab === "community" && <CommunityAdmin accent={accent} />}
-        {tab === "users"     && <UsersAdmin     accent={accent} currentUser={user} />}
-        {tab === "engagement" && <EngagementAdmin accent={accent} />}
+        {tab === "players"     && <PlayersAdmin     accent={accent} />}
+        {tab === "subteams"    && <SubteamsAdmin    accent={accent} />}
+        {tab === "matches"     && <MatchesAdmin     accent={accent} />}
+        {tab === "news"        && <NewsAdmin        accent={accent} />}
+        {tab === "scores"      && <ScoresAdmin      accent={accent} />}
+        {tab === "trophies"    && <TrophiesAdmin    accent={accent} />}
+        {tab === "sponsors"    && <SponsorsAdmin    accent={accent} />}
+        {tab === "association" && <AssociationAdmin accent={accent} />}
+        {tab === "socials"     && <SocialsAdmin     accent={accent} />}
+        {tab === "community"   && <CommunityAdmin   accent={accent} />}
+        {tab === "users"       && <UsersAdmin       accent={accent} currentUser={user} />}
+        {tab === "engagement"  && <EngagementAdmin  accent={accent} />}
       </section>
     </div>
   );
@@ -1468,15 +1471,30 @@ function emptySponsor() {
 function SponsorsAdmin({ accent }) {
   window.store.useVersion();
   const list = window.store.sponsors ? window.store.sponsors.list() : [];
+  const settings = (window.store.sponsors_settings && window.store.sponsors_settings.get()) || {};
+
   const [editing, setEditing] = useAdminState(null);
   const [draft, setDraft] = useAdminState(emptySponsor());
+  const [settingsDraft, setSettingsDraft] = useAdminState({
+    heroEyebrow: settings.heroEyebrow || "",
+    heroTitle: settings.heroTitle || "",
+    heroLede: settings.heroLede || "",
+    ctaTitle: settings.ctaTitle || "",
+    ctaDesc: settings.ctaDesc || "",
+    ctaButtonLabel: settings.ctaButtonLabel || "",
+    ctaButtonUrl: settings.ctaButtonUrl || "",
+    footerNotice: settings.footerNotice || "",
+  });
+
+  const [activeSection, setActiveSection] = useAdminState("sponsors"); // "sponsors" | "header"
 
   function startEdit(s) {
     setEditing(s.id);
     setDraft({ ...emptySponsor(), ...s });
+    setActiveSection("sponsors");
   }
 
-  function submit() {
+  function submitSponsor() {
     if (!draft.name.trim()) return alert("Le nom du sponsor est requis");
     const payload = {
       ...draft,
@@ -1492,126 +1510,839 @@ function SponsorsAdmin({ accent }) {
     setDraft(emptySponsor());
   }
 
+  function saveSettings(e) {
+    e.preventDefault();
+    window.store.sponsors_settings.set(settingsDraft);
+    alert("Textes de la page Sponsors enregistrés avec succès !");
+  }
+
   return (
     <div className="nafe-admin__section">
-      <FormShell
-        title={editing ? "Modifier le sponsor" : "Nouveau sponsor partenaire"}
-        onSubmit={submit}
-        onCancel={editing ? () => { setEditing(null); setDraft(emptySponsor()); } : null}
-        submitLabel={editing ? "Mettre à jour" : "Ajouter le sponsor"}
-        accent={accent}
-      >
-        <Field label="Nom du sponsor / Marque" span={2}>
-          <input
-            value={draft.name}
-            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-            placeholder="Ex: Razer, Red Bull, etc."
-          />
-        </Field>
-        <Field label="Palier de partenariat">
-          <select
-            value={draft.tier}
-            onChange={(e) => setDraft({ ...draft, tier: e.target.value })}
-          >
-            {SPONSOR_TIERS.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Secteur d'activité">
-          <input
-            value={draft.category || ""}
-            onChange={(e) => setDraft({ ...draft, category: e.target.value })}
-            placeholder="Ex: Nutrition, Périphériques Gaming..."
-          />
-        </Field>
-        <Field label="URL de la bannière (1200x400 approx)" span={2}>
-          <input
-            value={draft.banner || ""}
-            onChange={(e) => setDraft({ ...draft, banner: e.target.value })}
-            placeholder="https://..."
-          />
-          {draft.banner && (
-            <div style={{ marginTop: 8, height: 70, overflow: "hidden", borderRadius: 4, border: "1px solid rgba(255,255,255,0.1)" }}>
-              <img src={draft.banner} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { e.target.style.display = 'none'; }} />
-            </div>
-          )}
-        </Field>
-        <Field label="URL du logo / Icône">
-          <input
-            value={draft.logo || ""}
-            onChange={(e) => setDraft({ ...draft, logo: e.target.value })}
-            placeholder="https://... ou assets/brand/..."
-          />
-        </Field>
-        <Field label="Lien du site officiel">
-          <input
-            value={draft.websiteUrl || ""}
-            onChange={(e) => setDraft({ ...draft, websiteUrl: e.target.value })}
-            placeholder="https://..."
-          />
-        </Field>
-        <Field label="Code promo communautaire (optionnel)">
-          <input
-            value={draft.promoCode || ""}
-            onChange={(e) => setDraft({ ...draft, promoCode: e.target.value })}
-            placeholder="Ex: NAFE10"
-          />
-        </Field>
-        <Field label="Ordre d'affichage">
-          <input
-            type="number"
-            min={1}
-            value={draft.order}
-            onChange={(e) => setDraft({ ...draft, order: e.target.value })}
-          />
-        </Field>
-        <Field label="Statut actif" span={2}>
-          <label style={{ display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer", color: "#fff" }}>
-            <input
-              type="checkbox"
-              checked={draft.active !== false}
-              onChange={(e) => setDraft({ ...draft, active: e.target.checked })}
-              style={{ width: 18, height: 18 }}
-            />
-            <span>Afficher ce sponsor publiquement sur la page Sponsors</span>
-          </label>
-        </Field>
-        <Field label="Description détaillée du partenariat" span={2}>
-          <textarea
-            rows={4}
-            value={draft.description}
-            onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-            placeholder="Présentation des offres, de l'accompagnement des joueurs NAFE..."
-          />
-        </Field>
-      </FormShell>
+      {/* Barre d'action rapide */}
+      <div className="nafe-admin__card" style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <h3 className="nafe-display" style={{ margin: 0, fontSize: 18 }}>
+              ESPACE SPONSORS & PARTENAIRES<span style={{ color: accent }}>.</span>
+            </h3>
+            <p className="nafe-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", margin: "4px 0 0" }}>
+              Tous les blocs et fiches partenaires sont entièrement configurables et dynamiques.
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="nafe-btn nafe-btn--sm nafe-btn--accent"
+              style={{ background: accent }}
+              onClick={() => {
+                if (confirm("Charger les exemples de sponsors et de textes par défaut ?")) {
+                  window.store.seedSponsorsTemplate();
+                  setSettingsDraft(window.store.sponsors_settings.get());
+                }
+              }}
+            >
+              ⚡ Charger un modèle d'exemple
+            </button>
+            <button
+              type="button"
+              className="nafe-btn nafe-btn--sm nafe-btn--ghost"
+              style={{ borderColor: "#FF5252", color: "#FF8A80" }}
+              onClick={() => {
+                if (confirm("Voulez-vous vraiment vider TOUS les sponsors et textes de la page ?")) {
+                  window.store.clearSponsors();
+                  setSettingsDraft({
+                    heroEyebrow: "", heroTitle: "", heroLede: "",
+                    ctaTitle: "", ctaDesc: "", ctaButtonLabel: "", ctaButtonUrl: "", footerNotice: ""
+                  });
+                }
+              }}
+            >
+              🗑 Vider tous les sponsors & textes
+            </button>
+          </div>
+        </div>
 
-      <DataTable
-        accent={accent}
-        empty="Aucun sponsor enregistré. Remplissez le formulaire ci-dessus pour en ajouter un."
-        columns={[
-          { key: "order", label: "N°", flex: 0.3, render: (r) => `#${r.order || 1}` },
-          { key: "logo", label: "LOGO", flex: 0.5, render: (r) => (
-            r.logo ? <img src={r.logo} alt={r.name} style={{ width: 28, height: 28, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; }} /> : "—"
-          )},
-          { key: "name", label: "NOM", flex: 1.2 },
-          { key: "tier", label: "PALIER", flex: 1, render: (r) => (
-            <span className="nafe-mono" style={{ color: accent, fontSize: 11 }}>{r.tier}</span>
-          )},
-          { key: "promoCode", label: "CODE PROMO", flex: 0.8, render: (r) => r.promoCode ? <span className="nafe-mono" style={{ background: "rgba(255,255,255,0.06)", padding: "2px 6px" }}>{r.promoCode}</span> : "—" },
-          { key: "active", label: "STATUT", flex: 0.6, render: (r) => (
-            <span style={{ color: r.active !== false ? "var(--nafe-green-peas)" : "#FF5252" }}>
-              {r.active !== false ? "● Actif" : "○ Inactif"}
-            </span>
-          )},
-        ]}
-        rows={list.sort((a, b) => (a.order || 0) - (b.order || 0))}
-        onEdit={startEdit}
-        onDelete={(id) => window.store.sponsors.remove(id)}
-      />
+        {/* Sous-onglets */}
+        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+          <button
+            type="button"
+            className={`nafe-btn nafe-btn--sm ${activeSection === "sponsors" ? "nafe-btn--accent" : "nafe-btn--ghost"}`}
+            style={activeSection === "sponsors" ? { background: accent } : {}}
+            onClick={() => setActiveSection("sponsors")}
+          >
+            ★ Fiches Partenaires ({list.length})
+          </button>
+          <button
+            type="button"
+            className={`nafe-btn nafe-btn--sm ${activeSection === "header" ? "nafe-btn--accent" : "nafe-btn--ghost"}`}
+            style={activeSection === "header" ? { background: accent } : {}}
+            onClick={() => setActiveSection("header")}
+          >
+            ✎ Textes d'en-tête & CTA Partenaire
+          </button>
+        </div>
+      </div>
+
+      {activeSection === "header" ? (
+        <form onSubmit={saveSettings} className="nafe-admin__card" style={{ marginBottom: 24 }}>
+          <h4 className="nafe-display" style={{ margin: "0 0 16px", fontSize: 16 }}>
+            PERSONNALISATION DES TEXTES DE LA PAGE SPONSORS
+          </h4>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+            <Field label="Surtitre Hero (Eyebrow)" span={2}>
+              <input
+                value={settingsDraft.heroEyebrow}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, heroEyebrow: e.target.value })}
+                placeholder="Ex: Écosystème & Partenariats Officiels"
+              />
+            </Field>
+            <Field label="Titre Principal">
+              <input
+                value={settingsDraft.heroTitle}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, heroTitle: e.target.value })}
+                placeholder="Ex: NOS SPONSORS"
+              />
+            </Field>
+            <Field label="Légende de bas de page (Footer notice)">
+              <input
+                value={settingsDraft.footerNotice}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, footerNotice: e.target.value })}
+                placeholder="Ex: PARTENARIAT SAISON 2026 · CERTIFIÉ NAFE ESPORT"
+              />
+            </Field>
+            <Field label="Introduction / Lede du Hero" span={2}>
+              <textarea
+                rows={2}
+                value={settingsDraft.heroLede}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, heroLede: e.target.value })}
+                placeholder="Texte introductif sous le titre..."
+              />
+            </Field>
+
+            <Field label="Titre du bloc 'Devenir Partenaire'">
+              <input
+                value={settingsDraft.ctaTitle}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, ctaTitle: e.target.value })}
+                placeholder="Ex: DEVENEZ PARTENAIRE"
+              />
+            </Field>
+            <Field label="Label du bouton CTA">
+              <input
+                value={settingsDraft.ctaButtonLabel}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, ctaButtonLabel: e.target.value })}
+                placeholder="Ex: Dossier Partenariat →"
+              />
+            </Field>
+            <Field label="Lien du bouton CTA">
+              <input
+                value={settingsDraft.ctaButtonUrl}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, ctaButtonUrl: e.target.value })}
+                placeholder="Ex: #/contact"
+              />
+            </Field>
+            <Field label="Description du bloc 'Devenir Partenaire'" span={2}>
+              <textarea
+                rows={2}
+                value={settingsDraft.ctaDesc}
+                onChange={(e) => setSettingsDraft({ ...settingsDraft, ctaDesc: e.target.value })}
+                placeholder="Ex: Associez votre marque à l'esprit de conquête de NAFE ESPORT..."
+              />
+            </Field>
+          </div>
+
+          <div style={{ marginTop: 18, display: "flex", justifyContent: "flex-end" }}>
+            <button type="submit" className="nafe-btn nafe-btn--accent" style={{ background: accent }}>
+              ✓ Enregistrer les textes de la page Sponsors
+            </button>
+          </div>
+        </form>
+      ) : (
+        <>
+          <FormShell
+            title={editing ? "Modifier la fiche sponsor" : "Créer une nouvelle fiche sponsor"}
+            onSubmit={submitSponsor}
+            onCancel={editing ? () => { setEditing(null); setDraft(emptySponsor()); } : null}
+            submitLabel={editing ? "Mettre à jour" : "Ajouter le sponsor"}
+            accent={accent}
+          >
+            <Field label="Nom du sponsor / Marque" span={2}>
+              <input
+                value={draft.name}
+                onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                placeholder="Ex: Razer, Red Bull, Pulse Audio..."
+              />
+            </Field>
+            <Field label="Palier de partenariat">
+              <select
+                value={draft.tier}
+                onChange={(e) => setDraft({ ...draft, tier: e.target.value })}
+              >
+                {SPONSOR_TIERS.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Secteur / Catégorie">
+              <input
+                value={draft.category || ""}
+                onChange={(e) => setDraft({ ...draft, category: e.target.value })}
+                placeholder="Ex: Périphériques Gaming, Nutrition, Vêtements..."
+              />
+            </Field>
+            <Field label="URL de la bannière (grande image)" span={2}>
+              <input
+                value={draft.banner || ""}
+                onChange={(e) => setDraft({ ...draft, banner: e.target.value })}
+                placeholder="https://..."
+              />
+              {draft.banner && (
+                <div style={{ marginTop: 8, height: 70, overflow: "hidden", borderRadius: 4, border: "1px solid rgba(255,255,255,0.1)" }}>
+                  <img src={draft.banner} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { e.target.style.display = 'none'; }} />
+                </div>
+              )}
+            </Field>
+            <Field label="URL du logo / Icône">
+              <input
+                value={draft.logo || ""}
+                onChange={(e) => setDraft({ ...draft, logo: e.target.value })}
+                placeholder="https://... ou assets/brand/..."
+              />
+            </Field>
+            <Field label="Lien du site officiel">
+              <input
+                value={draft.websiteUrl || ""}
+                onChange={(e) => setDraft({ ...draft, websiteUrl: e.target.value })}
+                placeholder="https://..."
+              />
+            </Field>
+            <Field label="Code promo communautaire (optionnel)">
+              <input
+                value={draft.promoCode || ""}
+                onChange={(e) => setDraft({ ...draft, promoCode: e.target.value })}
+                placeholder="Ex: NAFE10"
+              />
+            </Field>
+            <Field label="Ordre d'affichage">
+              <input
+                type="number"
+                min={1}
+                value={draft.order}
+                onChange={(e) => setDraft({ ...draft, order: e.target.value })}
+              />
+            </Field>
+            <Field label="Statut actif" span={2}>
+              <label style={{ display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer", color: "#fff" }}>
+                <input
+                  type="checkbox"
+                  checked={draft.active !== false}
+                  onChange={(e) => setDraft({ ...draft, active: e.target.checked })}
+                  style={{ width: 18, height: 18 }}
+                />
+                <span>Afficher ce sponsor publiquement sur la page Sponsors</span>
+              </label>
+            </Field>
+            <Field label="Description détaillée du partenariat" span={2}>
+              <textarea
+                rows={4}
+                value={draft.description}
+                onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                placeholder="Description des produits, de l'accompagnement des joueurs NAFE..."
+              />
+            </Field>
+          </FormShell>
+
+          <DataTable
+            accent={accent}
+            empty="Aucun sponsor enregistré. Utilisez le formulaire ci-dessus pour créer vos partenaires."
+            columns={[
+              { key: "order", label: "N°", flex: 0.3, render: (r) => `#${r.order || 1}` },
+              { key: "logo", label: "LOGO", flex: 0.5, render: (r) => (
+                r.logo ? <img src={r.logo} alt={r.name} style={{ width: 28, height: 28, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; }} /> : "—"
+              )},
+              { key: "name", label: "NOM", flex: 1.2 },
+              { key: "tier", label: "PALIER", flex: 1, render: (r) => (
+                <span className="nafe-mono" style={{ color: accent, fontSize: 11 }}>{r.tier}</span>
+              )},
+              { key: "promoCode", label: "CODE PROMO", flex: 0.8, render: (r) => r.promoCode ? <span className="nafe-mono" style={{ background: "rgba(255,255,255,0.06)", padding: "2px 6px" }}>{r.promoCode}</span> : "—" },
+              { key: "active", label: "STATUT", flex: 0.6, render: (r) => (
+                <span style={{ color: r.active !== false ? "var(--nafe-green-peas)" : "#FF5252" }}>
+                  {r.active !== false ? "● Actif" : "○ Inactif"}
+                </span>
+              )},
+            ]}
+            rows={list.sort((a, b) => (a.order || 0) - (b.order || 0))}
+            onEdit={startEdit}
+            onDelete={(id) => window.store.sponsors.remove(id)}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+//  Association Admin (Personnalisation complète Loi 1901)
+// ============================================================
+const BLOCK_TYPES = [
+  { value: "pillars", label: "Missions & Piliers (Cartes numérotées)" },
+  { value: "terms",   label: "Termes & Statuts (Articles officiels)" },
+  { value: "stats",   label: "Chiffres Clés / Statistiques d'Impact" },
+  { value: "text",    label: "Texte Libre / Section Éditoriale" },
+  { value: "cta",     label: "Appel à l'Action / Recrutement Bénévoles" },
+];
+
+function emptyAssociationBlock() {
+  return {
+    order: 1,
+    active: true,
+    type: "pillars",
+    eyebrow: "",
+    title: "",
+    subtitle: "",
+    content: "",
+    buttonLabel: "",
+    buttonUrl: "",
+    button2Label: "",
+    button2Url: "",
+    rawItemsText: "",
+    items: [],
+  };
+}
+
+function AssociationAdmin({ accent }) {
+  window.store.useVersion();
+  const settings = (window.store.association_settings && window.store.association_settings.get()) || {};
+  const blocks = (window.store.association_blocks && window.store.association_blocks.list()) || [];
+
+  const [activeSubTab, setActiveSubTab] = useAdminState("blocks"); // "blocks" | "header" | "donation"
+  const [editingBlock, setEditingBlock] = useAdminState(null);
+  const [blockDraft, setBlockDraft] = useAdminState(emptyAssociationBlock());
+
+  const [headerDraft, setHeaderDraft] = useAdminState({
+    heroBadge: settings.heroBadge || "",
+    heroTitle: settings.heroTitle || "",
+    heroLede: settings.heroLede || "",
+    statutLegal: settings.statutLegal || "",
+    devise: settings.devise || "",
+    transparence: settings.transparence || "",
+  });
+
+  const [donationDraft, setDonationDraft] = useAdminState({
+    donationActive: settings.donationActive !== false,
+    donationEyebrow: settings.donationEyebrow || "",
+    donationTitle: settings.donationTitle || "",
+    donationDesc: settings.donationDesc || "",
+    donationUrl: settings.donationUrl || "https://www.helloasso.com",
+    donationButtonLabel: settings.donationButtonLabel || "",
+    donationNotice: settings.donationNotice || "",
+    rawPledgesText: (settings.donationPledges || []).map(p => `${p.amount}|${p.label}|${p.perk || ""}`).join("\n"),
+    rawImpactText: (settings.donationImpact || []).map(f => `${f.label}|${f.pct}|${f.desc || ""}`).join("\n"),
+  });
+
+  function startEditBlock(b) {
+    setEditingBlock(b.id);
+    // Convert items into editable text format: num|title|desc
+    const rawItemsText = (b.items || []).map(item => {
+      if (b.type === "terms") return `${item.num || ""}|${item.title || ""}|${item.text || item.desc || ""}`;
+      if (b.type === "stats") return `${item.stat || item.num || ""}|${item.label || item.title || ""}|${item.desc || ""}`;
+      return `${item.num || ""}|${item.title || ""}|${item.desc || ""}`;
+    }).join("\n");
+
+    setBlockDraft({
+      ...emptyAssociationBlock(),
+      ...b,
+      rawItemsText,
+    });
+    setActiveSubTab("blocks");
+  }
+
+  function submitBlock() {
+    if (!blockDraft.title.trim()) return alert("Le titre du bloc est requis.");
+
+    // Parse items from rawItemsText
+    let items = [];
+    if (blockDraft.rawItemsText && blockDraft.rawItemsText.trim()) {
+      const lines = blockDraft.rawItemsText.split("\n").filter(l => l.trim());
+      items = lines.map((line, idx) => {
+        const parts = line.split("|").map(s => s.trim());
+        if (blockDraft.type === "terms") {
+          return { num: parts[0] || `Article ${idx + 1}`, title: parts[1] || "", text: parts[2] || "" };
+        }
+        if (blockDraft.type === "stats") {
+          return { stat: parts[0] || "—", label: parts[1] || "", desc: parts[2] || "" };
+        }
+        return { num: parts[0] || `0${idx + 1} //`, title: parts[1] || "", desc: parts[2] || "" };
+      });
+    }
+
+    const payload = {
+      order: +blockDraft.order || 1,
+      active: blockDraft.active !== false,
+      type: blockDraft.type,
+      eyebrow: blockDraft.eyebrow,
+      title: blockDraft.title,
+      subtitle: blockDraft.subtitle,
+      content: blockDraft.content,
+      buttonLabel: blockDraft.buttonLabel,
+      buttonUrl: blockDraft.buttonUrl,
+      button2Label: blockDraft.button2Label,
+      button2Url: blockDraft.button2Url,
+      items,
+    };
+
+    if (editingBlock) {
+      window.store.association_blocks.update(editingBlock, payload);
+    } else {
+      window.store.association_blocks.add(payload);
+    }
+    setEditingBlock(null);
+    setBlockDraft(emptyAssociationBlock());
+  }
+
+  function saveHeaderSettings(e) {
+    e.preventDefault();
+    window.store.association_settings.update(headerDraft);
+    alert("En-tête de l'Association enregistré avec succès !");
+  }
+
+  function saveDonationSettings(e) {
+    e.preventDefault();
+
+    // Parse pledges
+    let donationPledges = [];
+    if (donationDraft.rawPledgesText) {
+      donationPledges = donationDraft.rawPledgesText.split("\n").filter(l => l.trim()).map((l, i) => {
+        const parts = l.split("|").map(s => s.trim());
+        return { id: `p_${i}`, amount: +parts[0] || 0, label: parts[1] || "Don", perk: parts[2] || "" };
+      });
+    }
+
+    // Parse impact
+    let donationImpact = [];
+    if (donationDraft.rawImpactText) {
+      donationImpact = donationDraft.rawImpactText.split("\n").filter(l => l.trim()).map(l => {
+        const parts = l.split("|").map(s => s.trim());
+        return { label: parts[0] || "", pct: +parts[1] || 0, desc: parts[2] || "" };
+      });
+    }
+
+    window.store.association_settings.update({
+      donationActive: donationDraft.donationActive,
+      donationEyebrow: donationDraft.donationEyebrow,
+      donationTitle: donationDraft.donationTitle,
+      donationDesc: donationDraft.donationDesc,
+      donationUrl: donationDraft.donationUrl,
+      donationButtonLabel: donationDraft.donationButtonLabel,
+      donationNotice: donationDraft.donationNotice,
+      donationPledges,
+      donationImpact,
+    });
+    alert("Paramètres du module Don & Soutien enregistrés !");
+  }
+
+  return (
+    <div className="nafe-admin__section">
+      {/* Barre d'action rapide */}
+      <div className="nafe-admin__card" style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <h3 className="nafe-display" style={{ margin: 0, fontSize: 18 }}>
+              ESPACE ASSOCIATION NAFE (LOI 1901)<span style={{ color: accent }}>.</span>
+            </h3>
+            <p className="nafe-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", margin: "4px 0 0" }}>
+              Créez et personnalisez librement tous les blocs qui composent la page de l'association.
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="nafe-btn nafe-btn--sm nafe-btn--accent"
+              style={{ background: accent }}
+              onClick={() => {
+                if (confirm("Charger le modèle type complet de l'Association (Piliers, Statuts, Soutien) ?")) {
+                  window.store.seedAssociationTemplate();
+                  const cur = window.store.association_settings.get();
+                  setHeaderDraft({
+                    heroBadge: cur.heroBadge || "",
+                    heroTitle: cur.heroTitle || "",
+                    heroLede: cur.heroLede || "",
+                    statutLegal: cur.statutLegal || "",
+                    devise: cur.devise || "",
+                    transparence: cur.transparence || "",
+                  });
+                }
+              }}
+            >
+              ⚡ Charger un modèle complet
+            </button>
+            <button
+              type="button"
+              className="nafe-btn nafe-btn--sm nafe-btn--ghost"
+              style={{ borderColor: "#FF5252", color: "#FF8A80" }}
+              onClick={() => {
+                if (confirm("Voulez-vous vraiment vider TOUS les blocs et paramètres de l'Association ?")) {
+                  window.store.clearAssociation();
+                  setHeaderDraft({ heroBadge: "", heroTitle: "", heroLede: "", statutLegal: "", devise: "", transparence: "" });
+                  setDonationDraft({ donationActive: false, donationEyebrow: "", donationTitle: "", donationDesc: "", donationUrl: "", donationButtonLabel: "", donationNotice: "", rawPledgesText: "", rawImpactText: "" });
+                }
+              }}
+            >
+              🗑 Vider tous les blocs de l'Association
+            </button>
+          </div>
+        </div>
+
+        {/* Sous-onglets de configuration */}
+        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+          <button
+            type="button"
+            className={`nafe-btn nafe-btn--sm ${activeSubTab === "blocks" ? "nafe-btn--accent" : "nafe-btn--ghost"}`}
+            style={activeSubTab === "blocks" ? { background: accent } : {}}
+            onClick={() => setActiveSubTab("blocks")}
+          >
+            ✦ Blocs Modulaires de Contenu ({blocks.length})
+          </button>
+          <button
+            type="button"
+            className={`nafe-btn nafe-btn--sm ${activeSubTab === "header" ? "nafe-btn--accent" : "nafe-btn--ghost"}`}
+            style={activeSubTab === "header" ? { background: accent } : {}}
+            onClick={() => setActiveSubTab("header")}
+          >
+            ⚑ En-tête & Méta de l'Association
+          </button>
+          <button
+            type="button"
+            className={`nafe-btn nafe-btn--sm ${activeSubTab === "donation" ? "nafe-btn--accent" : "nafe-btn--ghost"}`}
+            style={activeSubTab === "donation" ? { background: accent } : {}}
+            onClick={() => setActiveSubTab("donation")}
+          >
+            ♥ Module Don & Soutien Financier
+          </button>
+        </div>
+      </div>
+
+      {/* Onglet 1 : En-tête & Méta */}
+      {activeSubTab === "header" && (
+        <form onSubmit={saveHeaderSettings} className="nafe-admin__card" style={{ marginBottom: 24 }}>
+          <h4 className="nafe-display" style={{ margin: "0 0 16px", fontSize: 16 }}>
+            EN-TÊTE DU HERO & IDENTITÉ ASSOCIATIVE
+          </h4>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+            <Field label="Surtitre / Badge">
+              <input
+                value={headerDraft.heroBadge}
+                onChange={(e) => setHeaderDraft({ ...headerDraft, heroBadge: e.target.value })}
+                placeholder="Ex: STRUCTURE ASSOCIATIVE OFFICIELLE"
+              />
+            </Field>
+            <Field label="Titre Principal">
+              <input
+                value={headerDraft.heroTitle}
+                onChange={(e) => setHeaderDraft({ ...headerDraft, heroTitle: e.target.value })}
+                placeholder="Ex: L'ASSOCIATION NAFE"
+              />
+            </Field>
+            <Field label="Description d'introduction (Lede)" span={2}>
+              <textarea
+                rows={3}
+                value={headerDraft.heroLede}
+                onChange={(e) => setHeaderDraft({ ...headerDraft, heroLede: e.target.value })}
+                placeholder="Présentation de l'objet associatif..."
+              />
+            </Field>
+
+            <Field label="Statut Légal">
+              <input
+                value={headerDraft.statutLegal}
+                onChange={(e) => setHeaderDraft({ ...headerDraft, statutLegal: e.target.value })}
+                placeholder="Ex: Loi 1901"
+              />
+            </Field>
+            <Field label="Devise de l'Association">
+              <input
+                value={headerDraft.devise}
+                onChange={(e) => setHeaderDraft({ ...headerDraft, devise: e.target.value })}
+                placeholder="Ex: Le Phœnix ne meurt jamais"
+              />
+            </Field>
+            <Field label="Mention Transparence">
+              <input
+                value={headerDraft.transparence}
+                onChange={(e) => setHeaderDraft({ ...headerDraft, transparence: e.target.value })}
+                placeholder="Ex: 100% Réinvesti"
+              />
+            </Field>
+          </div>
+
+          <div style={{ marginTop: 18, display: "flex", justifyContent: "flex-end" }}>
+            <button type="submit" className="nafe-btn nafe-btn--accent" style={{ background: accent }}>
+              ✓ Enregistrer l'en-tête de l'Association
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Onglet 2 : Module Don & Soutien */}
+      {activeSubTab === "donation" && (
+        <form onSubmit={saveDonationSettings} className="nafe-admin__card" style={{ marginBottom: 24 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <h4 className="nafe-display" style={{ margin: 0, fontSize: 16 }}>
+              MODULE DE SOUTIEN FINANCIER & DONS
+            </h4>
+            <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#fff" }}>
+              <input
+                type="checkbox"
+                checked={donationDraft.donationActive}
+                onChange={(e) => setDonationDraft({ ...donationDraft, donationActive: e.target.checked })}
+                style={{ width: 18, height: 18 }}
+              />
+              <span className="nafe-mono" style={{ fontSize: 12 }}>Activer ce module sur la page publique</span>
+            </label>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+            <Field label="Surtitre">
+              <input
+                value={donationDraft.donationEyebrow}
+                onChange={(e) => setDonationDraft({ ...donationDraft, donationEyebrow: e.target.value })}
+                placeholder="Ex: // IMPACT DIRECT & SOLIDAIRE"
+              />
+            </Field>
+            <Field label="Titre du bloc don">
+              <input
+                value={donationDraft.donationTitle}
+                onChange={(e) => setDonationDraft({ ...donationDraft, donationTitle: e.target.value })}
+                placeholder="Ex: SOUTENIR L'ASSOCIATION FINANCIÈREMENT"
+              />
+            </Field>
+            <Field label="Texte explicatif" span={2}>
+              <textarea
+                rows={3}
+                value={donationDraft.donationDesc}
+                onChange={(e) => setDonationDraft({ ...donationDraft, donationDesc: e.target.value })}
+                placeholder="Pourquoi soutenir l'association et à quoi servent les dons..."
+              />
+            </Field>
+
+            <Field label="URL externe de don (HelloAsso / Cagnotte)" span={2}>
+              <input
+                value={donationDraft.donationUrl}
+                onChange={(e) => setDonationDraft({ ...donationDraft, donationUrl: e.target.value })}
+                placeholder="https://www.helloasso.com/associations/..."
+              />
+            </Field>
+            <Field label="Label du bouton de don">
+              <input
+                value={donationDraft.donationButtonLabel}
+                onChange={(e) => setDonationDraft({ ...donationDraft, donationButtonLabel: e.target.value })}
+                placeholder="Ex: Accéder au formulaire de don sécurisé ↗"
+              />
+            </Field>
+            <Field label="Mention de réassurance">
+              <input
+                value={donationDraft.donationNotice}
+                onChange={(e) => setDonationDraft({ ...donationDraft, donationNotice: e.target.value })}
+                placeholder="Ex: Paiement 100% sécurisé via HelloAsso · Reçu et attestation fournis"
+              />
+            </Field>
+
+            <Field label="Paliers de don (1 palier par ligne : Montant|Titre|Avantage)" span={2}>
+              <textarea
+                rows={4}
+                value={donationDraft.rawPledgesText}
+                onChange={(e) => setDonationDraft({ ...donationDraft, rawPledgesText: e.target.value })}
+                placeholder={"10|Supporter|Badge Discord exclusif & salons privés\n25|Adhérent|Pack stickers + vote consultatif\n50|Bienfaiteur|Nom crédité + jersey dédicacé"}
+              />
+              <span className="nafe-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
+                Format : Montant en € | Nom du palier | Contrepartie
+              </span>
+            </Field>
+
+            <Field label="Barres d'impact budget (1 par ligne : Label|Pourcentage|Description)" span={2}>
+              <textarea
+                rows={4}
+                value={donationDraft.rawImpactText}
+                onChange={(e) => setDonationDraft({ ...donationDraft, rawImpactText: e.target.value })}
+                placeholder={"Déplacements LAN|45|Transport & hébergement pour les LANs\nÉquipement & Maillots|30|Jerseys officiels & matériel gaming"}
+              />
+              <span className="nafe-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
+                Format : Intitulé | % (chiffre entre 1 et 100) | Description courte
+              </span>
+            </Field>
+          </div>
+
+          <div style={{ marginTop: 18, display: "flex", justifyContent: "flex-end" }}>
+            <button type="submit" className="nafe-btn nafe-btn--accent" style={{ background: accent }}>
+              ✓ Enregistrer le module Don & Soutien
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Onglet 3 : Blocs Modulaires de Contenu */}
+      {activeSubTab === "blocks" && (
+        <>
+          <FormShell
+            title={editingBlock ? "Modifier le bloc de contenu" : "Créer un nouveau bloc de contenu"}
+            onSubmit={submitBlock}
+            onCancel={editingBlock ? () => { setEditingBlock(null); setBlockDraft(emptyAssociationBlock()); } : null}
+            submitLabel={editingBlock ? "Mettre à jour le bloc" : "Ajouter le bloc à la page"}
+            accent={accent}
+          >
+            <Field label="Type de bloc">
+              <select
+                value={blockDraft.type}
+                onChange={(e) => setBlockDraft({ ...blockDraft, type: e.target.value })}
+              >
+                {BLOCK_TYPES.map(t => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Ordre d'affichage">
+              <input
+                type="number"
+                min={1}
+                value={blockDraft.order}
+                onChange={(e) => setBlockDraft({ ...blockDraft, order: e.target.value })}
+              />
+            </Field>
+            <Field label="Surtitre (Eyebrow)">
+              <input
+                value={blockDraft.eyebrow}
+                onChange={(e) => setBlockDraft({ ...blockDraft, eyebrow: e.target.value })}
+                placeholder="Ex: Objectifs 2026, Charte Loi 1901..."
+              />
+            </Field>
+            <Field label="Titre principal de la section" span={2}>
+              <input
+                value={blockDraft.title}
+                onChange={(e) => setBlockDraft({ ...blockDraft, title: e.target.value })}
+                placeholder="Ex: NOS MISSIONS, TERMES DE L'ASSOCIATION, CHIFFRES CLÉS..."
+              />
+            </Field>
+            <Field label="Sous-titre / Tag">
+              <input
+                value={blockDraft.subtitle}
+                onChange={(e) => setBlockDraft({ ...blockDraft, subtitle: e.target.value })}
+                placeholder="Ex: 4 PILIERS ASSOCIATIFS, RÈGLEMENT..."
+              />
+            </Field>
+            <Field label="Statut actif">
+              <label style={{ display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer", color: "#fff", marginTop: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={blockDraft.active !== false}
+                  onChange={(e) => setBlockDraft({ ...blockDraft, active: e.target.checked })}
+                  style={{ width: 18, height: 18 }}
+                />
+                <span>Actif sur la page</span>
+              </label>
+            </Field>
+
+            <Field label="Texte explicatif / Contenu éditorial" span={2}>
+              <textarea
+                rows={3}
+                value={blockDraft.content}
+                onChange={(e) => setBlockDraft({ ...blockDraft, content: e.target.value })}
+                placeholder="Texte introductif ou corps de texte complet..."
+              />
+            </Field>
+
+            {(blockDraft.type === "pillars" || blockDraft.type === "terms" || blockDraft.type === "stats") && (
+              <Field
+                label={`Éléments internes (1 par ligne) — Format: ${
+                  blockDraft.type === "terms"
+                    ? "Article N° | Titre | Texte complet"
+                    : blockDraft.type === "stats"
+                    ? "Chiffre/Stat | Titre | Description"
+                    : "01 // | Titre | Description de la mission"
+                }`}
+                span={2}
+              >
+                <textarea
+                  rows={6}
+                  value={blockDraft.rawItemsText}
+                  onChange={(e) => setBlockDraft({ ...blockDraft, rawItemsText: e.target.value })}
+                  placeholder={
+                    blockDraft.type === "terms"
+                      ? "Article 1|Engagement & Esprit Sportif|Tout membre représentant NAFE s'engage à respecter les principes du fair-play...\nArticle 2|Transparence Financière|L'association garantit la stricte affectation de chaque euro..."
+                      : blockDraft.type === "stats"
+                      ? "100%|Réinvesti|Totalité des fonds consacrés aux joueurs\n50+|Matchs par an|Présence sur les circuits majeurs\n3|Titres majeurs|Trophées remportés en LAN"
+                      : "01 //|Encadrement & Pédagogie|Suivi personnalisé de chaque joueur : analyse tactique...\n02 //|Accès à la Compétition|Financement des inscriptions et des déplacements..."
+                  }
+                />
+              </Field>
+            )}
+
+            {(blockDraft.type === "cta" || blockDraft.type === "text") && (
+              <>
+                <Field label="Label Bouton Principal">
+                  <input
+                    value={blockDraft.buttonLabel || ""}
+                    onChange={(e) => setBlockDraft({ ...blockDraft, buttonLabel: e.target.value })}
+                    placeholder="Ex: Nous Contacter →"
+                  />
+                </Field>
+                <Field label="Lien Bouton Principal">
+                  <input
+                    value={blockDraft.buttonUrl || ""}
+                    onChange={(e) => setBlockDraft({ ...blockDraft, buttonUrl: e.target.value })}
+                    placeholder="Ex: #/contact"
+                  />
+                </Field>
+              </>
+            )}
+
+            {blockDraft.type === "cta" && (
+              <>
+                <Field label="Label Bouton Secondaire">
+                  <input
+                    value={blockDraft.button2Label || ""}
+                    onChange={(e) => setBlockDraft({ ...blockDraft, button2Label: e.target.value })}
+                    placeholder="Ex: Faire un don ↗"
+                  />
+                </Field>
+                <Field label="Lien Bouton Secondaire">
+                  <input
+                    value={blockDraft.button2Url || ""}
+                    onChange={(e) => setBlockDraft({ ...blockDraft, button2Url: e.target.value })}
+                    placeholder="Ex: https://www.helloasso.com"
+                  />
+                </Field>
+              </>
+            )}
+          </FormShell>
+
+          <DataTable
+            accent={accent}
+            empty="Aucun bloc créé pour l'Association. Utilisez le formulaire ci-dessus pour composer votre page."
+            columns={[
+              { key: "order", label: "ORDRE", flex: 0.4, render: (r) => `#${r.order || 1}` },
+              { key: "type", label: "TYPE", flex: 0.8, render: (r) => (
+                <span className="nafe-mono" style={{ color: accent, fontSize: 11 }}>
+                  {BLOCK_TYPES.find(t => t.value === r.type)?.label.split(" (")[0] || r.type}
+                </span>
+              )},
+              { key: "title", label: "TITRE DU BLOC", flex: 1.4 },
+              { key: "items", label: "ÉLÉMENTS", flex: 0.6, render: (r) => (r.items ? `${r.items.length} items` : "—") },
+              { key: "active", label: "STATUT", flex: 0.5, render: (r) => (
+                <span style={{ color: r.active !== false ? "var(--nafe-green-peas)" : "#FF5252" }}>
+                  {r.active !== false ? "● Actif" : "○ Inactif"}
+                </span>
+              )},
+            ]}
+            rows={blocks.sort((a, b) => (a.order || 0) - (b.order || 0))}
+            onEdit={startEditBlock}
+            onDelete={(id) => window.store.association_blocks.remove(id)}
+          />
+        </>
+      )}
     </div>
   );
 }
 
 window.AdminPage = AdminPage;
+

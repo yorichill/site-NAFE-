@@ -19,6 +19,9 @@
     predictions: "nafe:predictions",
     badges:   "nafe:badges",
     sponsors: "nafe:sponsors",
+    sponsors_settings: "nafe:sponsors_settings",
+    association_settings: "nafe:association_settings",
+    association_blocks: "nafe:association_blocks",
   };
 
   const uid = (p) =>
@@ -66,6 +69,36 @@
     };
   }
 
+  function single(key, defaultVal = {}) {
+    return {
+      get: () => {
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw) return { ...defaultVal };
+          const v = JSON.parse(raw);
+          return (typeof v === "object" && v !== null && !Array.isArray(v)) ? { ...defaultVal, ...v } : { ...defaultVal };
+        } catch {
+          return { ...defaultVal };
+        }
+      },
+      set: (val) => {
+        localStorage.setItem(key, JSON.stringify(val));
+        window.dispatchEvent(new CustomEvent("store:update", { detail: { key } }));
+      },
+      update: (patch) => {
+        const cur = single(key, defaultVal).get();
+        const next = { ...cur, ...patch };
+        localStorage.setItem(key, JSON.stringify(next));
+        window.dispatchEvent(new CustomEvent("store:update", { detail: { key } }));
+        return next;
+      },
+      clear: () => {
+        localStorage.removeItem(key);
+        window.dispatchEvent(new CustomEvent("store:update", { detail: { key } }));
+      }
+    };
+  }
+
   const players  = crud(KEYS.players,  "pl");
   const matches  = crud(KEYS.matches,  "mt");
   const news     = crud(KEYS.news,     "nw");
@@ -80,6 +113,10 @@
   const predictions = crud(KEYS.predictions, "pr");
   const badges      = crud(KEYS.badges,      "bd");
   const sponsors    = crud(KEYS.sponsors,    "sp");
+  const association_blocks = crud(KEYS.association_blocks, "ab");
+
+  const sponsors_settings    = single(KEYS.sponsors_settings, {});
+  const association_settings = single(KEYS.association_settings, {});
 
   // --- Session (single object, not a list) ---
   const session = {
@@ -99,6 +136,95 @@
     clear: () => session.set(null),
   };
 
+  const DEFAULT_SPONSORS_SETTINGS = {
+    heroEyebrow: "Écosystème & Partenariats Officiels",
+    heroTitle: "NOS SPONSORS",
+    heroLede: "Découvrez les marques et partenaires d'élite qui propulsent nos rosters vers les sommets.",
+    ctaTitle: "DEVENEZ PARTENAIRE",
+    ctaDesc: "Associez votre marque à l'esprit de conquête de NAFE ESPORT.",
+    ctaButtonLabel: "Dossier Partenariat →",
+    ctaButtonUrl: "#/contact",
+    footerNotice: "PARTENARIAT SAISON 2026 · CERTIFIÉ NAFE ESPORT"
+  };
+
+  const DEFAULT_ASSOCIATION_SETTINGS = {
+    heroBadge: "STRUCTURE ASSOCIATIVE OFFICIELLE",
+    heroTitle: "L'ASSOCIATION NAFE",
+    heroLede: "NAFE ESPORT est une association française régie par la loi du 1er juillet 1901. Fondée par des passionnés, notre mission est de structurer, former et accompagner les talents de l'esport.",
+    statutLegal: "Loi 1901",
+    devise: "Le Phœnix ne meurt jamais",
+    transparence: "100% Réinvesti",
+    donationActive: true,
+    donationEyebrow: "// IMPACT DIRECT & SOLIDAIRE",
+    donationTitle: "SOUTENIR L'ASSOCIATION FINANCIÈREMENT",
+    donationDesc: "NAFE ESPORT fonctionne grâce à la passion de ses bénévoles et à la générosité de ses supporters. Vos contributions permettent directement de financer les déplacements en LAN, les maillots et les entraînements.",
+    donationUrl: "https://www.helloasso.com",
+    donationButtonLabel: "Accéder au formulaire de don sécurisé ↗",
+    donationNotice: "Paiement 100% sécurisé via HelloAsso · Reçu et attestation fournis",
+    donationPledges: [
+      { id: "p1", amount: 10, label: "Supporter", perk: "Badge Discord exclusif & accès aux salons privés" },
+      { id: "p2", amount: 25, label: "Adhérent", perk: "Pack stickers officiels + vote consultatif assemblée" },
+      { id: "p3", amount: 50, label: "Bienfaiteur", perk: "Nom crédité au générique des vidéos + jersey dédicacé" },
+      { id: "custom", amount: 25, label: "Don libre", perk: "Chaque euro contribue directement aux déplacements" }
+    ],
+    donationImpact: [
+      { label: "Déplacements LAN", desc: "Transport & hébergement pour les compétitions physiques", pct: 45 },
+      { label: "Équipement & Maillots", desc: "Jerseys officiels personnalisés & matériel gaming", pct: 30 },
+      { label: "Infrastructures & Serveurs", desc: "Serveurs d'entraînement, scrims & outils", pct: 15 },
+      { label: "Vie du Club", desc: "Animation de la communauté, tournois ouverts & streams", pct: 10 }
+    ]
+  };
+
+  const DEFAULT_ASSOCIATION_BLOCKS = [
+    {
+      id: "ab_pillars",
+      order: 1,
+      active: true,
+      type: "pillars",
+      eyebrow: "Objectifs 2026",
+      title: "NOS MISSIONS",
+      subtitle: "4 PILIERS ASSOCIATIFS",
+      content: "",
+      items: [
+        { num: "01 //", title: "Encadrement & Pédagogie", desc: "Suivi personnalisé de chaque joueur : analyse tactique, préparation mentale et équilibre de vie face aux écrans." },
+        { num: "02 //", title: "Accès à la Compétition", desc: "Financement des inscriptions aux tournois majeurs, frais de déplacement et logistique lors des LANs physiques en France et en Europe." },
+        { num: "03 //", title: "Matériel & Infrastructure", desc: "Mise à disposition de maillots officiels, serveurs d'entraînement dédiés et accompagnement pour les joueurs méritants." },
+        { num: "04 //", title: "Transparence & Gestion", desc: "100% des fonds perçus (cotisations, dons, gains de tournois réinvestis) sont alloués au projet sportif et au bien-être de nos membres." }
+      ]
+    },
+    {
+      id: "ab_terms",
+      order: 2,
+      active: true,
+      type: "terms",
+      eyebrow: "Règlement Intérieur & Statuts",
+      title: "TERMES DE L'ASSOCIATION",
+      subtitle: "CHARTE LOI 1901",
+      content: "Toute adhésion, partenariat ou participation aux activités de NAFE ESPORT implique l'adhésion pleine et entière à notre charte éthique et à nos statuts déposés.",
+      items: [
+        { num: "Article 1", title: "Engagement & Esprit Sportif", text: "Tout membre représentant NAFE s'engage à respecter les principes du fair-play, de courtoisie et de respect mutuel en jeu et sur les réseaux sociaux. Aucune forme de toxicité, harcèlement ou discrimination n'est tolérée." },
+        { num: "Article 2", title: "Transparence Financière", text: "L'association garantit la stricte affectation de chaque euro perçu au développement de la structure, des joueurs et des événements du club. Les comptes sont approuvés annuellement en assemblée générale." },
+        { num: "Article 3", title: "Statut des Joueurs & Staff", text: "Les membres associatifs contribuent bénévolement à la vie du club. Les gains obtenus en compétition sont redistribués selon la charte d'équipe approuvée avant chaque saison sportive." },
+        { num: "Article 4", title: "Adhésion & Révocation", text: "L'adhésion est ouverte à toute personne partageant les valeurs du club. Le bureau directeur se réserve le droit d'exclure tout membre manquant gravement au règlement intérieur de l'association." }
+      ]
+    },
+    {
+      id: "ab_cta",
+      order: 3,
+      active: true,
+      type: "cta",
+      eyebrow: "Rejoindre l'aventure",
+      title: "Envie de vous investir comme bénévole ou membre ?",
+      subtitle: "",
+      content: "Coachs, managers, casters, graphistes et bénévoles : notre association recrute constamment pour développer ses projets esportifs.",
+      buttonLabel: "Nous Contacter →",
+      buttonUrl: "#/contact",
+      button2Label: "Faire un don à l'association ↗",
+      button2Url: "https://www.helloasso.com",
+      items: []
+    }
+  ];
+
   const store = {
     KEYS,
     uid,
@@ -116,7 +242,36 @@
     predictions,
     badges,
     sponsors,
+    sponsors_settings,
+    association_blocks,
+    association_settings,
     session,
+
+    // Modèles configurables
+    DEFAULT_SPONSORS_SETTINGS,
+    DEFAULT_ASSOCIATION_SETTINGS,
+    DEFAULT_ASSOCIATION_BLOCKS,
+
+    seedSponsorsTemplate: () => {
+      sponsors.clear();
+      sponsors_settings.set(DEFAULT_SPONSORS_SETTINGS);
+      if (window.DEFAULT_SPONSORS) {
+        window.DEFAULT_SPONSORS.forEach(sp => sponsors.add(sp));
+      }
+    },
+    clearSponsors: () => {
+      sponsors.clear();
+      sponsors_settings.clear();
+    },
+    seedAssociationTemplate: () => {
+      association_blocks.clear();
+      association_settings.set(DEFAULT_ASSOCIATION_SETTINGS);
+      DEFAULT_ASSOCIATION_BLOCKS.forEach(b => association_blocks.add(b));
+    },
+    clearAssociation: () => {
+      association_blocks.clear();
+      association_settings.clear();
+    },
 
     // --- queries croisées utilisées par les pages publiques ---
     getPlayersByTeam: (team, subteamId) => {
@@ -356,11 +511,6 @@
 
     // --- seed de démonstration facultatif ---
     seedDemo: () => {
-      // Seed initial sponsors if empty
-      if (sponsors.list().length === 0 && window.DEFAULT_SPONSORS) {
-        window.DEFAULT_SPONSORS.forEach(sp => sponsors.add(sp));
-      }
-
       // Seed initial Fortnite players if none exist
       const fnPlayers = players.list().filter(p => p.team === "fortnite");
       if (fnPlayers.length === 0 && window.DEFAULT_FORTNITE_ROSTER) {
@@ -394,10 +544,15 @@
           patched.forEach(item => col.add(item));
         }
       });
-      // Ensure initial demo data for sponsors and fortnite if empty
-      if (sponsors.list().length === 0 && window.DEFAULT_SPONSORS) {
-        window.DEFAULT_SPONSORS.forEach(sp => sponsors.add(sp));
+      // Migration v2 : vide les blocs pré-remplis de sponsors et d'association pour personnalisation totale par l'admin
+      if (!localStorage.getItem("nafe:migrated_v2_empty_custom")) {
+        sponsors.clear();
+        sponsors_settings.clear();
+        association_blocks.clear();
+        association_settings.clear();
+        localStorage.setItem("nafe:migrated_v2_empty_custom", "true");
       }
+
       const fnPlayers = players.list().filter(p => p.team === "fortnite");
       if (fnPlayers.length === 0 && window.DEFAULT_FORTNITE_ROSTER) {
         window.DEFAULT_FORTNITE_ROSTER.forEach(p => players.add(p));

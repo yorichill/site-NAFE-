@@ -1,15 +1,18 @@
 // NAFE — Sponsors page
-// Tranche verticale des partenaires (master-detail) + fiches détaillées
-// Lecture seule pour les visiteurs. Gestion (ajout/modif/suppression) réservée à l'espace /admin.
+// Tranche des partenaires (master-detail) + fiches détaillées
+// Contenu entièrement administrable depuis la console /admin (store.sponsors et store.sponsors_settings)
 
 const { useState: useSponsorsState, useEffect: useSponsorsEffect } = React;
 
 function SponsorsPage({ accent }) {
   window.store.useVersion();
   const rawSponsors = window.store.sponsors ? window.store.sponsors.list() : [];
-  // Utiliser les sponsors du store, ou fallback sur DEFAULT_SPONSORS si vide
-  const allSponsors = rawSponsors.length > 0 ? rawSponsors : (window.DEFAULT_SPONSORS || []);
-  const activeSponsors = allSponsors.filter(s => s.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
+  const activeSponsors = rawSponsors
+    .filter(s => s.active !== false)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  const settings = (window.store.sponsors_settings && window.store.sponsors_settings.get()) || {};
+  const isAdmin = window.store.isAdmin();
 
   const [selectedId, setSelectedId] = useSponsorsState(activeSponsors[0]?.id || null);
   const [copiedCode, setCopiedCode] = useSponsorsState(false);
@@ -23,7 +26,6 @@ function SponsorsPage({ accent }) {
   }, [activeSponsors.length]);
 
   const currentSponsor = activeSponsors.find(s => s.id === selectedId) || activeSponsors[0] || null;
-  const isAdmin = window.store.isAdmin();
 
   const handleCopy = (code) => {
     if (!code) return;
@@ -32,21 +34,27 @@ function SponsorsPage({ accent }) {
     setTimeout(() => setCopiedCode(false), 2200);
   };
 
+  const hasContent = activeSponsors.length > 0 || settings.heroTitle || settings.heroLede;
+
   return (
     <div className="nafe-page nafe-sponsors-page">
-      {/* Hero Section */}
+      {/* Hero Section dynamique */}
       <section className="nafe-team__hero">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
-            <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>
-              Écosystème & Partenariats Officiels
-            </span>
+            {settings.heroEyebrow && (
+              <span className="nafe-eyebrow" style={{ color: accent || "var(--nafe-denim-blue)" }}>
+                {settings.heroEyebrow}
+              </span>
+            )}
             <h1 className="nafe-display nafe-team__title">
-              NOS SPONSORS<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span>
+              {settings.heroTitle || "NOS SPONSORS"}<span style={{ color: accent || "var(--nafe-water-blue)" }}>.</span>
             </h1>
-            <p className="nafe-team__lede">
-              Découvrez les marques et partenaires d'élite qui propulsent nos rosters vers les sommets.
-            </p>
+            {settings.heroLede && (
+              <p className="nafe-team__lede">
+                {settings.heroLede}
+              </p>
+            )}
           </div>
           {isAdmin && (
             <div style={{ alignSelf: "center" }}>
@@ -55,25 +63,30 @@ function SponsorsPage({ accent }) {
                 className="nafe-btn nafe-btn--ghost nafe-btn--sm nafe-clip-card"
                 style={{ borderColor: accent, color: accent }}
               >
-                ⚙ Gérer les sponsors (Admin)
+                ⚙ Gérer les sponsors & blocs (Admin)
               </a>
             </div>
           )}
         </div>
       </section>
 
-      {activeSponsors.length === 0 ? (
-        <div className="nafe-empty nafe-empty--panel">
-          <span className="nafe-mono" style={{ color: accent }}>AUCUN PARTENAIRE</span>
-          <p className="nafe-empty__text">
+      {!hasContent || activeSponsors.length === 0 ? (
+        <div className="nafe-empty nafe-empty--panel" style={{ marginTop: 40 }}>
+          <span className="nafe-mono" style={{ color: accent }}>ESPACE PARTENAIRES</span>
+          <h2 className="nafe-display" style={{ fontSize: 24, margin: "12px 0 8px" }}>
+            {isAdmin ? "AUCUN SPONSOR OU BLOC ENREGISTRÉ." : "PAGE EN COURS DE MISE À JOUR."}
+          </h2>
+          <p className="nafe-empty__text" style={{ maxWidth: 540 }}>
             {isAdmin
-              ? "Aucun sponsor n'est enregistré. Rendez-vous dans la console admin pour en ajouter."
-              : "La liste des partenaires officiels 2026 sera bientôt mise à jour."}
+              ? "Tous les blocs de texte par défaut ont été vidés. Vous pouvez créer les fiches partenaires, définir les paliers et configurer l'en-tête de la page depuis la console admin."
+              : "La liste officielle des partenaires et sponsors du club sera bientôt mise en ligne."}
           </p>
           {isAdmin && (
-            <a className="nafe-btn nafe-btn--accent" href="#/admin/sponsors" style={{ background: accent }}>
-              → Ajouter un sponsor
-            </a>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 20 }}>
+              <a className="nafe-btn nafe-btn--accent" href="#/admin/sponsors" style={{ background: accent }}>
+                + Créer un sponsor dans l'Admin
+              </a>
+            </div>
           )}
         </div>
       ) : (
@@ -106,7 +119,7 @@ function SponsorsPage({ accent }) {
                         <img src={sp.logo} alt={sp.name} onError={(e) => { e.target.style.display = 'none'; }} />
                       ) : (
                         <div className="nafe-sponsor-tab__avatar-fallback" style={{ background: accent }}>
-                          {sp.name.slice(0, 2).toUpperCase()}
+                          {(sp.name || "SP").slice(0, 2).toUpperCase()}
                         </div>
                       )}
                     </div>
@@ -122,19 +135,26 @@ function SponsorsPage({ accent }) {
               })}
             </div>
 
-            <div className="nafe-sponsors-rail__cta nafe-clip-card">
-              <span className="nafe-mono" style={{ color: accent, fontSize: 10 }}>DEVENEZ PARTENAIRE</span>
-              <p style={{ fontSize: 12, margin: "6px 0 12px", color: "rgba(255,255,255,0.7)", lineHeight: 1.4 }}>
-                Associez votre marque à l'esprit de conquête de NAFE ESPORT.
-              </p>
-              <a
-                href="#/contact"
-                className="nafe-btn nafe-btn--ghost nafe-btn--sm"
-                style={{ fontSize: 10, width: "100%", justifyContent: "center" }}
-              >
-                Dossier Partenariat →
-              </a>
-            </div>
+            {/* Bloc CTA personnalisé par l'admin (si configuré) */}
+            {(settings.ctaTitle || settings.ctaDesc || isAdmin) && (
+              <div className="nafe-sponsors-rail__cta nafe-clip-card">
+                <span className="nafe-mono" style={{ color: accent, fontSize: 10 }}>
+                  {settings.ctaTitle || (isAdmin ? "DEVENEZ PARTENAIRE" : "")}
+                </span>
+                {settings.ctaDesc && (
+                  <p style={{ fontSize: 12, margin: "6px 0 12px", color: "rgba(255,255,255,0.7)", lineHeight: 1.4 }}>
+                    {settings.ctaDesc}
+                  </p>
+                )}
+                <a
+                  href={settings.ctaButtonUrl || "#/contact"}
+                  className="nafe-btn nafe-btn--ghost nafe-btn--sm"
+                  style={{ fontSize: 10, width: "100%", justifyContent: "center" }}
+                >
+                  {settings.ctaButtonLabel || "Dossier Partenariat →"}
+                </a>
+              </div>
+            )}
           </aside>
 
           {/* Panneau d'affichage détaillé du sponsor sélectionné (Detail) */}
@@ -174,14 +194,16 @@ function SponsorsPage({ accent }) {
                           className="nafe-sponsor-detail__logo-placeholder nafe-display"
                           style={{ background: `${accent}22`, borderColor: accent }}
                         >
-                          {currentSponsor.name.slice(0, 2).toUpperCase()}
+                          {(currentSponsor.name || "SP").slice(0, 2).toUpperCase()}
                         </div>
                       )}
                     </div>
                     <div>
-                      <span className="nafe-mono nafe-sponsor-detail__category">
-                        {currentSponsor.category || "Partenariat d'Excellence"}
-                      </span>
+                      {currentSponsor.category && (
+                        <span className="nafe-mono nafe-sponsor-detail__category">
+                          {currentSponsor.category}
+                        </span>
+                      )}
                       <h2 className="nafe-display nafe-sponsor-detail__title">
                         {currentSponsor.name}
                       </h2>
@@ -203,15 +225,17 @@ function SponsorsPage({ accent }) {
                   </div>
                 </div>
 
-                {/* Description complète */}
-                <div className="nafe-sponsor-detail__body">
-                  <h3 className="nafe-mono nafe-sponsor-detail__section-title">
-                    // À PROPOS DU PARTENARIAT
-                  </h3>
-                  <p className="nafe-sponsor-detail__desc">
-                    {currentSponsor.description}
-                  </p>
-                </div>
+                {/* Description complète configurée */}
+                {currentSponsor.description && (
+                  <div className="nafe-sponsor-detail__body">
+                    <h3 className="nafe-mono nafe-sponsor-detail__section-title">
+                      // PRÉSENTATION DU PARTENARIAT
+                    </h3>
+                    <p className="nafe-sponsor-detail__desc">
+                      {currentSponsor.description}
+                    </p>
+                  </div>
+                )}
 
                 {/* Offre / Code promo communauté */}
                 {currentSponsor.promoCode && (
@@ -239,10 +263,10 @@ function SponsorsPage({ accent }) {
                   </div>
                 )}
 
-                {/* Pied de fiche */}
+                {/* Pied de fiche configurable */}
                 <div className="nafe-sponsor-detail__footer">
                   <span className="nafe-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
-                    PARTENARIAT SAISON 2026 · CERTIFIÉ NAFE ESPORT
+                    {settings.footerNotice || "PARTENARIAT SAISON 2026 · CERTIFIÉ NAFE ESPORT"}
                   </span>
                   {isAdmin && (
                     <a
