@@ -6,6 +6,16 @@ const { useState, useEffect, useRef } = React;
 function ScoreTicker() {
   window.store.useVersion();
   const scores = window.store.scores.list();
+
+  useEffect(() => {
+    if (scores.length > 0) {
+      document.body.classList.add("has-ticker");
+    } else {
+      document.body.classList.remove("has-ticker");
+    }
+    return () => document.body.classList.remove("has-ticker");
+  }, [scores.length]);
+
   if (!scores.length) return null;
   const doubled = [...scores, ...scores];
   return (
@@ -211,6 +221,41 @@ function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
              className={route === "/shop" ? "is-active" : ""}>Shop</a>
           <UserPill onLogin={onLogin} onRegister={onRegister} onNav={onNav} accent={accent} />
         </nav>
+        <div className="nafe-header__mobile-right">
+          {user ? (
+            <button
+              className="nafe-header__mobile-user-btn"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Mon profil"
+              style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", padding: 0 }}
+            >
+              <span
+                className="nafe-userPill__avatar"
+                style={{
+                  background: isAdmin ? accent : "rgba(255,255,255,0.08)",
+                  color: "#fff",
+                  width: 32,
+                  height: 32,
+                  fontSize: 13,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "50%"
+                }}
+              >
+                {(user.username || user.email)[0]?.toUpperCase() || "?"}
+              </span>
+            </button>
+          ) : (
+            <button
+              className="nafe-btn nafe-btn--accent nafe-btn--sm"
+              style={{ background: accent, padding: "6px 12px", fontSize: 11 }}
+              onClick={onLogin}
+            >
+              Connexion
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Drawer navigation mobile plein écran */}
@@ -276,7 +321,7 @@ function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
               {isAdmin && (
                 <a href="#/admin" onClick={(e) => { e.preventDefault(); handleMobileNav("#/admin"); }}
                    className="nafe-mobile-drawer__link" style={{ color: accent, borderColor: accent }}>
-                  <span className="nafe-mono">⚙ //</span> Console Admin
+                  <span className="nafe-mono">◈ //</span> Console Admin
                 </a>
               )}
             </div>
