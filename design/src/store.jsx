@@ -22,6 +22,7 @@
     sponsors_settings: "nafe:sponsors_settings",
     association_settings: "nafe:association_settings",
     association_blocks: "nafe:association_blocks",
+    home_settings: "nafe:home_settings",
   };
 
   const uid = (p) =>
@@ -117,6 +118,7 @@
 
   const sponsors_settings    = single(KEYS.sponsors_settings, {});
   const association_settings = single(KEYS.association_settings, {});
+  const home_settings        = single(KEYS.home_settings, {});
 
   // --- Session (single object, not a list) ---
   const session = {
@@ -181,8 +183,56 @@
     ],
     donationActive: true,
     donationUrl: "https://www.helloasso.com",
-    donationButtonText: "Soutenir l'Association (HelloAsso) ↗",
+    donationButtonText: "Soutenir l'Association (HelloAsso)",
     donationNote: "Association à but non lucratif (Loi 1901) · Vos dons contribuent directement aux déplacements de nos équipes en tournoi et à leurs équipements."
+  };
+
+  const DEFAULT_HOME_SETTINGS = {
+    heroEyebrow: "Saison 2026 · NAFE ESPORT",
+    heroLede: "L'excellence au cœur du jeu. Bâtir une structure compétitive d'élite portée par l'exigence, l'ambition et le dépassement de soi. Le phœnix ne meurt jamais.",
+    heroCtaPrimary: "Rejoindre le club",
+    heroCtaSecondary: "Voir le planning",
+    heroStat1Label: "JOUEURS",
+    heroStat2Label: "TROPHÉES",
+    heroStat3Label: "MATCHS PROG.",
+    emptyLiveTitle: "AUCUN MATCH LIVE",
+    emptyLiveTextUser: "Aucun match en direct pour l'instant. Reviens plus tard !",
+
+    valuesEyebrow: "NOTRE PHILOSOPHIE",
+    valuesTitle: "NOS VALEURS",
+    valuesSubtitle: "Quatre piliers fondamentaux qui forgent l'exigence et l'esprit de conquête de NAFE ESPORT.",
+    values: [
+      { num: "01", title: "Exigence", desc: "L'excellence au quotidien dans la préparation, la discipline et la rigueur compétitive." },
+      { num: "02", title: "Ambition", desc: "Conquérir les sommets et s'imposer comme structure majeure sur Valorant et Rocket League." },
+      { num: "03", title: "Suivi", desc: "Coaching dédié, staff stratégique et accompagnement holistique pour révéler chaque talent." },
+      { num: "04", title: "Dépassement", desc: "Repousser sans cesse ses limites pour sublimer le collectif. Le phœnix ne meurt jamais." }
+    ],
+
+    tweetsEyebrow: "FLUX OFFICIEL · TWITTER",
+    tweetsTitle: "DERNIERS TWEETS",
+    tweetsCtaNews: "Toute l'actu →",
+    tweetsCtaFollow: "Suivre @NafeOfficiel",
+
+    manifestoEyebrow: "Manifeste · 2026",
+    manifestoTitleLine1: "Le skill, c'est la constance.",
+    manifestoTitleLine2: "Le style, c'est la signature.",
+    manifestoItems: [
+      {
+        num: "01",
+        title: "Jouer fort",
+        desc: "Une méthodologie d'entraînement importée du sport de haut niveau. Analyse vidéo, préparation mentale, S&C."
+      },
+      {
+        num: "02",
+        title: "Créer plus fort",
+        desc: "Un studio interne dédié au contenu long-format. Documentaires, podcasts, drops capsule co-signés."
+      },
+      {
+        num: "03",
+        title: "Vivre ensemble",
+        desc: "Un club de membres actifs. Events physiques, loot tangible, hospitality en finale."
+      }
+    ]
   };
 
   const DEFAULT_ASSOCIATION_BLOCKS = [];
@@ -207,12 +257,14 @@
     sponsors_settings,
     association_blocks,
     association_settings,
+    home_settings,
     session,
 
     // Modèles configurables
     DEFAULT_SPONSORS_SETTINGS,
     DEFAULT_ASSOCIATION_SETTINGS,
     DEFAULT_ASSOCIATION_BLOCKS,
+    DEFAULT_HOME_SETTINGS,
 
     seedSponsorsTemplate: () => {
       sponsors.clear();
@@ -232,6 +284,9 @@
     clearAssociation: () => {
       if (association_blocks) association_blocks.clear();
       association_settings.clear();
+    },
+    resetHomeSettings: () => {
+      home_settings.set(DEFAULT_HOME_SETTINGS);
     },
 
     // --- queries croisées utilisées par les pages publiques ---

@@ -337,8 +337,10 @@ function Sidebar({ route, onNav }) {
       { label: "Twitter/X", href: "#/contact" },
     ],
     admin: [
+      { label: "Page de garde",      href: "#/admin/home" },
       { label: "Joueurs",            href: "#/admin/players" },
       { label: "Sponsors",           href: "#/admin/sponsors" },
+      { label: "L'Association",      href: "#/admin/association" },
       { label: "Sous-équipes",       href: "#/admin/subteams" },
       { label: "Matchs & calendrier",href: "#/admin/matches" },
       { label: "Actualités",         href: "#/admin/news" },

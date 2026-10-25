@@ -4,17 +4,18 @@
 const { useState: useAdminState, useEffect: useAdminEffect } = React;
 
 const ADMIN_TABS = [
-  { k: "players",   label: "Joueurs",             icon: "◈" },
-  { k: "subteams",  label: "Sous-équipes",        icon: "◇" },
-  { k: "matches",   label: "Matchs & calendrier", icon: "▦" },
-  { k: "news",      label: "Actualités",          icon: "▤" },
-  { k: "scores",    label: "Ticker scores",       icon: "▲" },
-  { k: "trophies",    label: "Palmarès",            icon: "" },
-  { k: "sponsors",    label: "Sponsors",            icon: "" },
+  { k: "home",        label: "Page de garde",       icon: "◉" },
+  { k: "players",     label: "Joueurs",             icon: "◈" },
+  { k: "subteams",    label: "Sous-équipes",        icon: "◇" },
+  { k: "matches",     label: "Matchs & calendrier", icon: "▦" },
+  { k: "news",        label: "Actualités",          icon: "▤" },
+  { k: "scores",      label: "Ticker scores",       icon: "▲" },
+  { k: "trophies",    label: "Palmarès",            icon: "★" },
+  { k: "sponsors",    label: "Sponsors",            icon: "✦" },
   { k: "association", label: "L'Association",       icon: "◈" },
   { k: "socials",     label: "Réseaux sociaux",     icon: "●" },
-  { k: "community", label: "Communauté",          icon: "◆" },
-  { k: "users",     label: "Utilisateurs",        icon: "" },
+  { k: "community",   label: "Communauté",          icon: "◆" },
+  { k: "users",       label: "Utilisateurs",        icon: "■" },
 ];
 
 // Route helper : renvoie la sous-page courante depuis le hash
@@ -146,6 +147,7 @@ function AdminPage({ accent }) {
   }
 
   const counts = {
+    home:        4,
     players:   window.store.players.list().length,
     subteams:  window.store.subteams.list().length,
     matches:   window.store.matches.list().length,
@@ -224,6 +226,7 @@ function AdminPage({ accent }) {
       </section>
 
       <section className="nafe-admin__panel">
+        {tab === "home"        && <HomeAdmin        accent={accent} />}
         {tab === "players"     && <PlayersAdmin     accent={accent} />}
         {tab === "subteams"    && <SubteamsAdmin    accent={accent} />}
         {tab === "matches"     && <MatchesAdmin     accent={accent} />}
@@ -2287,6 +2290,390 @@ function AssociationAdmin({ accent }) {
             style={{ background: accent, padding: "14px 36px", fontSize: 15, fontWeight: 700 }}
           >
             Enregistrer les modifications de la page Association
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// ============================================================
+//  HomeAdmin — Modification des textes de la page de garde (Accueil)
+// ============================================================
+function HomeAdmin({ accent }) {
+  window.store.useVersion();
+  const initial = (window.store && window.store.home_settings)
+    ? { ...(window.store.DEFAULT_HOME_SETTINGS || {}), ...(window.store.home_settings.get() || {}) }
+    : (window.store?.DEFAULT_HOME_SETTINGS || {});
+
+  const [form, setForm] = useAdminState(initial);
+  const [toast, setToast] = useAdminState(null);
+
+  useAdminEffect(() => {
+    const cur = (window.store && window.store.home_settings)
+      ? { ...(window.store.DEFAULT_HOME_SETTINGS || {}), ...(window.store.home_settings.get() || {}) }
+      : (window.store?.DEFAULT_HOME_SETTINGS || {});
+    setForm(cur);
+  }, []);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const handleField = (key, val) => {
+    setForm((prev) => ({ ...prev, [key]: val }));
+  };
+
+  const handleValueChange = (idx, field, val) => {
+    setForm((prev) => {
+      const arr = [...(prev.values || [])];
+      arr[idx] = { ...arr[idx], [field]: val };
+      return { ...prev, values: arr };
+    });
+  };
+
+  const handleManifestoChange = (idx, field, val) => {
+    setForm((prev) => {
+      const arr = [...(prev.manifestoItems || [])];
+      arr[idx] = { ...arr[idx], [field]: val };
+      return { ...prev, manifestoItems: arr };
+    });
+  };
+
+  const handleSave = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (window.store && window.store.home_settings) {
+      window.store.home_settings.set(form);
+      showToast("Modifications de la page de garde enregistrees avec succes.");
+    }
+  };
+
+  const handleReset = () => {
+    if (window.store && window.store.resetHomeSettings) {
+      window.store.resetHomeSettings();
+      setForm(window.store.DEFAULT_HOME_SETTINGS);
+      showToast("Textes par defaut de la page d'accueil retablis.");
+    }
+  };
+
+  return (
+    <div className="nafe-admin-section">
+      <div className="nafe-admin__head" style={{ marginBottom: 20 }}>
+        <div>
+          <span className="nafe-mono" style={{ color: accent, fontSize: 11, letterSpacing: "0.1em" }}>
+            PANEL DE GESTION · PAGE DE GARDE
+          </span>
+          <h2 className="nafe-display" style={{ fontSize: 24, margin: "4px 0 6px" }}>
+            MODIFICATION DES TEXTES DE L'ACCUEIL<span style={{ color: accent }}>.</span>
+          </h2>
+          <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.6)" }}>
+            Modifiez directement le contenu de chaque texte pose sur la page d'accueil sans alterer sa structure.
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <a
+            href="#/"
+            className="nafe-btn nafe-btn--ghost nafe-btn--sm"
+          >
+            Voir la page d'accueil
+          </a>
+          <button
+            type="button"
+            className="nafe-btn nafe-btn--ghost nafe-btn--sm"
+            onClick={handleReset}
+          >
+            Retablir les textes d'origine
+          </button>
+          <button
+            type="button"
+            className="nafe-btn nafe-btn--accent nafe-btn--sm"
+            style={{ background: accent }}
+            onClick={handleSave}
+          >
+            Enregistrer les modifications
+          </button>
+        </div>
+      </div>
+
+      {toast && (
+        <div
+          className="nafe-clip-card"
+          style={{
+            background: "rgba(2, 136, 209, 0.15)",
+            border: `1px solid ${accent}`,
+            padding: "12px 18px",
+            marginBottom: 20,
+            color: "#fff",
+            fontSize: 13,
+            fontWeight: 600
+          }}
+        >
+          {toast}
+        </div>
+      )}
+
+      <form onSubmit={handleSave}>
+        {/* 1. SECTION HERO & EN-TETE */}
+        <div className="nafe-admin__card" style={{ marginBottom: 24 }}>
+          <h4 className="nafe-display" style={{ margin: "0 0 16px", fontSize: 16, color: accent }}>
+            1. SECTION HERO & EN-TETE
+          </h4>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+            <Field label="Surtitre / Saison" span={2}>
+              <input
+                value={form.heroEyebrow || ""}
+                onChange={(e) => handleField("heroEyebrow", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Texte d'accroche principal (Lede)" span={2}>
+              <textarea
+                rows={3}
+                value={form.heroLede || ""}
+                onChange={(e) => handleField("heroLede", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Intitule du bouton principal (CTA 1)">
+              <input
+                value={form.heroCtaPrimary || ""}
+                onChange={(e) => handleField("heroCtaPrimary", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Intitule du bouton secondaire (CTA 2)">
+              <input
+                value={form.heroCtaSecondary || ""}
+                onChange={(e) => handleField("heroCtaSecondary", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Libelle Statistique 1">
+              <input
+                value={form.heroStat1Label || ""}
+                onChange={(e) => handleField("heroStat1Label", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Libelle Statistique 2">
+              <input
+                value={form.heroStat2Label || ""}
+                onChange={(e) => handleField("heroStat2Label", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Libelle Statistique 3">
+              <input
+                value={form.heroStat3Label || ""}
+                onChange={(e) => handleField("heroStat3Label", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Titre encart quand aucun match live n'est en cours">
+              <input
+                value={form.emptyLiveTitle || ""}
+                onChange={(e) => handleField("emptyLiveTitle", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Message public quand aucun match live n'est en cours" span={2}>
+              <input
+                value={form.emptyLiveTextUser || ""}
+                onChange={(e) => handleField("emptyLiveTextUser", e.target.value)}
+              />
+            </Field>
+          </div>
+        </div>
+
+        {/* 2. SECTION PHILOSOPHIE & LES 4 PILIERS */}
+        <div className="nafe-admin__card" style={{ marginBottom: 24 }}>
+          <h4 className="nafe-display" style={{ margin: "0 0 16px", fontSize: 16, color: accent }}>
+            2. SECTION PHILOSOPHIE & LES 4 PILIERS DE VALEURS
+          </h4>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 20 }}>
+            <Field label="Surtitre de section">
+              <input
+                value={form.valuesEyebrow || ""}
+                onChange={(e) => handleField("valuesEyebrow", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Titre principal">
+              <input
+                value={form.valuesTitle || ""}
+                onChange={(e) => handleField("valuesTitle", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Sous-titre descriptif" span={2}>
+              <textarea
+                rows={2}
+                value={form.valuesSubtitle || ""}
+                onChange={(e) => handleField("valuesSubtitle", e.target.value)}
+              />
+            </Field>
+          </div>
+
+          <span className="nafe-mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", display: "block", marginBottom: 12 }}>
+            LES 4 PILIERS OFFICIELS
+          </span>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+            {(form.values || []).map((val, idx) => (
+              <div
+                key={idx}
+                className="nafe-clip-card"
+                style={{
+                  background: "rgba(19, 24, 33, 0.6)",
+                  border: "1px solid rgba(115, 190, 222, 0.15)",
+                  padding: "16px"
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <span className="nafe-mono" style={{ fontSize: 11, color: accent }}>
+                    PILIER {val.num || ("0" + (idx + 1))}
+                  </span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <Field label="Titre du pilier">
+                    <input
+                      value={val.title || ""}
+                      onChange={(e) => handleValueChange(idx, "title", e.target.value)}
+                    />
+                  </Field>
+                  <Field label="Description du pilier">
+                    <textarea
+                      rows={3}
+                      value={val.desc || ""}
+                      onChange={(e) => handleValueChange(idx, "desc", e.target.value)}
+                    />
+                  </Field>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. SECTION FIL TWITTER / X */}
+        <div className="nafe-admin__card" style={{ marginBottom: 24 }}>
+          <h4 className="nafe-display" style={{ margin: "0 0 16px", fontSize: 16, color: accent }}>
+            3. SECTION RESEAUX SOCIAUX & FIL D'ACTUALITES
+          </h4>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+            <Field label="Surtitre">
+              <input
+                value={form.tweetsEyebrow || ""}
+                onChange={(e) => handleField("tweetsEyebrow", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Titre principal">
+              <input
+                value={form.tweetsTitle || ""}
+                onChange={(e) => handleField("tweetsTitle", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Intitule du bouton vers les actualites">
+              <input
+                value={form.tweetsCtaNews || ""}
+                onChange={(e) => handleField("tweetsCtaNews", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Intitule du bouton suivre sur Twitter / X">
+              <input
+                value={form.tweetsCtaFollow || ""}
+                onChange={(e) => handleField("tweetsCtaFollow", e.target.value)}
+              />
+            </Field>
+          </div>
+        </div>
+
+        {/* 4. SECTION MANIFESTE (BAS DE PAGE) */}
+        <div className="nafe-admin__card" style={{ marginBottom: 24 }}>
+          <h4 className="nafe-display" style={{ margin: "0 0 16px", fontSize: 16, color: accent }}>
+            4. SECTION MANIFESTE (BAS DE PAGE)
+          </h4>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 20 }}>
+            <Field label="Surtitre du manifeste">
+              <input
+                value={form.manifestoEyebrow || ""}
+                onChange={(e) => handleField("manifestoEyebrow", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Titre - Premiere phrase">
+              <input
+                value={form.manifestoTitleLine1 || ""}
+                onChange={(e) => handleField("manifestoTitleLine1", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Titre - Deuxieme phrase" span={2}>
+              <input
+                value={form.manifestoTitleLine2 || ""}
+                onChange={(e) => handleField("manifestoTitleLine2", e.target.value)}
+              />
+            </Field>
+          </div>
+
+          <span className="nafe-mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", display: "block", marginBottom: 12 }}>
+            LES 3 POINTS DU MANIFESTE
+          </span>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+            {(form.manifestoItems || []).map((item, idx) => (
+              <div
+                key={idx}
+                className="nafe-clip-card"
+                style={{
+                  background: "rgba(19, 24, 33, 0.6)",
+                  border: "1px solid rgba(115, 190, 222, 0.15)",
+                  padding: "16px"
+                }}
+              >
+                <div style={{ marginBottom: 10 }}>
+                  <span className="nafe-mono" style={{ fontSize: 11, color: accent }}>
+                    POINT {item.num || ("0" + (idx + 1))}
+                  </span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <Field label="Titre">
+                    <input
+                      value={item.title || ""}
+                      onChange={(e) => handleManifestoChange(idx, "title", e.target.value)}
+                    />
+                  </Field>
+                  <Field label="Description">
+                    <textarea
+                      rows={3}
+                      value={item.desc || ""}
+                      onChange={(e) => handleManifestoChange(idx, "desc", e.target.value)}
+                    />
+                  </Field>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bouton Enregistrer Principal */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="nafe-btn nafe-btn--ghost"
+            onClick={handleReset}
+          >
+            Retablir les textes d'origine
+          </button>
+          <button
+            type="submit"
+            className="nafe-btn nafe-btn--accent"
+            style={{ background: accent, padding: "14px 36px", fontSize: 15, fontWeight: 700 }}
+          >
+            Enregistrer toutes les modifications
           </button>
         </div>
       </form>
