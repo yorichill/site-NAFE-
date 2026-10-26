@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2026-04-22.dahlia',
-});
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
@@ -12,6 +10,10 @@ export async function POST(request: Request) {
     if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json({ error: "Clé secrète Stripe non configurée." }, { status: 500 });
     }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2026-04-22.dahlia' as any,
+    });
 
     // Créer une session Stripe Checkout
     const session = await stripe.checkout.sessions.create({

@@ -1,13 +1,19 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2026-04-22.dahlia',
-});
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   const body = await request.text();
   const signature = request.headers.get('stripe-signature') as string;
+
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return NextResponse.json({ error: "Clés Stripe non configurées." }, { status: 500 });
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2026-04-22.dahlia' as any,
+  });
 
   let event: Stripe.Event;
 
